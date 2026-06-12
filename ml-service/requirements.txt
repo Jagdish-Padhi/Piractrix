@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+python-multipart
+Pillow
+imagehash
+opencv-python
+videohash
+pymongo
+requests
+beautifulsoup4
+numpy
+python-dotenv
+google-cloud-vision
+google-generativeai
