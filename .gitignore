@@ -1,0 +1,102 @@
+# ===============================
+# Dependencies
+# ===============================
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# ===============================
+# Build / Output Artifacts
+# ===============================
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+.vercel/
+storybook-static/
+*.tsbuildinfo
+
+# ===============================
+# Environment / Secrets
+# ===============================
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# ===============================
+# Logs / Runtime Files
+# ===============================
+logs/
+*.log
+*.pid
+*.pid.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===============================
+# Python (ML Service)
+# ===============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.nox/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+pip-wheel-metadata/
+
+# ===============================
+# Test / Coverage
+# ===============================
+coverage/
+coverage-final.json
+
+# ===============================
+# Local Data / Temp / Cache
+# ===============================
+.cache/
+.tmp/
+.temp/
+tmp/
+temp/
+scratch/
+*.tmp
+*.sqlite
+*.sqlite3
+uploads/
+
+# ===============================
+# Jupyter / Notebook
+# ===============================
+.ipynb_checkpoints/
+
+# ===============================
+# Editor / IDE
+# ===============================
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ===============================
+# OS Generated
+# ===============================
+.DS_Store
+Thumbs.db
+Desktop.ini

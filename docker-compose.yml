@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: sportshield-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  ml-service:
+    build:
+      context: ./ml-service
+    container_name: sportshield-ml
+    restart: unless-stopped
+    # Use internal healthcheck to ensure it's ready
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - "8000:8000"
+
+  server:
+    build:
+      context: ./server
+    container_name: sportshield-api
+    restart: unless-stopped
+    env_file:
+      - ./server/.env
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/sportshield
+      - ML_SERVICE_URL=http://ml-service:8000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+      - ml-service
+
+  client:
+    build:
+      context: ./client
+    container_name: sportshield-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo_data:
