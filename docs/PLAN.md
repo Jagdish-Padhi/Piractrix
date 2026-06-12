@@ -1,5 +1,5 @@
-# 🤖 ShieldAgent — FAR AWAY 2026 Hackathon Plan
-### SportShield → Autonomous Rights Enforcement Agent
+# 🤖 Piractrix — FAR AWAY 2026 Hackathon Plan
+### Piractrix → Autonomous Rights Enforcement Agent
 **Theme:** Agentic & Autonomous Systems | **Deadline:** 3 Days | **Team:** Esc(Reality);
 
 ---
@@ -10,7 +10,7 @@
 
 ### 1.1 What You Currently Have (Honest Audit)
 
-SportShield is already a working, deployed product (top 106 Google Solution Challenge).
+Piractrix is already a working, deployed product (top 106 Google Solution Challenge).
 Here is what the codebase shows is **actually built and running**:
 
 **ML Service (Python/FastAPI)**
@@ -68,7 +68,7 @@ The judging panel at FAR AWAY rewards:
 - Technical depth beyond surface-level AI wrappers
 - Scalability of the concept
 
-**SportShield → ShieldAgent transformation score: 9/10**
+**Piractrix → Autonomous Enforcement Agent transformation score: 9/10**
 
 Why? Because the problem domain is PERFECT for agentic framing:
 - Rights enforcement has a clear decision tree (detect → assess → act → escalate)
@@ -81,11 +81,11 @@ Why? Because the problem domain is PERFECT for agentic framing:
 
 ### 1.3 The New Identity
 
-**Name:** ShieldAgent *(or keep SportShield with "Powered by ShieldAgent" subtitle)*
+**Name:** Piractrix *(or keep Piractrix with an "Autonomous Rights Enforcement Agent" subtitle)*
 **Tagline:** "The Autonomous Rights Enforcement Agent. Detect. Decide. Defend."
 
 **The Pitch Sentence for Judges:**
-> "ShieldAgent is an autonomous AI agent that continuously monitors 4 platforms for copyright violations, independently decides severity and appropriate action, auto-drafts legal enforcement with forensic evidence, and escalates based on threat patterns — all without human intervention. Every decision is logged with full reasoning so rights holders stay in control."
+> "Piractrix is an autonomous AI system that continuously monitors 4 platforms for copyright violations, independently decides severity and appropriate action, auto-drafts legal enforcement with forensic evidence, and escalates based on threat patterns — all without human intervention. Every decision is logged with full reasoning so rights holders stay in control."
 
 **What Makes This Different from Every Other Agent Project:**
 1. Domain specificity — not a generic agent, a specialized enforcement agent
@@ -421,7 +421,7 @@ This becomes the **new homepage** of the dashboard. Replace or extend `Dashboard
 **Layout:**
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  🤖 ShieldAgent                    [AUTONOMOUS MODE: ●ON / OFF] │
+│  🤖 Piractrix                     [AUTONOMOUS MODE: ●ON / OFF] │
 │  Status: Active | Last action: 2 min ago | Decisions today: 47  │
 ├──────────────────────┬──────────────────────────────────────────┤
 │  AGENT LIVE FEED     │  THREAT MEMORY                           │
@@ -522,7 +522,7 @@ Expand to: `video | image | highlight | exam_paper | document | music | ott_cont
 Update the landing page to emphasize the **autonomous agent** angle, not just the piracy detector angle.
 
 **Key copy changes:**
-- Hero headline: "Introducing ShieldAgent. The Autonomous Rights Enforcement Agent."
+- Hero headline: "Introducing Piractrix. The Autonomous Rights Enforcement Agent."
 - Sub-headline: "Detect. Decide. Defend. Automatically."
 - Replace static feature cards with a flow diagram showing the agent decision loop
 - Add a "Powered by" section: Gemini AI, pHash fingerprinting, multi-platform scraping
@@ -549,7 +549,7 @@ This is the most impressive bonus feature if you can build it:
 - Output: `{ expectedViolations: 45, peakHour: 2, riskLevel: 'high', topPlatforms: ['telegram', 'youtube'] }`
 - Show in Agent Command Center as "Upcoming Event Forecast" card
 
-**In the demo:** "In 6 hours, the IPL Final broadcasts. ShieldAgent predicts 45+ violations within 2 hours. Autonomous mode is active."
+**In the demo:** "In 6 hours, the IPL Final broadcasts. Piractrix predicts 45+ violations within 2 hours. Autonomous mode is active."
 
 This is genuinely novel. No other team will have this.
 
@@ -565,7 +565,7 @@ Track which search keywords from Gemini actually found violations vs which found
 - Show in UI as "Top Performing Search Queries" and "Low Signal Queries"
 - Over time, agent weights effective queries higher (simple frequency scoring)
 
-**Pitch to judges:** "ShieldAgent continuously learns which search patterns find pirates most effectively, improving scan precision with each enforcement cycle."
+**Pitch to judges:** "Piractrix continuously learns which search patterns find pirates most effectively, improving scan precision with each enforcement cycle."
 
 ---
 
@@ -606,7 +606,7 @@ The README is what judges read before they watch the demo. Make it count.
 
 **Structure:**
 ```
-# ShieldAgent — Autonomous Rights Enforcement Agent
+# Piractrix — Autonomous Rights Enforcement Agent
 ## FAR AWAY 2026 | Agentic & Autonomous Systems Theme
 [Live Demo] [Demo Video] [Presentation]
 
@@ -637,7 +637,7 @@ Recommended 3-minute structure:
 0:00-0:20 — HOOK
   "Every day, thousands of pirated sports clips flood the internet.
    Rights holders lose billions. Current detection is slow, manual, and reactive.
-   ShieldAgent changes this."
+  Piractrix changes this."
 
 0:20-0:40 — SHOW THE PROBLEM
   Open a Telegram group showing pirated match clips
@@ -646,7 +646,7 @@ Recommended 3-minute structure:
 0:40-1:20 — INTRODUCE THE AGENT
   Show Agent Command Center
   Turn on Autonomous Mode
-  "We give ShieldAgent one asset: the IPL Final highlights."
+  "We give Piractrix one asset: the IPL Final highlights."
   Upload a video → fingerprint generates
   "The agent begins monitoring. Watch the live feed."
 
@@ -663,7 +663,7 @@ Recommended 3-minute structure:
   Switch to analytics page briefly
   Show Threat Memory: "The agent remembers 23 known pirate domains"
   Show asset expansion: "Works for sports, OTT, exam papers, documents"
-  "ShieldAgent doesn't just detect piracy. It builds a persistent intelligence network."
+  "Piractrix doesn't just detect piracy. It builds a persistent intelligence network."
 
 2:30-3:00 — OUTRO
   Show the GitHub, live demo link
@@ -684,7 +684,7 @@ Recommended 3-minute structure:
 ### Phase 3.5 — Presentation Slides (1 hr)
 
 If you have time, update the existing Canva presentation to:
-- Slide 1: ShieldAgent — Autonomous Rights Enforcement Agent
+- Slide 1: Piractrix — Autonomous Rights Enforcement Agent
 - Slide 2: The Problem (numbers, piracy stats)
 - Slide 3: The Agent Loop (animated diagram)
 - Slide 4: How It Works (5-step decision chain with icons)
@@ -719,7 +719,7 @@ Keep it to 10-12 slides max. FAR AWAY rules say max 15 slides but judges skim.
 
 ## PART 5 — JUDGING CRITERIA ALIGNMENT
 
-| Criteria | How ShieldAgent Scores |
+| Criteria | How Piractrix Scores |
 |----------|----------------------|
 | **Innovation & Technical Depth** | Multi-agent architecture, confidence cascade, pHash + Vision AI + Gemini chain, ThreatMemory persistence |
 | **Engineering Quality** | 3-service microarchitecture, real deployed app, proper models/controllers/services separation, Socket.io real-time |
@@ -794,7 +794,7 @@ At the 1:30 mark of your video, this sequence must happen live:
 1. You say: "Autonomous Mode is ON"
 2. You upload a new video asset
 3. The fingerprint generates (10 seconds)
-4. You say: "ShieldAgent is now monitoring"
+4. You say: "Piractrix is now monitoring"
 5. You trigger a scan (or it auto-triggers)
 6. The Agent Live Feed starts populating with reasoning text — animated, real-time
 7. A SEVERITY 4 violation appears in the feed
@@ -829,7 +829,7 @@ Even this minimum transforms the positioning from "tool" to "agent" and makes th
 ```
 GitHub Repository
 [ ] All new agent files committed with clean commit messages
-[ ] README.md fully rewritten (ShieldAgent framing)
+[ ] README.md fully rewritten (Piractrix framing)
 [ ] .env.example updated with any new env vars
 [ ] docker-compose.yml tested locally
 [ ] Seed script working (npm run seed:demo)

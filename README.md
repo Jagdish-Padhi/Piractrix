@@ -1,8 +1,8 @@
-# 🛡️ SportShield : AI-Powered Rights Protection & Intelligence
+# 🛡️ Piractrix : AI-Powered Autonomous Rights Enforcement
 
 **Hackathon:** Google Solution Challenge 2026 | **Team:** Esc(Reality); | **Track:** Digital Asset Protection
 
-> Transforming reactive piracy monitoring into proactive, AI-driven legal enforcement through real-time fingerprinting and automated DMCA resolution.
+
 
 ---
 
@@ -15,39 +15,45 @@
 ---
 
 ## 🎯 Problem Statement
-Digital piracy in live sports and premium content costs broadcasters billions annually. Current detection methods are fragmented, often failing to track content across diverse platforms like Telegram and Twitter. Even when detected, the legal enforcement process (DMCA filing) is manual, slow, and lacks the hard technical evidence needed for rapid takedowns.
+Digital piracy across sports, OTT, education, and publishing costs rights holders billions annually. Current detection methods are fragmented, often failing to track content across diverse platforms like Telegram, Twitter/X, and the open web. Even when detected, the legal enforcement process is manual, slow, and lacks the technical evidence and reasoning trail needed for rapid takedowns.
 
 ## 💡 Solution
-SportShield is an end-to-end intelligence suite that protects digital assets using **AI Video DNA Fingerprinting**. It monitors major social platforms and the open web in real-time, provides deep technical evidence (Hamming distance, frame similarity), and bridges the gap to enforcement with **AI-powered DMCA drafting**, allowing rights holders to go from "detection" to "takedown" in seconds.
+Piractrix is an autonomous rights-enforcement agent that protects digital assets using **AI Video DNA Fingerprinting**. It monitors major social platforms and the open web in real-time, reasons over threat signals, ranks severity, and bridges the gap to enforcement with **AI-powered DMCA drafting** and structured decision logs, allowing rights holders to go from "detection" to "takedown" in seconds.
+
+It is built to support **Sports | OTT | Education | Publishing** workflows without changing the core platform.
 
 
 
 ## 🚀 Key Features
 
 ### ✅ AI Asset Library
-- **Video DNA Ingestion**: Upload match highlights or images to generate a unique digital fingerprint.
-- **Asset Intelligence**: View similarity metrics and tracking history for every protected file.
-- **Cloud Management**: Secure storage and metadata management for corporate rights holders.
+- **Video DNA Ingestion**: Upload match highlights, courses, documents, or images to generate a unique digital fingerprint.
+- **Asset Intelligence**: View similarity metrics, scan history, and enforcement outcomes for every protected file.
+- **Cloud Management**: Secure storage and metadata management for rights holders across multiple content domains.
 
-### ✅ Intelligent Scan Discovery
+### ✅ Autonomous Scan Discovery
 - **Cross-Platform Monitoring**: Scans YouTube, Twitter (X), Telegram, and the open web simultaneously.
 - **AI Auto-Suggest**: Automatically generates search keywords and metadata based on asset context.
-- **Confidence Scoring**: Prioritizes results based on AI-calculated match probability.
+- **Confidence Scoring**: Prioritizes results based on AI-calculated match probability and threat likelihood.
+- **Adaptive Discovery**: Helps the agent decide when a scan should trigger based on signal strength.
 
 ### ✅ Violation Command Center (USP)
-- **Evidence Audit**: Deep-dive into match explainability (Color similarity, Hamming distance, Frame match count).
+- **Evidence Audit**: Deep-dive into match explainability with color similarity, Hamming distance, and frame match count.
+- **Reasoning Trail**: Review the agent's decision path and why a case was classified a certain way.
 - **One-Click DMCA Draft**: Instantly generates legally-compliant, platform-specific takedown notices.
 - **Resolution Workflow**: Track cases through `OPEN` → `REPORTED` → `RESOLVED` statuses.
+- **Threat Memory**: Surface repeat offenders and known domains so the agent can escalate faster.
 - **Deep Linking**: Direct navigation from email alerts to specific evidence records.
 
 ### ✅ Intelligence Analytics
 - **Professional Reporting**: Generate high-fidelity PDF reports with embedded SVG charts.
 - **Background Ops**: Start complex report generation and continue working; the service follows you globally.
-- **Risk Assessment**: Automated AI insights into piracy hotspots and distribution trends.
+- **Risk Assessment**: Automated AI insights into piracy hotspots, repeat offenders, and distribution trends.
+- **Forecast Mode**: Preview likely violation spikes around major broadcasts and release windows.
 
 ### ✅ Real-Time Alerts
 - **High-Confidence Notifications**: Instant email alerts for matches >85% similarity.
-- **Piracy Surge Alerts**: Automated warnings for coordinated sharing (e.g., 5+ links in 1 hour).
+- **Piracy Surge Alerts**: Automated warnings for coordinated sharing or repeat-offender behavior.
 - **Direct Enforcement Links**: "View Evidence" buttons in emails take you straight to the action.
 
 ---
@@ -59,7 +65,7 @@ SportShield is an end-to-end intelligence suite that protects digital assets usi
 | **Frontend** | React 18, Vite, Vanilla CSS (Premium Themes), Lucide Icons, Chart.js |
 | **Backend** | Node.js, Express.js, MongoDB Atlas (Mongoose) |
 | **ML/Scraping** | Python, FastAPI, Puppeteer (PDF Rendering), Image/Video Hashing |
-| **Integrations** | Brevo (Email), Cloudinary (Asset Hosting), Gemini AI (Legal Drafting) |
+| **Integrations** | Brevo (Email), Cloudinary (Asset Hosting), Gemini AI (Reasoning + Legal Drafting) |
 | **Auth** | JWT (Access + Refresh Tokens), Firebase (Social Login) |
 
 ---
@@ -68,11 +74,11 @@ SportShield is an end-to-end intelligence suite that protects digital assets usi
 
 | Google Technology | Implementation Detail | Status |
 |-------------------|-----------------------|--------|
-| **Gemini Pro (Google AI)** | **AI Enforcement:** Generates high-accuracy legal context and platform-specific DMCA drafts in <3s using structured JSON outputs. | 🚀 Active |
+| **Gemini Pro (Google AI)** | **AI Reasoning:** Generates high-accuracy classification, legal context, and platform-specific DMCA drafts in <3s using structured JSON outputs. | 🚀 Active |
 | **Firebase Authentication** | **Identity Management:** Seamless Google One-Tap integration for verified rights-holder sessions. | 🚀 Active |
-| **Google Cloud Platform** | **Microservice Target:** Proposed for serverless Cloud Run deployment to handle bursty ML workloads during live match events. | 🛡️ Target |
+| **Google Cloud Platform** | **Microservice Target:** Proposed for serverless Cloud Run deployment to handle bursty agent and ML workloads during live events. | 🛡️ Target |
 | **Chrome DevTools Protocol** | **Evidence Engine:** Native Puppeteer integration for high-fidelity PDF renders and automated screenshot evidence. | 🚀 Active |
-| **Google Search API** | **Smart Scrapers:** Used specialized Puppeteer nodes to bypass **API rate-limits** and monitor dynamic 'pirate' domains in real-time. | 💎 Optimized |
+| **Google Search API** | **Smart Scrapers:** Used specialized Puppeteer nodes to bypass **API rate-limits** and monitor dynamic threat domains in real-time. | 💎 Optimized |
 | **Google Vision AI** | **Hybrid Matching:** Local **pHash & Transformers** used for 1M+ frame analysis to ensure **low-latency throughput** and cost scaling. | 💎 Optimized |
 | **Google Maps Platform** | **Tactical Viz:** SVG-based Geo-Mapping used for **zero-latency distribution tracking** during high-traffic match windows. | 💎 Optimized |
 
@@ -83,7 +89,7 @@ SportShield is an end-to-end intelligence suite that protects digital assets usi
 ```bash
 # Clone repository
 git clone <repo-url>
-cd SportShield
+cd Piractrix
 
 # Backend setup
 cd server
