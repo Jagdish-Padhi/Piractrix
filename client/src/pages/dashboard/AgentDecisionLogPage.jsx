@@ -13,7 +13,8 @@ import {
   Clock,
   Eye,
   Info,
-  Calendar
+  Calendar,
+  Loader2
 } from 'lucide-react';
 import { Card, Badge, Button, Loader, Table, Pagination } from '../../components';
 import api from '../../services/api.js';
