@@ -5,6 +5,7 @@ import AgentDecisionLog from '../models/agentDecisionLog.model.js';
 import Violation from '../models/violation.model.js';
 import { findThreatByDomain, upsertThreat } from './memory.agent.js';
 import { decideForViolation } from './decision.agent.js';
+import { getAgentStatus } from '../services/agent.service.js';
 import { executeAction } from './executor.agent.js';
 import { emitAgentDecision } from '../config/socket.js';
 
@@ -78,12 +79,15 @@ export async function runAgentOnScanComplete({ orgId, scanJobId, violations }) {
         const threatEntry = await findThreatByDomain({ orgId: violation.orgId || orgId, domain });
 
         // 3) Run decision engine
+        const status = await getAgentStatus(violation.orgId || orgId) || { autonomousMode: false };
+        const { autonomousMode } = status;
+
         const decision = await decideForViolation({
           orgId: violation.orgId || orgId,
           violation,
           severityResult,
           threatEntry,
-          autonomousMode: true,
+          autonomousMode: Boolean(autonomousMode),
         });
 
         // 4) Execute action
