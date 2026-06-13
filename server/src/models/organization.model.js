@@ -53,8 +53,6 @@ const organizationSchema = new mongoose.Schema(
 	},
 );
 
-organizationSchema.index({ email: 1 }, { unique: true });
-
 const Organization = mongoose.model('Organization', organizationSchema);
 
 export default Organization;

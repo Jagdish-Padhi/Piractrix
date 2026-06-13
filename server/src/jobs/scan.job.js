@@ -1,18 +1,7 @@
-import { createScanJob, dispatchScanJob, getAssetsForScheduledScans } from '../services/scans.service.js';
+import { runPerceptionScheduling } from '../agents/perception.agent.js';
 
 export async function runScheduledScanJob() {
-  const assets = await getAssetsForScheduledScans();
-
-  for (const asset of assets) {
-    const scanJob = await createScanJob({
-      orgId: asset.orgId,
-      assetId: asset._id,
-      keywords: [asset.title],
-      platforms: ['youtube', 'web'],
-    });
-
-    void dispatchScanJob(scanJob._id.toString());
-  }
-
-  return { status: 'queued', count: assets.length };
+  // Use perception agent to decide which assets to scan this run
+  const result = await runPerceptionScheduling();
+  return { status: 'queued', count: result.scheduled };
 }

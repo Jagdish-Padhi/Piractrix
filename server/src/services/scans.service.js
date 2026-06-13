@@ -4,6 +4,7 @@ import { createAlertFromViolation } from './alerts.service.js';
 import ScanJob from '../models/scanJob.model.js';
 import ScanResult from '../models/scanResult.model.js';
 import Violation from '../models/violation.model.js';
+import { runAgentOnScanComplete } from '../agents/orchestrator.agent.js';
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
 const GOOGLE_TRANSLATE_API_URL = 'https://translation.googleapis.com/language/translate/v2';
@@ -479,6 +480,15 @@ export async function dispatchScanJob(scanJobId) {
 		scanJob.violationsCount = violationsCount;
 		scanJob.completedAt = new Date();
 		await scanJob.save();
+
+		// Fire-and-forget: run agent orchestration after scan completes
+		try {
+			const createdViolations = await Violation.find({ scanJobId: scanJob._id }).lean();
+			void runAgentOnScanComplete({ orgId: scanJob.orgId, scanJobId: scanJob._id.toString(), violations: createdViolations });
+		} catch (e) {
+			// Ensure agent failures don't impact scans
+			console.error('[scans.service] failed to start agent orchestration:', e?.message || e);
+		}
 	} catch (error) {
 		await ScanJob.findByIdAndUpdate(scanJobId, {
 			status: 'failed',
