@@ -11,6 +11,7 @@ import scansRouter from './scans.route.js';
 import organizationRouter from './organization.route.js';
 import violationsRouter from './violations.route.js';
 import digestRouter from './digest.route.js';
+import agentRouter from './agent.route.js';
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use('/scans', scansRouter);
 router.use('/violations', violationsRouter);
 router.use('/organization', organizationRouter);
 router.use('/digest', digestRouter);
+router.use('/agent', agentRouter);
 
 export default router;

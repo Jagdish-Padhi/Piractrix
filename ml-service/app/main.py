@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException
 
 from ai.gemini_service import suggest_keywords
 from ai.vision_service import verify_visual_similarity
+from ai.severity_classifier import classify_severity
 from fingerprint.fingerprint_service import generate_fingerprint
 from matching.matching_service import match_content
 from scraper.scraper_service import run_scrape_job
@@ -141,3 +142,20 @@ def vision_verify_endpoint(payload: VisionVerifyRequest) -> dict:
         raise HTTPException(status_code=503, detail=str(error)) from error
     except Exception as error:
         raise HTTPException(status_code=500, detail=f"Vision verification failed: {error}") from error
+
+
+class SeverityRequest(BaseModel):
+    confidence: int
+    matchType: str | None = None
+    platform: str | None = None
+    domainReputation: str | int | None = None
+    assetType: str | None = None
+
+
+@app.post("/ml/classify-severity")
+def classify_severity_endpoint(payload: SeverityRequest) -> dict:
+    try:
+        result = classify_severity(payload.__dict__)
+        return result
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=f"Severity classification failed: {error}") from error

@@ -96,3 +96,9 @@ export function emitAlertsUpdated({ orgId, unreadCount }) {
 		unreadCount,
 	});
 }
+
+export function emitAgentDecision({ orgId, decision }) {
+    if (!io) return;
+
+    io.to(getSocketRoom(orgId)).emit('agent:decision', { decision });
+}
