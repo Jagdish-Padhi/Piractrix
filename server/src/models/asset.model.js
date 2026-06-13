@@ -24,7 +24,7 @@ const assetSchema = new mongoose.Schema(
 		},
 		type: {
 			type: String,
-			enum: ['video', 'image', 'highlight'],
+			enum: ['video', 'image', 'highlight', 'exam_paper', 'document', 'music', 'ott_content'],
 			required: true,
 		},
 		storageKey: {

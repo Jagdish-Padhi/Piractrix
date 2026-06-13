@@ -50,16 +50,31 @@ async function requestSuggestedKeywords({ title, assetType, sourceUrl, count = 1
 	return response.json();
 }
 
-export function inferAssetType(mimeType = '') {
+export function inferAssetType(mimeType = '', filename = '') {
+	const name = filename.toLowerCase();
+	if (mimeType.startsWith('audio/')) {
+		return 'music';
+	}
+	if (mimeType === 'application/pdf' || name.endsWith('.pdf')) {
+		return 'exam_paper';
+	}
+	if (mimeType.startsWith('text/') || mimeType.includes('document') || mimeType.includes('msword') || name.endsWith('.doc') || name.endsWith('.docx') || name.endsWith('.txt')) {
+		return 'document';
+	}
 	if (mimeType.startsWith('image/')) {
 		return 'image';
 	}
-
 	if (mimeType.startsWith('video/')) {
+		if (name.includes('highlight')) {
+			return 'highlight';
+		}
+		if (name.includes('ott') || name.includes('movie') || name.includes('show') || name.includes('episode')) {
+			return 'ott_content';
+		}
 		return 'video';
 	}
 
-	return 'highlight';
+	return 'document';
 }
 
 export async function createAsset({ orgId, title, description, file, publicUrl }) {
@@ -67,7 +82,7 @@ export async function createAsset({ orgId, title, description, file, publicUrl }
 		orgId,
 		title,
 		description: description || '',
-		type: inferAssetType(file.mimetype),
+		type: inferAssetType(file.mimetype, file.originalname || file.filename || ''),
 		storageKey: file.filename,
 		gcsUrl: publicUrl,
 		thumbnailUrl: null,

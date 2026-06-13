@@ -20,12 +20,14 @@ import {
 	Save, 
 	Trash2, 
 	UploadCloud,
-	Layers
+	Layers,
+	FileText,
+	Music
 } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Loader, Modal, Spinner } from '../../components';
 import api from '../../services/api.js';
 
-const acceptedFileTypes = 'video/mp4,video/quicktime,image/jpeg,image/png';
+const acceptedFileTypes = 'video/mp4,video/quicktime,image/jpeg,image/png,audio/mpeg,audio/wav,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain';
 
 function getStatusBadgeVariant(status) {
 	if (status === 'active') {
@@ -164,9 +166,17 @@ export default function DashboardAssetsPage() {
 		setIsDragging(false);
 		const file = event.dataTransfer.files?.[0] || null;
 		if (file) {
-			const accepted = ['video/mp4', 'video/quicktime', 'image/jpeg', 'image/png'];
-			if (!accepted.includes(file.type)) {
-				toast.error('Unsupported file type. Please use MP4, MOV, JPEG, or PNG.');
+			const accepted = [
+				'video/mp4', 'video/quicktime', 
+				'image/jpeg', 'image/png', 
+				'audio/mpeg', 'audio/wav', 
+				'application/pdf', 
+				'application/msword', 
+				'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+				'text/plain'
+			];
+			if (!accepted.includes(file.type) && !file.name.endsWith('.pdf') && !file.name.endsWith('.docx') && !file.name.endsWith('.mp3')) {
+				toast.error('Unsupported file type. Please use MP4, MOV, JPEG, PNG, MP3, WAV, PDF or DOCX.');
 				return;
 			}
 			setUploadForm((current) => ({ ...current, file }));
@@ -281,13 +291,13 @@ export default function DashboardAssetsPage() {
 						</div>
 					</div>
 				</Card>
-				<Card className='border-(--app-color-border) shadow-sm group hover:border-emerald-500/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
+				<Card className='border-(--app-color-border) shadow-sm group hover:border-[var(--app-color-primary)]/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
 							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Processing now</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{processingCount}</p>
 						</div>
-						<div className="h-12 w-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+						<div className="h-12 w-12 rounded-2xl bg-[var(--app-color-primary-soft)] flex items-center justify-center text-[var(--app-color-primary)] group-hover:scale-110 transition-transform">
 							<Activity size={22} className={processingCount > 0 ? 'animate-pulse' : ''} />
 						</div>
 					</div>
@@ -333,7 +343,7 @@ export default function DashboardAssetsPage() {
 
 				<div className='mt-5'>
 					{processingCount > 0 && (
-						<div className='mb-4 flex items-center gap-4 rounded-lg border border-emerald-200 bg-emerald-50/40 px-4 py-3 text-sm text-emerald-700'>
+						<div className='mb-4 flex items-center gap-4 rounded-lg border border-primary/20 bg-primary-soft/50 px-4 py-3 text-sm text-primary'>
 							<Loader size={0.3} />
 							<span className="font-bold uppercase tracking-wider">Processing fingerprints for {processingCount} asset{processingCount > 1 ? 's' : ''}...</span>
 						</div>
@@ -416,7 +426,7 @@ export default function DashboardAssetsPage() {
 												</div>
 												<div className="h-1.5 w-full overflow-hidden rounded-full bg-(--app-color-surface-elevated)">
 													<div 
-														className="h-full bg-linear-to-r from-(--app-color-primary) to-emerald-400 transition-all duration-1000 ease-out" 
+														className="h-full bg-linear-to-r from-(--app-color-primary) to-[var(--app-color-accent)] transition-all duration-1000 ease-out" 
 														style={{ width: `${progress}%` }} 
 													/>
 												</div>
@@ -428,8 +438,11 @@ export default function DashboardAssetsPage() {
 											<div className="mt-4 pt-4 border-t border-(--app-color-border)/50 space-y-3">
 												<div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-(--app-color-text-muted)">
 													<span className="flex items-center gap-1.5 font-bold">
-														{asset.type === 'image' ? <ImageIcon size={12} /> : <FileVideo size={12} />}
-														{asset.type}
+														{asset.type === 'image' ? <ImageIcon size={12} /> : 
+														 asset.type === 'music' ? <Music size={12} /> :
+														 (asset.type === 'exam_paper' || asset.type === 'document') ? <FileText size={12} /> :
+														 <FileVideo size={12} />}
+														{asset.type.replace('_', ' ')}
 													</span>
 													<span className="flex items-center gap-1.5">
 														<Calendar size={12} />
@@ -486,10 +499,10 @@ export default function DashboardAssetsPage() {
 				<div
 					className={`rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer ${
 						isDragging
-							? 'border-(--app-color-primary) bg-blue-50/50 scale-[1.01]'
+							? 'border-(--app-color-primary) bg-primary-soft/30 scale-[1.01]'
 							: uploadForm.file
-								? 'border-emerald-400 bg-emerald-50/50'
-								: 'border-(--app-color-border) bg-(--app-color-surface) hover:border-(--app-color-primary)/60 hover:bg-blue-50/20'
+								? 'border-primary/50 bg-primary-soft/40'
+								: 'border-(--app-color-border) bg-(--app-color-surface) hover:border-(--app-color-primary)/60 hover:bg-primary-soft/10'
 					}`}
 					onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }}
 					onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -507,11 +520,11 @@ export default function DashboardAssetsPage() {
 					<div className='flex flex-col items-center justify-center gap-2 py-8 px-4 select-none pointer-events-none'>
 						{uploadForm.file ? (
 							<>
-								<div className='h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center'>
-									<FileCheck className='h-5 w-5 text-emerald-600' />
+								<div className='h-10 w-10 rounded-full bg-primary-soft flex items-center justify-center'>
+									<FileCheck className='h-5 w-5 text-primary' />
 								</div>
-								<p className='text-sm font-bold text-emerald-700 text-center truncate max-w-[240px]'>{uploadForm.file.name}</p>
-								<p className='text-xs text-emerald-600/70'>{(uploadForm.file.size / (1024 * 1024)).toFixed(2)} MB &middot; <span className='underline'>Click to change</span></p>
+								<p className='text-sm font-bold text-primary text-center truncate max-w-[240px]'>{uploadForm.file.name}</p>
+								<p className='text-xs text-primary/70'>{(uploadForm.file.size / (1024 * 1024)).toFixed(2)} MB &middot; <span className='underline'>Click to change</span></p>
 							</>
 						) : (
 							<>
@@ -521,7 +534,7 @@ export default function DashboardAssetsPage() {
 								<p className='text-sm font-semibold text-(--app-color-text)'>
 									{isDragging ? 'Drop file here!' : 'Drag & drop or click to browse'}
 								</p>
-								<p className='text-xs text-(--app-color-text-muted)'>MP4, MOV, JPEG, PNG &middot; Max 2 GB</p>
+								<p className='text-xs text-(--app-color-text-muted)'>MP4, MOV, JPEG, PNG, MP3, WAV, PDF, DOCX &middot; Max 2 GB</p>
 							</>
 						)}
 					</div>
@@ -588,7 +601,10 @@ export default function DashboardAssetsPage() {
 					<div className='space-y-6'>
 						<div className="flex items-start gap-4 pb-6 border-b border-(--app-color-border)/50">
 							<div className="h-16 w-16 rounded-xl bg-(--app-color-primary-soft) flex items-center justify-center text-(--app-color-primary) shrink-0">
-								{selectedAsset.type === 'image' ? <ImageIcon size={32} /> : <FileVideo size={32} />}
+								{selectedAsset.type === 'image' ? <ImageIcon size={32} /> : 
+								 selectedAsset.type === 'music' ? <Music size={32} /> :
+								 (selectedAsset.type === 'exam_paper' || selectedAsset.type === 'document') ? <FileText size={32} /> :
+								 <FileVideo size={32} />}
 							</div>
 							<div className="min-w-0">
 								<h3 className="text-lg font-bold text-(--app-color-text) truncate">{selectedAsset.title}</h3>
@@ -599,7 +615,7 @@ export default function DashboardAssetsPage() {
 						<div className="grid grid-cols-2 gap-x-8 gap-y-6">
 							<div className="space-y-1">
 								<p className="text-[10px] font-black uppercase tracking-widest text-(--app-color-text-muted) flex items-center gap-1.5">
-									<Activity size={12} className="text-emerald-500" />
+									<Activity size={12} className="text-accent" />
 									Status
 								</p>
 								<Badge variant={getStatusBadgeVariant(selectedAsset.status)} size="sm">
