@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import * as AgentController from '../controllers/agent.controller.js';
+import { verifyToken } from '../middlewares/verifyToken.js';
 
 const router = Router();
+
+// protect all agent endpoints
+router.use(verifyToken);
 
 router.get('/status', AgentController.getStatus);
 router.get('/decisions', AgentController.listDecisions);

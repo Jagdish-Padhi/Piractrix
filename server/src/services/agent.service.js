@@ -6,9 +6,11 @@ import { emitAgentDecision } from '../config/socket.js';
 // In-memory mode store per org. For demo/demo seed this is fine.
 const modeByOrg = new Map();
 
-export function getAgentStatus(orgId) {
+export async function getAgentStatus(orgId) {
   const mode = modeByOrg.get(String(orgId)) || false;
-  return { autonomousMode: Boolean(mode), lastRun: null };
+  // find last decision timestamp
+  const lastDecision = await AgentDecisionLog.findOne({ orgId }).sort({ createdAt: -1 }).lean();
+  return { autonomousMode: Boolean(mode), lastRun: lastDecision ? lastDecision.createdAt : null };
 }
 
 export async function listDecisions({ orgId, page = 1, limit = 20 }) {
@@ -65,5 +67,17 @@ export async function approveDecision({ orgId, decisionId }) {
 export async function getStats({ orgId }) {
   const total = await AgentDecisionLog.countDocuments({ orgId });
   const actionsTaken = await AgentDecisionLog.countDocuments({ orgId, outcome: 'success' });
-  return { totalDecisions: total, actionsTaken };
+
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const decisionsLast24h = await AgentDecisionLog.countDocuments({ orgId, createdAt: { $gte: since } });
+
+  const breakdownAgg = await AgentDecisionLog.aggregate([
+    { $match: { orgId } },
+    { $group: { _id: '$action', count: { $sum: 1 } } },
+  ]);
+  const breakdown = breakdownAgg.reduce((acc, cur) => { acc[cur._id] = cur.count; return acc; }, {});
+
+  const threatDomainsCount = await ThreatMemory.countDocuments({ orgId });
+
+  return { totalDecisions: total, actionsTaken, decisionsLast24h, breakdown, threatDomainsCount };
 }
