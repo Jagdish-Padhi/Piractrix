@@ -16,7 +16,22 @@ export async function upsertThreat({ orgId, domain, platform }) {
   };
 
   const opts = { upsert: true, new: true, setDefaultsOnInsert: true };
-  return ThreatMemory.findOneAndUpdate({ orgId, domain }, update, opts).lean();
+  // First increment and get the updated document
+  const doc = await ThreatMemory.findOneAndUpdate({ orgId, domain }, update, opts).lean();
+  if (!doc) return null;
+
+  const count = doc.totalViolations || 0;
+  let level = 'low';
+  if (count >= 10) level = 'critical';
+  else if (count >= 6) level = 'high';
+  else if (count >= 3) level = 'medium';
+
+  if (doc.threatLevel !== level) {
+    const updated = await ThreatMemory.findOneAndUpdate({ orgId, domain }, { $set: { threatLevel: level } }, { new: true }).lean();
+    return updated;
+  }
+
+  return doc;
 }
 
 export async function setThreatLevel({ orgId, domain, level }) {
