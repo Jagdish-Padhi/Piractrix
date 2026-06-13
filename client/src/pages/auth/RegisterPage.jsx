@@ -76,7 +76,7 @@ export default function RegisterPage() {
 							
 							<div className='relative z-10 flex flex-col items-center'>
 								<div className='flex flex-col items-center gap-6'>
-									<img src='/logo.png' alt='Piractrix Logo' className='h-36 w-36 object-contain filter drop-shadow-2xl' />
+									<img src='/logo.png' alt='Piractrix Logo' className='h-36 w-36 object-contain mix-blend-screen filter drop-shadow-2xl' />
 									<div className='h-[3px] w-16 rounded-full bg-[var(--app-color-accent)]' />
 								</div>
 
