@@ -19,12 +19,15 @@ import {
 	LogOut,
 	Radar,
 	ShieldAlert,
+	Bot,
+	History
 } from 'lucide-react';
 
 const navigationItems = [
-	{ label: 'Overview', path: '/dashboard', icon: LayoutDashboard },
+	{ label: 'Agent Center', path: '/dashboard', icon: Bot },
 	{ label: 'Assets', path: '/dashboard/assets', icon: Layers },
 	{ label: 'Scans', path: '/dashboard/scans', icon: Radar },
+	{ label: 'Decision Log', path: '/dashboard/agent-log', icon: History },
 	{ label: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
 	{ label: 'Alerts', path: '/dashboard/alerts', icon: Bell },
 	{ label: 'Violations', path: '/dashboard/violations', icon: ShieldAlert },
@@ -75,12 +78,12 @@ export default function DashboardLayout() {
 
 			const handleAlertCreated = (payload) => {
 				updateUnreadCount(payload);
-				window.dispatchEvent(new CustomEvent('sportshield:alerts:new', { detail: payload }));
+				window.dispatchEvent(new CustomEvent('piractrix:alerts:new', { detail: payload }));
 			};
 
 			const handleAlertsUpdated = (payload) => {
 				updateUnreadCount(payload);
-				window.dispatchEvent(new CustomEvent('sportshield:alerts:updated', { detail: payload }));
+				window.dispatchEvent(new CustomEvent('piractrix:alerts:updated', { detail: payload }));
 			};
 
 			socket?.on('alerts:unread-count', updateUnreadCount);
@@ -131,7 +134,7 @@ export default function DashboardLayout() {
 			const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
 			const anchor = document.createElement('a');
 			anchor.href = blobUrl;
-			anchor.download = `SportShield_Report_${report._id || 'Generated'}.pdf`;
+			anchor.download = `Piractrix_Report_${report._id || 'Generated'}.pdf`;
 			document.body.appendChild(anchor);
 			anchor.click();
 			anchor.remove();
@@ -158,11 +161,11 @@ export default function DashboardLayout() {
 			<header className='sticky top-0 z-20 border-b border-white/60 bg-white/75 backdrop-blur-xl'>
 				<Container className='flex min-h-20 items-center justify-between gap-4 py-4'>
 					<Link to='/' className='flex items-center gap-3 group'>
-						<img src='/navlogo.png' alt='SportShield' className='h-12 w-12 object-contain transition-transform duration-500 group-hover:scale-110' />
+						<img src='/navlogo.png' alt='Piractrix' className='h-12 w-12 object-contain transition-transform duration-500 group-hover:scale-110' />
 						<div className="logo-brand">
 							<div className="flex items-baseline gap-0.5">
-								<span className="text-(--app-color-text) text-2xl!">Sport</span>
-								<span className="logo-shield text-2xl!">Shield</span>
+								<span className="text-(--app-color-text) text-2xl!">Pirac</span>
+								<span className="logo-shield text-2xl!">trix</span>
 							</div>
 						</div>
 					</Link>
@@ -179,7 +182,7 @@ export default function DashboardLayout() {
 									className={`nav-link-underline px-4 py-2 text-sm font-medium ${isActive ? 'active' : ''}`}
 								>
 									<span className='flex items-center gap-2.5'>
-										<Icon size={16} className={`${isActive ? 'text-(--app-color-success)' : 'text-(--app-color-text-muted)'} transition-colors duration-300`} />
+										<Icon size={16} className={`${isActive ? 'text-(--app-color-primary)' : 'text-(--app-color-text-muted)'} transition-colors duration-300`} />
 										{item.label}
 										{item.label === 'Alerts' && unreadAlerts > 0 ? (
 											<Badge variant='danger' size='sm' className='min-w-6 justify-center px-2 py-0.5 text-[10px]'>

@@ -5,7 +5,8 @@ import DashboardLayout from '../components/layout/DashboardLayout.jsx';
 import LoginPage from '../pages/auth/LoginPage.jsx';
 import LandingPage from '../pages/landing/LandingPage.jsx';
 import RegisterPage from '../pages/auth/RegisterPage.jsx';
-import DashboardHomePage from '../pages/dashboard/DashboardHomePage.jsx';
+import AgentCommandCenterPage from '../pages/dashboard/AgentCommandCenterPage.jsx';
+import AgentDecisionLogPage from '../pages/dashboard/AgentDecisionLogPage.jsx';
 import DashboardAssetsPage from '../pages/dashboard/DashboardAssetsPage.jsx';
 import DashboardScansPage from '../pages/dashboard/DashboardScansPage.jsx';
 import DashboardScanResultsPage from '../pages/dashboard/DashboardScanResultsPage.jsx';
@@ -62,7 +63,8 @@ export default function AppRoutes() {
 				<Route path='/register' element={<RegisterPage />} />
 				<Route element={<PrivateRoute />}>
 					<Route element={<DashboardLayout />}>
-						<Route path='/dashboard' element={<DashboardHomePage />} />
+						<Route path='/dashboard' element={<AgentCommandCenterPage />} />
+						<Route path='/dashboard/agent-log' element={<AgentDecisionLogPage />} />
 						<Route path='/dashboard/assets' element={<DashboardAssetsPage />} />
 						<Route path='/dashboard/scans' element={<DashboardScansPage />} />
 						<Route path='/dashboard/scans/:jobId' element={<DashboardScanResultsPage />} />
