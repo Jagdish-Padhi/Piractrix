@@ -60,7 +60,7 @@ const Header = ({
 								href={item.href}
 								className='nav-link-underline flex items-center gap-2 text-sm font-medium'
 							>
-								{Icon && <Icon size={16} className="text-(--app-color-success)/70" />}
+								{Icon && <Icon size={16} className="text-accent/70" />}
 								{item.label}
 							</a>
 						);
