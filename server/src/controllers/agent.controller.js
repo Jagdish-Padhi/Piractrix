@@ -2,8 +2,8 @@ import * as AgentService from '../services/agent.service.js';
 
 export async function getStatus(req, res, next) {
   try {
-    const orgId = req.user.orgId;
-    const status = AgentService.getAgentStatus(orgId);
+    const orgId = req.auth?.orgId;
+    const status = await AgentService.getAgentStatus(orgId);
     return res.json(status);
   } catch (error) {
     next(error);
@@ -12,7 +12,7 @@ export async function getStatus(req, res, next) {
 
 export async function listDecisions(req, res, next) {
   try {
-    const orgId = req.user.orgId;
+    const orgId = req.auth?.orgId;
     const page = Number(req.query.page || 1);
     const limit = Number(req.query.limit || 20);
     const result = await AgentService.listDecisions({ orgId, page, limit });
@@ -24,7 +24,7 @@ export async function listDecisions(req, res, next) {
 
 export async function getDecision(req, res, next) {
   try {
-    const orgId = req.user.orgId;
+    const orgId = req.auth?.orgId;
     const id = req.params.id;
     const item = await AgentService.getDecision({ orgId, id });
     if (!item) return res.status(404).json({ error: 'Not found' });
@@ -36,7 +36,7 @@ export async function getDecision(req, res, next) {
 
 export async function listThreatMemory(req, res, next) {
   try {
-    const orgId = req.user.orgId;
+    const orgId = req.auth?.orgId;
     const page = Number(req.query.page || 1);
     const limit = Number(req.query.limit || 50);
     const result = await AgentService.listThreatMemory({ orgId, page, limit });
@@ -48,7 +48,7 @@ export async function listThreatMemory(req, res, next) {
 
 export async function setMode(req, res, next) {
   try {
-    const orgId = req.user.orgId;
+    const orgId = req.auth?.orgId;
     const mode = req.body?.mode === true || req.body?.mode === 'true' || false;
     const result = AgentService.setMode({ orgId, mode });
     return res.json(result);
@@ -59,7 +59,7 @@ export async function setMode(req, res, next) {
 
 export async function approveDecision(req, res, next) {
   try {
-    const orgId = req.user.orgId;
+    const orgId = req.auth?.orgId;
     const decisionId = req.params.decisionId;
     const result = await AgentService.approveDecision({ orgId, decisionId });
     return res.json(result);
@@ -70,7 +70,7 @@ export async function approveDecision(req, res, next) {
 
 export async function getStats(req, res, next) {
   try {
-    const orgId = req.user.orgId;
+    const orgId = req.auth?.orgId;
     const result = await AgentService.getStats({ orgId });
     return res.json(result);
   } catch (error) {
