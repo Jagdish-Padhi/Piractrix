@@ -20,8 +20,8 @@
 	--app-color-warning: #d97706;
 	--app-color-danger: #dc2626;
 	--app-gradient-shell: radial-gradient(circle at top left, rgba(var(--app-rgb-accent), 0.08), transparent 35%), radial-gradient(circle at bottom right, rgba(var(--app-rgb-primary), 0.06), transparent 28%), linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-	--app-gradient-auth-login: linear-gradient(160deg, #090915 0%, #1c0a2b 50%, #3b0764 100%);
-	--app-gradient-auth-register: linear-gradient(150deg, #090915 0%, #1d0733 50%, #4c1d95 100%);
+	--app-gradient-auth-login: linear-gradient(160deg, #160c3a 0%, #221254 50%, #3b0764 100%);
+	--app-gradient-auth-register: linear-gradient(150deg, #160c3a 0%, #221254 50%, #4c1d95 100%);
 	--app-shadow-elevated: 0 24px 40px rgba(11, 20, 34, 0.12);
 }
 
