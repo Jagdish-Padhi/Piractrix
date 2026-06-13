@@ -372,7 +372,7 @@ export default function DashboardLayout() {
 			</aside>
 
 			{/* Main Pane (Header on mobile, content scrolls next to sidebar) */}
-			<div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+			<div className="flex-1 flex flex-col min-h-screen md:h-screen md:overflow-hidden overflow-x-hidden">
 				
 				{/* Mobile top bar */}
 				<header className="flex md:hidden sticky top-0 z-20 border-b border-white/60 bg-white/75 backdrop-blur-xl h-16 items-center justify-between px-4 shrink-0">
@@ -512,7 +512,7 @@ export default function DashboardLayout() {
 				</header>
 
 				{/* Main dashboard content pane */}
-				<main className="flex-1 py-8 px-8 lg:px-12 w-full max-w-none">
+				<main className="flex-1 py-8 px-8 lg:px-12 w-full max-w-none md:overflow-y-auto scrollbar-thin">
 					<Outlet />
 				</main>
 			</div>
