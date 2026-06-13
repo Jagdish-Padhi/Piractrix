@@ -124,6 +124,24 @@ const getRouteMetadata = (pathname) => {
 	};
 };
 
+const routeIcons = {
+	'/dashboard': Bot,
+	'/dashboard/agent-log': History,
+	'/dashboard/assets': Layers,
+	'/dashboard/scans': Radar,
+	'/dashboard/analytics': BarChart3,
+	'/dashboard/alerts': Bell,
+	'/dashboard/violations': ShieldAlert,
+};
+
+const getRouteIcon = (pathname) => {
+	if (pathname.startsWith('/dashboard/scans/')) return Radar;
+	if (pathname.startsWith('/dashboard/violations/')) return ShieldAlert;
+	
+	const matched = Object.keys(routeIcons).find(route => pathname === route);
+	return matched ? routeIcons[matched] : Bot;
+};
+
 const navigationItems = [
 	{ label: 'Agent Center', path: '/dashboard', icon: Bot },
 	{ label: 'Assets', path: '/dashboard/assets', icon: Layers },
@@ -453,7 +471,13 @@ export default function DashboardLayout() {
 								<div key={crumb.path} className="flex items-center gap-1.5">
 									{idx > 0 && <ChevronRight size={12} className="text-slate-300 shrink-0" />}
 									{crumb.isLast ? (
-										<span className="text-slate-800 font-extrabold text-sm tracking-tight">{crumb.label}</span>
+										<div className="flex items-center gap-1.5">
+											{(() => {
+												const Icon = getRouteIcon(location.pathname);
+												return <Icon size={14} className="text-[var(--app-color-primary)] shrink-0" />;
+											})()}
+											<span className="text-slate-800 font-extrabold text-sm tracking-tight">{crumb.label}</span>
+										</div>
 									) : (
 										<Link to={crumb.path} className="hover:text-slate-500 transition-colors">
 											{crumb.label}
