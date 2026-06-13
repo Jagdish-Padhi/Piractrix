@@ -10,6 +10,7 @@ export async function decideForViolation({ orgId, violation, severityResult, thr
 
   if (severity >= 5) {
     action = 'draft_dmca';
+    decisionType = 'violation_escalated';
   } else if (severity >= 4) {
     action = 'draft_dmca';
   } else if (severity >= 3) {
@@ -35,5 +36,6 @@ export async function decideForViolation({ orgId, violation, severityResult, thr
     reasoning,
     autonomousMode: Boolean(autonomousMode),
     severity,
+    sendImmediately: severity >= 5,
   };
 }
