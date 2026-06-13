@@ -119,7 +119,7 @@ export default function ReportGenerationModal({ isGenerating, progress, report, 
 									{ label: 'Accuracy', val: `${report.stats?.avgConfidenceScore ?? 0}%`, color: 'text-indigo-600' }
 								].map(s => (
 									<div key={s.label} className='bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex flex-col items-center'>
-										<p className='text-[9px] font-bold text-slate-400 uppercase tracking-tighter mb-0.5'>{s.label}</p>
+										<p className='text-xs font-semibold text-slate-400 uppercase tracking-tighter mb-0.5'>{s.label}</p>
 										<p className={`text-base font-black ${s.color}`}>{s.val}</p>
 									</div>
 								))}
@@ -143,7 +143,7 @@ export default function ReportGenerationModal({ isGenerating, progress, report, 
 
 							{/* Secure Share */}
 							<div className='w-full border-t border-slate-100 pt-6'>
-								<p className='text-[9px] uppercase font-black text-slate-400 tracking-[0.2em] mb-4 text-center'>Distribute Securely</p>
+								<p className='text-xs uppercase font-semibold text-slate-400 tracking-[0.2em] mb-4 text-center'>Distribute Securely</p>
 								<div className='flex justify-center gap-3'>
 									{[
 										{ id: 'mail', label: 'Mail', icon: Mail },
@@ -159,7 +159,7 @@ export default function ReportGenerationModal({ isGenerating, progress, report, 
 											<div className='w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-primary-soft group-hover:border-primary/20 transition-colors'>
 												{typeof p.icon === 'function' ? <span className='text-sm font-black'>{p.icon()}</span> : <p.icon size={16} className='text-slate-600 group-hover:text-primary' />}
 											</div>
-											<span className='text-[9px] font-bold text-slate-500 group-hover:text-primary uppercase'>{p.label}</span>
+											<span className='text-xs font-bold text-slate-500 group-hover:text-primary uppercase'>{p.label}</span>
 										</button>
 									))}
 								</div>

@@ -283,7 +283,7 @@ export default function DashboardAssetsPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-(--app-color-primary)/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Total assets</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Total assets</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{totalAssets}</p>
 						</div>
 						<div className="h-12 w-12 rounded-2xl bg-(--app-color-primary-soft) flex items-center justify-center text-(--app-color-primary) group-hover:scale-110 transition-transform">
@@ -294,7 +294,7 @@ export default function DashboardAssetsPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-[var(--app-color-primary)]/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Processing now</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Processing now</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{processingCount}</p>
 						</div>
 						<div className="h-12 w-12 rounded-2xl bg-[var(--app-color-primary-soft)] flex items-center justify-center text-[var(--app-color-primary)] group-hover:scale-110 transition-transform">
@@ -305,7 +305,7 @@ export default function DashboardAssetsPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-(--app-color-primary)/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>System status</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>System status</p>
 							<p className='text-xs font-bold text-(--app-color-success) flex items-center gap-1.5'>
 								<div className="w-1.5 h-1.5 rounded-full bg-(--app-color-success) animate-pulse" />
 								Active Discovery
@@ -384,7 +384,7 @@ export default function DashboardAssetsPage() {
 										<div className='flex items-start justify-between gap-3'>
 											<div className="flex-1 min-w-0">
 												<h3 className='text-base font-semibold text-(--app-color-text) truncate'>{asset.title}</h3>
-												<p className='mt-0.5 text-[10px] text-(--app-color-text-muted) line-clamp-1 h-4'>{asset.description || 'No description'}</p>
+												<p className='mt-0.5 text-xs text-(--app-color-text-muted) line-clamp-1 h-4'>{asset.description || 'No description'}</p>
 											</div>
 											<div className="flex flex-col items-end gap-2">
 												<Badge variant={getStatusBadgeVariant(asset.status)} size='sm'>
@@ -420,7 +420,7 @@ export default function DashboardAssetsPage() {
 
 										{isProcessing ? (
 											<div className="mt-4 space-y-2">
-												<div className="flex justify-between text-[10px] uppercase tracking-widest text-(--app-color-text-muted)">
+												<div className="flex justify-between text-xs uppercase tracking-wider text-(--app-color-text-muted)">
 													<span>{timeSinceUpload > expectedTime ? 'Finalizing...' : 'AI Fingerprinting...'}</span>
 													<span>{progress}%</span>
 												</div>
@@ -428,15 +428,15 @@ export default function DashboardAssetsPage() {
 													<div 
 														className="h-full bg-linear-to-r from-(--app-color-primary) to-[var(--app-color-accent)] transition-all duration-1000 ease-out" 
 														style={{ width: `${progress}%` }} 
-													/>
+														/>
 												</div>
-												<p className="text-[10px] text-center text-(--app-color-text-muted)">
+												<p className="text-xs text-center text-(--app-color-text-muted)">
 													{timeSinceUpload > expectedTime ? 'Analysis taking longer than usual...' : `Estimated completion in ~${timeRemaining}s`}
 												</p>
 											</div>
 										) : (
 											<div className="mt-4 pt-4 border-t border-(--app-color-border)/50 space-y-3">
-												<div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-(--app-color-text-muted)">
+												<div className="flex items-center justify-between text-xs uppercase tracking-wider text-(--app-color-text-muted)">
 													<span className="flex items-center gap-1.5 font-bold">
 														{asset.type === 'image' ? <ImageIcon size={12} /> : 
 														 asset.type === 'music' ? <Music size={12} /> :
@@ -614,7 +614,7 @@ export default function DashboardAssetsPage() {
 
 						<div className="grid grid-cols-2 gap-x-8 gap-y-6">
 							<div className="space-y-1">
-								<p className="text-[10px] font-black uppercase tracking-widest text-(--app-color-text-muted) flex items-center gap-1.5">
+								<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
 									<Activity size={12} className="text-accent" />
 									Status
 								</p>
@@ -624,7 +624,7 @@ export default function DashboardAssetsPage() {
 							</div>
 
 							<div className="space-y-1">
-								<p className="text-[10px] font-black uppercase tracking-widest text-(--app-color-text-muted) flex items-center gap-1.5">
+								<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
 									<AlertTriangle size={12} className={selectedAsset.violationsFound > 0 ? 'text-red-500' : 'text-emerald-500'} />
 									Violations Found
 								</p>
@@ -634,7 +634,7 @@ export default function DashboardAssetsPage() {
 							</div>
 
 							<div className="space-y-1">
-								<p className="text-[10px] font-black uppercase tracking-widest text-(--app-color-text-muted) flex items-center gap-1.5">
+								<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
 									<Fingerprint size={12} className="text-(--app-color-primary)" />
 									PHash (Image)
 								</p>
@@ -644,7 +644,7 @@ export default function DashboardAssetsPage() {
 							</div>
 
 							<div className="space-y-1">
-								<p className="text-[10px] font-black uppercase tracking-widest text-(--app-color-text-muted) flex items-center gap-1.5">
+								<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
 									<Activity size={12} className="text-(--app-color-primary)" />
 									Video DNA
 								</p>
@@ -654,7 +654,7 @@ export default function DashboardAssetsPage() {
 							</div>
 
 							<div className="space-y-1">
-								<p className="text-[10px] font-black uppercase tracking-widest text-(--app-color-text-muted) flex items-center gap-1.5">
+								<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
 									<Calendar size={12} />
 									Ingestion Date
 								</p>
@@ -664,7 +664,7 @@ export default function DashboardAssetsPage() {
 							</div>
 
 							<div className="space-y-1">
-								<p className="text-[10px] font-black uppercase tracking-widest text-(--app-color-text-muted) flex items-center gap-1.5">
+								<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
 									<Box size={12} />
 									Asset Type
 								</p>

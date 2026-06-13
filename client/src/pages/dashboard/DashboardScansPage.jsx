@@ -174,7 +174,7 @@ export default function DashboardScansPage() {
 			} else {
 				toast.error('No keywords suggested by AI.');
 			}
-		} catch (requestError) {
+		} catch {
 			toast.error('Failed to suggest keywords.');
 		} finally {
 			setIsSuggesting(false);
@@ -235,8 +235,8 @@ export default function DashboardScansPage() {
 			await api.post(`/scans/${jobId}/retry`);
 			toast.success('Scan re-queued successfully.');
 			await loadScans();
-		} catch (requestError) {
-			const message = requestError.response?.data?.message || 'Failed to retry scan job.';
+		} catch (err) {
+			const message = err.response?.data?.message || 'Failed to retry scan job.';
 			toast.error(message);
 		}
 	};
@@ -297,25 +297,21 @@ export default function DashboardScansPage() {
 
 	return (
 		<div className='space-y-6'>
-			<div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-				<div>
-					<h2 className='text-2xl font-semibold text-(--app-color-text)'>Scan management</h2>
-					<p className='text-sm text-(--app-color-text-muted)'>Queue scans, monitor progress, and review discovered results.</p>
-				</div>
-				<div className='flex items-center gap-2'>
+			<div className='flex items-center justify-end gap-2 pb-2 border-b border-slate-200/60'>
+				<div className='flex flex-wrap items-center gap-2'>
 					{scanJobs.some((job) => job.status === 'failed') && (
-						<Button variant='secondary' onClick={handleRetryAllFailed} loading={isRetryingAll} disabled={isRetryingAll} className="flex items-center gap-2">
-							<RotateCcw size={16} />
-							Retry All Failed
+						<Button variant='secondary' onClick={handleRetryAllFailed} loading={isRetryingAll} disabled={isRetryingAll} className="flex items-center gap-2 text-xs h-9 px-4 rounded-xl">
+							<RotateCcw size={14} />
+							Retry Failed
 						</Button>
 					)}
-					<Button variant='secondary' onClick={handleRunScheduledNow} loading={isRunningScheduled} disabled={isRunningScheduled} className="flex items-center gap-2">
-						<CalendarClock size={16} />
-						Run Scheduled Now
+					<Button variant='secondary' onClick={handleRunScheduledNow} loading={isRunningScheduled} disabled={isRunningScheduled} className="flex items-center gap-2 text-xs h-9 px-4 rounded-xl">
+						<CalendarClock size={14} />
+						Run Scheduled
 					</Button>
-					<Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2">
-						<Play size={16} fill="currentColor" />
-						Start New Scan
+					<Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 text-xs h-9 px-4 rounded-xl text-white shadow-xs">
+						<Play size={14} fill="currentColor" />
+						Start Scan
 					</Button>
 				</div>
 			</div>
@@ -324,7 +320,7 @@ export default function DashboardScansPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-(--app-color-primary)/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Total scans</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Total scans</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{scanJobs.length}</p>
 						</div>
 						<div className="h-12 w-12 rounded-2xl bg-(--app-color-primary-soft) flex items-center justify-center text-(--app-color-primary) group-hover:scale-110 transition-transform">
@@ -335,7 +331,7 @@ export default function DashboardScansPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-[var(--app-color-primary)]/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Active scans</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Active scans</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{runningCount}</p>
 						</div>
 						<div className="h-12 w-12 rounded-2xl bg-[var(--app-color-primary-soft)] flex items-center justify-center text-[var(--app-color-primary)] group-hover:scale-110 transition-transform">
@@ -346,7 +342,7 @@ export default function DashboardScansPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-(--app-color-primary)/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Assets available</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Assets available</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{assets.length}</p>
 						</div>
 						<div className="h-12 w-12 rounded-2xl bg-(--app-color-primary-soft) flex items-center justify-center text-(--app-color-primary) group-hover:scale-110 transition-transform">
@@ -417,9 +413,9 @@ export default function DashboardScansPage() {
 								<div className='flex flex-wrap items-center justify-between gap-3'>
 									<div>
 										<p className='text-base font-bold text-(--app-color-text) uppercase tracking-tight'>{job.assetId?.title || 'System Asset'}</p>
-										<p className='text-[10px] text-(--app-color-text-muted) font-mono uppercase tracking-widest'>Last Updated: {new Date(job.updatedAt || job.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</p>
+										<p className='text-xs text-(--app-color-text-muted) font-mono uppercase tracking-wider'>Last Updated: {new Date(job.updatedAt || job.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</p>
 									</div>
-									<Badge variant={statusDisplay(job).variant} size='sm' className="flex items-center gap-1.5 font-bold uppercase tracking-wider">
+									<Badge variant={statusDisplay(job).variant} size='sm' className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-xs">
 										{(() => {
 											const StatusIcon = statusDisplay(job).icon;
 											return <StatusIcon size={12} />;
@@ -430,7 +426,7 @@ export default function DashboardScansPage() {
 
 								{job.status === 'running' && (
 									<div className="mt-3 space-y-1.5">
-										<div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-(--app-color-primary)">
+										<div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-(--app-color-primary)">
 											<span>Intelligence Discovery</span>
 											<span>{job.progress || 0}%</span>
 										</div>
@@ -461,7 +457,7 @@ export default function DashboardScansPage() {
 									<div className="mt-3 rounded-lg bg-red-50/50 border border-red-100 p-2.5">
 										<div className="flex items-center gap-2 mb-1">
 											<AlertCircle size={12} className="text-red-600" />
-											<span className="text-[10px] font-black uppercase tracking-widest text-red-600">Diagnostic Report</span>
+											<span className="text-xs font-semibold uppercase tracking-wider text-red-600">Diagnostic Report</span>
 										</div>
 										<p className='text-xs text-red-800 line-clamp-2'>{job.lastError}</p>
 									</div>

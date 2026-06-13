@@ -153,7 +153,7 @@ export default function DashboardAlertsPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-(--app-color-primary)/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Total alerts</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Total alerts</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{alerts.length}</p>
 						</div>
 						<div className="h-12 w-12 rounded-2xl bg-(--app-color-primary-soft) flex items-center justify-center text-(--app-color-primary) group-hover:scale-110 transition-transform">
@@ -164,7 +164,7 @@ export default function DashboardAlertsPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-(--app-color-primary)/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Unread</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Unread</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{alerts.filter((alert) => !alert.read).length}</p>
 						</div>
 						<div className="h-12 w-12 rounded-2xl bg-(--app-color-primary-soft) flex items-center justify-center text-(--app-color-primary) group-hover:scale-110 transition-transform">
@@ -175,7 +175,7 @@ export default function DashboardAlertsPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-red-500/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>High severity</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>High severity</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>
 								{alerts.filter((alert) => ['high', 'critical'].includes(alert.severity)).length}
 							</p>
@@ -275,12 +275,12 @@ export default function DashboardAlertsPage() {
 											</div>
 										</div>
 										<div className='text-right space-y-3'>
-											<p className="flex items-center justify-end gap-1.5 text-[10px] font-bold uppercase tracking-wider text-(--app-color-text-muted)">
+											<p className="flex items-center justify-end gap-1.5 text-xs font-bold uppercase tracking-wider text-(--app-color-text-muted)">
 												<Clock size={12} />
 												{new Date(alert.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
 											</p>
 											{alert.read ? (
-												<div className='flex items-center justify-end gap-1 ml-auto text-[10px] font-black uppercase tracking-widest text-emerald-600'>
+												<div className='flex items-center justify-end gap-1 ml-auto text-xs font-black uppercase tracking-wider text-emerald-600'>
 													<CheckCheck size={14} strokeWidth={3} />
 													Read
 												</div>
@@ -353,7 +353,7 @@ export default function DashboardAlertsPage() {
 
 						<div className='flex justify-end'>
 							{selectedAlert.read ? (
-								<div className='flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 px-4 py-2'>
+								<div className='flex items-center gap-1 text-xs font-black uppercase tracking-wider text-emerald-600 px-4 py-2'>
 									<CheckCheck size={16} strokeWidth={3} />
 									Read
 								</div>

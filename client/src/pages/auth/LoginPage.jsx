@@ -103,7 +103,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-             <div className='absolute bottom-6 left-0 right-0 z-10 flex items-center justify-between px-10 text-[9px] font-black uppercase tracking-[0.3em] text-white/25'>
+             <div className='absolute bottom-6 left-0 right-0 z-10 flex items-center justify-between px-10 text-xs font-black uppercase tracking-[0.3em] text-white/25'>
                <p>© 2026 Piractrix</p>
                <p>Enterprise Protection</p>
              </div>

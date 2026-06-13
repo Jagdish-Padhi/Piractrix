@@ -86,7 +86,7 @@ export default function AgentDecisionLogPage() {
   };
 
   return (
-    <div className="max-w-[1440px] mx-auto space-y-6 p-3 lg:p-6 animate-in fade-in duration-500">
+    <div className="w-full space-y-6 animate-in fade-in duration-500">
       
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -110,7 +110,7 @@ export default function AgentDecisionLogPage() {
             
             {/* Filter by Type */}
             <div className="flex flex-col min-w-44">
-              <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold mb-1.5">Decision Type</span>
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1.5">Decision Type</span>
               <select
                 name="decisionType"
                 value={filters.decisionType}
@@ -127,7 +127,7 @@ export default function AgentDecisionLogPage() {
 
             {/* Filter by Mode */}
             <div className="flex flex-col min-w-40">
-              <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold mb-1.5">Agent Mode</span>
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1.5">Agent Mode</span>
               <select
                 name="mode"
                 value={filters.mode}
@@ -142,7 +142,7 @@ export default function AgentDecisionLogPage() {
 
             {/* Filter by Outcome */}
             <div className="flex flex-col min-w-40">
-              <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold mb-1.5">Outcome Status</span>
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1.5">Outcome Status</span>
               <select
                 name="outcome"
                 value={filters.outcome}
@@ -188,17 +188,17 @@ export default function AgentDecisionLogPage() {
             <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Loading audit trail...</p>
           </div>
         ) : decisions.length > 0 ? (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto lg:overflow-x-visible">
             <table className="w-full text-left text-sm border-separate border-spacing-0">
               <thead className="bg-slate-50/70">
                 <tr>
                   <th className="w-8 px-4 py-3 border-b border-slate-100"></th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Date/Time</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Type</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Action Recommended</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Severity</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Mode</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Outcome</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Date/Time</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Type</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Action Recommended</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Severity</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Mode</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Outcome</th>
                   <th className="px-4 py-3 text-right border-b border-slate-100">Details</th>
                 </tr>
               </thead>
@@ -227,12 +227,12 @@ export default function AgentDecisionLogPage() {
                           </span>
                         </td>
                         <td className="px-4 py-4">
-                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider ${getSeverityColor(d.meta?.severityResult?.severity || 3)}`}>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${getSeverityColor(d.meta?.severityResult?.severity || 3)}`}>
                             SEV {d.meta?.severityResult?.severity || 3}
                           </span>
                         </td>
                         <td className="px-4 py-4">
-                          <Badge variant={d.autonomousMode ? 'primary' : 'secondary'} size="sm" className="font-bold uppercase tracking-widest text-[9px] px-2">
+                          <Badge variant={d.autonomousMode ? 'primary' : 'secondary'} size="sm" className="font-bold uppercase tracking-wider text-xs px-2">
                             {d.autonomousMode ? 'Auto' : 'Manual'}
                           </Badge>
                         </td>
@@ -245,7 +245,7 @@ export default function AgentDecisionLogPage() {
                             {d.outcome === 'success' ? <CheckCircle size={14} /> :
                              d.outcome === 'failed' ? <XCircle size={14} /> :
                              d.outcome === 'skipped' ? <XCircle size={14} className="text-slate-400" /> : <Loader2 size={14} className="animate-spin text-amber-500" />}
-                            <span className="uppercase text-[10px] tracking-wide">{d.outcome}</span>
+                            <span className="uppercase text-xs tracking-wider">{d.outcome}</span>
                           </span>
                         </td>
                         <td className="px-4 py-4 text-right">
@@ -279,23 +279,23 @@ export default function AgentDecisionLogPage() {
                                   <Cpu size={13} className="text-[var(--app-color-primary)]" />
                                   Ecosystem Input Metrics
                                 </h4>
-                                <div className="rounded-xl border border-slate-200/60 bg-white p-4 font-mono text-[10px] text-slate-600 grid grid-cols-2 gap-y-3">
+                                <div className="rounded-xl border border-slate-200/60 bg-white p-4 font-mono text-xs text-slate-600 grid grid-cols-2 gap-y-3">
                                   <div>
-                                    <span className="text-slate-400 block font-sans text-[9px] uppercase tracking-wider font-bold">Input Confidence</span>
+                                    <span className="text-slate-400 block font-sans text-xs font-semibold uppercase tracking-wide">Input Confidence</span>
                                     <span className="font-semibold text-slate-800 text-xs">{d.input?.confidence || 0}%</span>
                                   </div>
                                   <div>
-                                    <span className="text-slate-400 block font-sans text-[9px] uppercase tracking-wider font-bold">Match Type</span>
+                                    <span className="text-slate-400 block font-sans text-xs font-semibold uppercase tracking-wide">Match Type</span>
                                     <span className="font-semibold text-slate-800 text-xs capitalize">{d.input?.matchType || 'N/A'}</span>
                                   </div>
                                   <div>
-                                    <span className="text-slate-400 block font-sans text-[9px] uppercase tracking-wider font-bold">Source Domain</span>
+                                    <span className="text-slate-400 block font-sans text-xs font-semibold uppercase tracking-wide">Source Domain</span>
                                     <span className="font-semibold text-slate-800 text-xs truncate block max-w-[180px]" title={d.input?.domainReputation || 'N/A'}>
                                       {d.input?.domainReputation || 'N/A'}
                                     </span>
                                   </div>
                                   <div>
-                                    <span className="text-slate-400 block font-sans text-[9px] uppercase tracking-wider font-bold">Asset ID</span>
+                                    <span className="text-slate-400 block font-sans text-xs font-semibold uppercase tracking-wide">Asset ID</span>
                                     <span className="font-semibold text-slate-800 text-xs">{d.assetId || 'N/A'}</span>
                                   </div>
                                 </div>

@@ -22,11 +22,11 @@ import {
 import { Card, Badge, Button, Loader, Toggle } from '../../components';
 import api from '../../services/api.js';
 import useAuthStore from '../../store/auth.store.js';
-import { getRealtimeSocket, connectRealtime } from '../../services/realtime.js';
+import { connectRealtime } from '../../services/realtime.js';
 import toast from 'react-hot-toast';
 
 export default function AgentCommandCenterPage() {
-  const user = useAuthStore((state) => state.user);
+
   const accessToken = useAuthStore((state) => state.accessToken);
   
   const [autonomousMode, setAutonomousMode] = useState(false);
@@ -109,26 +109,31 @@ export default function AgentCommandCenterPage() {
       const { decision } = payload;
       if (!decision) return;
 
-      // Add to decisions list
-      setDecisions((prev) => [decision, ...prev].slice(0, 10));
+      // Only add to decisions list if it is a complete decision object to prevent crashes
+      if (decision._id && decision.action) {
+        setDecisions((prev) => {
+          if (prev.some((d) => d._id === decision._id)) return prev;
+          return [decision, ...prev].slice(0, 10);
+        });
+      }
 
       // Add to live visual logs
       const logEntry = {
-        id: decision._id || Math.random().toString(),
+        id: decision._id || decision.decisionId || Math.random().toString(),
         type: decision.decisionType || 'action_taken',
-        action: decision.action || 'none',
-        reason: decision.reasoning || 'Autonomous action executed.',
+        action: decision.action || 'approved_action',
+        reason: decision.reasoning || 'Action approved and executed.',
         timestamp: new Date().toLocaleTimeString(),
-        success: decision.outcome === 'success'
+        success: decision.outcome === 'success' || decision.approved
       };
 
       setLiveLogs((prev) => [logEntry, ...prev].slice(0, 8));
 
-      // Refresh Stats in background
+      // Refresh Stats in background to pull full synchronized data
       loadAgentData(true);
 
       // Toast notification for autonomous enforcement
-      if (decision.autonomousMode) {
+      if (decision.autonomousMode && decision.action) {
         toast(`[Agent Enforcement] ${decision.action.toUpperCase()}: ${decision.reasoning?.slice(0, 60)}...`, {
           icon: '🤖',
           duration: 4000,
@@ -181,7 +186,7 @@ export default function AgentCommandCenterPage() {
         toast.error('Failed to execute action.');
         setDecisions(originalDecisions);
       }
-    } catch (err) {
+    } catch {
       toast.error('Error approving action.');
       setDecisions(originalDecisions);
     }
@@ -208,48 +213,25 @@ export default function AgentCommandCenterPage() {
   }
 
   return (
-    <div className='max-w-[1440px] mx-auto space-y-6 lg:space-y-8 p-3 lg:p-6 animate-in fade-in duration-500'>
+    <div className='w-full space-y-6 lg:space-y-8 animate-in fade-in duration-500'>
       
-      {/* Banner / Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-linear-to-r from-[var(--app-color-primary)] to-[var(--app-color-accent)] rounded-3xl p-6 lg:p-8 text-white shadow-xl relative overflow-hidden">
-        {/* Background Decorative Rings */}
-        <div className="absolute right-0 top-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 w-64 h-64 bg-white/5 rounded-full blur-2xl -ml-20 -mb-20 pointer-events-none" />
-        
-        <div className="space-y-3 relative z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="h-10 w-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-              <Bot size={22} className="text-purple-200 animate-pulse" />
-            </div>
-            <div>
-              <span className="text-[10px] uppercase font-bold tracking-widest text-purple-200 bg-white/10 px-2.5 py-1 rounded-full border border-white/5">
-                Defense Core v1.0
-              </span>
-            </div>
-          </div>
-          <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight">
-            Piractrix Command Center
-          </h1>
-          <p className="text-sm text-purple-100 max-w-xl font-medium">
-            Autonomous Digital Rights Defense. Monitoring OTT, streams, music, and academic leak vectors.
-          </p>
+      {/* Page Actions Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-200/60">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Enforcement Engine:</span>
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${autonomousMode ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-700'}`}>
+            {autonomousMode ? 'Autonomous Mode' : 'Manual Approvals'}
+          </span>
         </div>
-
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 relative z-10 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 shrink-0">
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase tracking-widest text-purple-200 font-bold">Autonomous Control</span>
-            <span className="text-xs font-bold text-white mt-0.5">
-              {autonomousMode ? 'Direct Auto-Enforcement' : 'Queued Approvals Mode'}
-            </span>
-          </div>
-          <div className="h-px sm:h-8 w-full sm:w-px bg-white/20 my-1 sm:my-0" />
+        <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-3 py-1.5 rounded-xl">
+          <span className="text-xs font-bold text-slate-500 select-none">Auto-Defense Control</span>
           <Toggle 
             checked={autonomousMode} 
             onChange={handleToggleMode} 
-            className="scale-110 focus:ring-0!"
+            className="scale-90"
           />
         </div>
-      </header>
+      </div>
 
       {/* Stats row */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -261,23 +243,24 @@ export default function AgentCommandCenterPage() {
         ].map((item) => (
           <div key={item.label} className={`relative group bg-white rounded-2xl border border-slate-200/60 border-l-4 ${item.accent} p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1`}>
             <div className="flex items-start justify-between mb-3">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{item.label}</p>
               <div className={`p-2 rounded-xl ${item.bg} ${item.color} group-hover:scale-105 transition-transform`}>
                 <item.icon className="w-4 h-4" />
               </div>
             </div>
             <span className="font-mono text-2xl font-bold tracking-tight text-slate-900 block">{item.value}</span>
-            <span className="text-[11px] font-medium text-slate-400 mt-1 block">{item.subtitle}</span>
+            <span className="text-xs font-medium text-slate-400 mt-1 block">{item.subtitle}</span>
           </div>
         ))}
       </section>
 
       {/* Main split row */}
-      <section className="grid gap-6 lg:grid-cols-[1fr_0.55fr]">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Live Decisions Feed */}
-        <Card
-          className="border-slate-200/60 bg-white shadow-sm overflow-hidden"
+        <div className="lg:col-span-2">
+          <Card
+            className="border-slate-200/60 bg-white shadow-sm overflow-hidden"
           title="Security Enforcement Queue"
           subtitle="Real-time autonomous classification & legal response logs."
           headerAction={
@@ -297,79 +280,79 @@ export default function AgentCommandCenterPage() {
             </div>
           }
         >
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-separate border-spacing-0">
-              <thead className="bg-slate-50 border-b border-slate-100">
-                <tr>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Decision details</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Action</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Mode</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Outcome</th>
-                  <th className="px-4 py-3 text-right border-b border-slate-100"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {decisions.length > 0 ? (
-                  decisions.map((d) => (
-                    <tr key={d._id} className="group hover:bg-slate-50/30 transition-colors">
-                      <td className="px-4 py-4 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wide ${getSeverityColor(d.meta?.severityResult?.severity || 3)}`}>
-                            SEV {d.meta?.severityResult?.severity || 3}
+            <div className="overflow-x-auto lg:overflow-x-visible">
+              <table className="w-full table-fixed text-left text-sm border-separate border-spacing-0">
+                <thead className="bg-slate-50 border-b border-slate-100">
+                  <tr>
+                    <th className="w-[45%] px-3 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Decision details</th>
+                    <th className="w-[15%] px-3 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Action</th>
+                    <th className="w-[12%] px-3 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Mode</th>
+                    <th className="w-[15%] px-3 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">Outcome</th>
+                    <th className="w-[13%] px-3 py-3 text-right border-b border-slate-100"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {decisions.length > 0 ? (
+                    decisions.map((d) => (
+                      <tr key={d._id} className="group hover:bg-slate-50/30 transition-colors">
+                        <td className="px-3 py-3.5 space-y-1 min-w-0 overflow-hidden">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${getSeverityColor(d.meta?.severityResult?.severity || 3)}`}>
+                              SEV {d.meta?.severityResult?.severity || 3}
+                            </span>
+                            <span className="text-xs text-slate-400 font-mono">
+                              {new Date(d.createdAt).toLocaleTimeString()}
+                            </span>
+                          </div>
+                          <p className="font-bold text-slate-800 text-xs truncate max-w-full">
+                            {d.reasoning || 'Autonomous violation processing.'}
+                          </p>
+                          <p className="text-xs text-slate-400 font-mono truncate max-w-full italic">
+                            Platform: <span className="text-slate-600 font-semibold uppercase">{d.input?.platform || 'web'}</span> | Confidence: <span className="text-slate-600 font-semibold">{d.input?.confidence || 0}%</span>
+                          </p>
+                        </td>
+                        <td className="px-3 py-3.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="capitalize text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200/60 px-2.5 py-1 rounded-lg">
+                              {d.action.replace('_', ' ')}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3.5">
+                          <Badge variant={d.autonomousMode ? 'primary' : 'secondary'} size="sm" className="font-bold uppercase tracking-wider text-xs px-2">
+                            {d.autonomousMode ? 'Auto' : 'Manual'}
+                          </Badge>
+                        </td>
+                        <td className="px-3 py-3.5">
+                          <span className={`inline-flex items-center gap-1 text-xs font-bold ${
+                            d.outcome === 'success' ? 'text-green-600' :
+                            d.outcome === 'failed' ? 'text-red-500' :
+                            d.outcome === 'skipped' ? 'text-slate-400' : 'text-amber-500'
+                          }`}>
+                            {d.outcome === 'success' ? <CheckCircle size={14} /> :
+                             d.outcome === 'failed' ? <XCircle size={14} /> :
+                             d.outcome === 'skipped' ? <XCircle size={14} className="text-slate-400" /> : <Activity size={14} className="animate-pulse" />}
+                            <span className="uppercase text-xs tracking-wider">{d.outcome}</span>
                           </span>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            {new Date(d.createdAt).toLocaleTimeString()}
-                          </span>
-                        </div>
-                        <p className="font-bold text-slate-800 text-xs truncate max-w-[280px]">
-                          {d.reasoning || 'Autonomous violation processing.'}
-                        </p>
-                        <p className="text-[10px] text-slate-400 font-mono truncate max-w-[280px] italic">
-                          Platform: <span className="text-slate-600 font-semibold uppercase">{d.input?.platform || 'web'}</span> | Confidence: <span className="text-slate-600 font-semibold">{d.input?.confidence || 0}%</span>
-                        </p>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-1.5">
-                          <span className="capitalize text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200/60 px-2.5 py-1 rounded-lg">
-                            {d.action.replace('_', ' ')}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <Badge variant={d.autonomousMode ? 'primary' : 'secondary'} size="sm" className="font-bold uppercase tracking-widest text-[9px] px-2">
-                          {d.autonomousMode ? 'Auto' : 'Manual'}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex items-center gap-1 text-xs font-bold ${
-                          d.outcome === 'success' ? 'text-green-600' :
-                          d.outcome === 'failed' ? 'text-red-500' :
-                          d.outcome === 'skipped' ? 'text-slate-400' : 'text-amber-500'
-                        }`}>
-                          {d.outcome === 'success' ? <CheckCircle size={14} /> :
-                           d.outcome === 'failed' ? <XCircle size={14} /> :
-                           d.outcome === 'skipped' ? <XCircle size={14} className="text-slate-400" /> : <Activity size={14} className="animate-pulse" />}
-                          <span className="uppercase text-[10px] tracking-wide">{d.outcome}</span>
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        {d.outcome === 'pending' && !d.autonomousMode ? (
-                          <Button 
-                            variant="primary" 
-                            size="sm" 
-                            onClick={() => handleApprove(d._id)}
-                            className="h-7 px-3 rounded-lg text-[10px] font-bold tracking-wider uppercase shadow-sm bg-[var(--app-color-primary)] hover:bg-[var(--app-color-primary-hover)] text-white"
-                          >
-                            Approve
-                          </Button>
-                        ) : (
-                          <Link 
-                            to={`/dashboard/violations/${d.violationId || ''}`}
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--app-color-primary)] hover:underline group-hover:translate-x-1 transition-transform"
-                          >
-                            Inspect <ChevronRight size={14} />
-                          </Link>
-                        )}
+                        </td>
+                        <td className="px-3 py-3.5 text-right">
+                          {d.outcome === 'pending' && !d.autonomousMode ? (
+                            <Button 
+                              variant="primary" 
+                              size="sm" 
+                              onClick={() => handleApprove(d._id)}
+                              className="h-7 px-3 rounded-lg text-xs font-bold tracking-wider uppercase shadow-sm bg-[var(--app-color-primary)] hover:bg-[var(--app-color-primary-hover)] text-white"
+                            >
+                              Approve
+                            </Button>
+                          ) : (
+                            <Link 
+                              to={`/dashboard/violations/${d.violationId || ''}`}
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--app-color-primary)] hover:underline group-hover:translate-x-1 transition-transform"
+                            >
+                              Inspect <ChevronRight size={14} />
+                            </Link>
+                          )}
                       </td>
                     </tr>
                   ))
@@ -378,7 +361,7 @@ export default function AgentCommandCenterPage() {
                     <td colSpan="5" className="px-4 py-24 text-center text-slate-400 bg-slate-50/20">
                       <ShieldCheck className="w-12 h-12 mx-auto mb-3 text-slate-300" />
                       <p className="text-xs font-bold uppercase tracking-widest text-slate-400">No agent decisions logged</p>
-                      <p className="text-[11px] text-slate-400 mt-1">Decisions stream here when scan jobs execute.</p>
+                      <p className="text-xs text-slate-400 mt-1">Decisions stream here when scan jobs execute.</p>
                     </td>
                   </tr>
                 )}
@@ -386,9 +369,10 @@ export default function AgentCommandCenterPage() {
             </table>
           </div>
         </Card>
+      </div>
 
-        {/* Threat Memory & Live logs stack */}
-        <div className="space-y-6">
+      {/* Threat Memory & Live logs stack */}
+      <div className="lg:col-span-1 space-y-6">
           
           {/* Real-time Ingestion Stream */}
           <Card
@@ -410,10 +394,10 @@ export default function AgentCommandCenterPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] uppercase font-bold text-[var(--app-color-accent)] tracking-widest">{log.action.replace('_', ' ')}</span>
-                        <span className="text-[9px] text-slate-500 font-mono">{log.timestamp}</span>
+                        <span className="text-xs uppercase font-bold text-[var(--app-color-accent)] tracking-wider">{log.action.replace('_', ' ')}</span>
+                        <span className="text-xs text-slate-500 font-mono">{log.timestamp}</span>
                       </div>
-                      <p className="text-[11px] text-slate-300 font-mono mt-0.5 truncate">{log.reason}</p>
+                      <p className="text-xs text-slate-300 font-mono mt-0.5 truncate">{log.reason}</p>
                     </div>
                   </div>
                 ))}
@@ -437,13 +421,13 @@ export default function AgentCommandCenterPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-slate-800 truncate">{t.domain}</p>
-                        <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                           Platforms: {t.platforms?.join(', ') || 'web'}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5">
-                      <Badge variant={t.threatLevel === 'critical' || t.threatLevel === 'high' ? 'danger' : 'warning'} size="sm" className="font-bold uppercase tracking-wider text-[8px] px-1.5 py-0.5">
+                      <Badge variant={t.threatLevel === 'critical' || t.threatLevel === 'high' ? 'danger' : 'warning'} size="sm" className="font-bold uppercase tracking-wider text-xs px-1.5 py-0.5">
                         {t.threatLevel}
                       </Badge>
                       <span className="text-xs font-black text-slate-800 font-mono w-6 text-right">{t.totalViolations}</span>

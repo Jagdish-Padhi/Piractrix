@@ -26,6 +26,7 @@ import api from '../../services/api.js';
 import useReportStore from '../../store/report.store.js';
 import { useLocation } from 'react-router-dom';
 import { useRef } from 'react';
+import toast from 'react-hot-toast';
 
 const rangeOptions = [
 	{ value: '7d', label: 'Last 7 days' },
@@ -235,10 +236,10 @@ function TrendLineChart({ items }) {
 						>
 							<div className="flex flex-col items-center justify-end h-full w-full animate-in fade-in zoom-in-95 duration-150">
 								<div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl shadow-xl shadow-purple-900/20 border border-slate-700/50 flex flex-col items-center">
-									<span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 whitespace-nowrap leading-none">{hoveredPoint.item.label}</span>
+									<span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap leading-none">{hoveredPoint.item.label}</span>
 									<span className="text-sm font-black text-purple-300 tabular-nums leading-tight mt-0.5">
 										{hoveredPoint.item.count}
-										<span className="text-[8px] text-slate-500 font-bold ml-1">VIOLATIONS</span>
+										<span className="text-[10px] text-slate-500 font-bold ml-1">VIOLATIONS</span>
 									</span>
 								</div>
 								<div className="w-2.5 h-2.5 bg-slate-900 rotate-45 border-r border-b border-slate-700/50 -mt-1.5 z-[-1]"></div>
@@ -249,7 +250,7 @@ function TrendLineChart({ items }) {
 			</div>
 
 			{/* X-Axis labels below the chart */}
-			<div className='flex justify-between text-[10px] font-bold uppercase tracking-widest text-(--app-color-text-muted) px-2 mt-4'>
+			<div className='flex justify-between text-xs font-bold uppercase tracking-wider text-(--app-color-text-muted) px-2 mt-4'>
 				{items.filter((_, i) => i % Math.max(1, Math.floor(items.length / 7)) === 0).map((item) => {
 					const parts = item.label.split(' ');
 					return (
@@ -333,7 +334,7 @@ function KPIMetricsGrid({ kpis }) {
 			<Card className='border-(--app-color-border) shadow-sm group hover:border-(--app-color-primary)/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 				<div className="flex items-center justify-between">
 					<div className="space-y-1">
-						<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Detection Time</p>
+						<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Detection Time</p>
 						<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>
 							{detectionTime.meanTimeHours > 24 ? `${Math.round(detectionTime.meanTimeHours / 24)}d` : `${detectionTime.meanTimeHours}h`}
 						</p>
@@ -342,7 +343,7 @@ function KPIMetricsGrid({ kpis }) {
 						<Zap size={22} />
 					</div>
 				</div>
-				<p className='mt-4 text-[10px] text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
+				<p className='mt-4 text-xs text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
 					{detectionTime.count} assets tracked
 				</p>
 			</Card>
@@ -350,14 +351,14 @@ function KPIMetricsGrid({ kpis }) {
 			<Card className='border-(--app-color-border) shadow-sm group hover:border-red-500/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 				<div className="flex items-center justify-between">
 					<div className="space-y-1">
-						<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Repeat Offenders</p>
+						<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Repeat Offenders</p>
 						<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{repeatOffenderRatio.ratio}%</p>
 					</div>
 					<div className="h-12 w-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
 						<ShieldAlert size={22} />
 					</div>
 				</div>
-				<p className='mt-4 text-[10px] text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
+				<p className='mt-4 text-xs text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
 					{repeatOffenderRatio.repeatOffenderCount} identified domains
 				</p>
 			</Card>
@@ -365,14 +366,14 @@ function KPIMetricsGrid({ kpis }) {
 			<Card className='border-(--app-color-border) shadow-sm group hover:border-amber-500/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 				<div className="flex items-center justify-between">
 					<div className="space-y-1">
-						<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>False Positives</p>
+						<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>False Positives</p>
 						<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{falsePositiveRate.rate}%</p>
 					</div>
 					<div className="h-12 w-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
 						<Target size={22} />
 					</div>
 				</div>
-				<p className='mt-4 text-[10px] text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
+				<p className='mt-4 text-xs text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
 					{falsePositiveRate.falsePositiveCount} of {falsePositiveRate.totalViolations}
 				</p>
 			</Card>
@@ -380,14 +381,14 @@ function KPIMetricsGrid({ kpis }) {
 			<Card className='border-(--app-color-border) shadow-sm group hover:border-[var(--app-color-primary)]/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 				<div className="flex items-center justify-between">
 					<div className="space-y-1">
-						<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>SLA Compliance</p>
+						<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>SLA Compliance</p>
 						<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{resolutionSLA.slaCompliancePercentage}%</p>
 					</div>
 					<div className="h-12 w-12 rounded-2xl bg-[var(--app-color-primary-soft)] flex items-center justify-center text-[var(--app-color-primary)] group-hover:scale-110 transition-transform">
 						<ShieldCheck size={22} />
 					</div>
 				</div>
-				<p className='mt-4 text-[10px] text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
+				<p className='mt-4 text-xs text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
 					Avg Resolution: {resolutionSLA.avgTimeHours}h
 				</p>
 			</Card>
@@ -629,14 +630,14 @@ export default function DashboardAnalyticsPage() {
 							<Card key={item.label} className='border-(--app-color-border) shadow-sm group hover:border-(--app-color-primary)/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 								<div className="flex items-center justify-between">
 									<div className="space-y-1">
-										<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>{item.label}</p>
+										<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>{item.label}</p>
 										<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{item.value}</p>
 									</div>
 									<div className={`h-12 w-12 rounded-2xl ${item.bg} flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
 										<item.icon size={22} />
 									</div>
 								</div>
-								<p className='mt-4 text-[10px] text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
+								<p className='mt-4 text-xs text-(--app-color-text-muted) border-t border-(--app-color-border)/50 pt-2'>
 									{item.subtitle}
 								</p>
 							</Card>
@@ -747,7 +748,7 @@ export default function DashboardAnalyticsPage() {
 											</div>
 											<div>
 												<p className='font-bold text-(--app-color-text)'>{report.title}</p>
-												<p className='text-[10px] uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5'>
+												<p className='text-xs uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5'>
 													<Clock size={12} />
 													{report.rangeLabel} • {new Date(report.generatedAt).toLocaleString()}
 												</p>

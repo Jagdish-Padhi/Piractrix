@@ -90,7 +90,7 @@ export default function DashboardHomePage() {
         discoveryPulse: response.data.discoveryPulse || [],
         coverage: response.data.coverage || { youtube: 0, twitter: 0, telegram: 0, web: 0 }
       });
-    } catch (err) {
+    } catch {
       console.error('Telemetry sync failed');
     } finally {
       setIsLoading(false);
@@ -114,14 +114,14 @@ export default function DashboardHomePage() {
   }
 
   return (
-    <div className='max-w-[1440px] mx-auto space-y-6 lg:space-y-8 p-3 lg:p-6 animate-in fade-in slide-in-from-bottom-2 duration-500'>
+    <div className='w-full space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500'>
 
       {/* --- HEADER --- */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Security Command</h1>
-            <Badge variant="outline" className="border-teal-500/30 text-teal-700 bg-teal-50/50 text-[10px] uppercase font-bold tracking-widest px-2 py-0.5">Live</Badge>
+            <Badge variant="outline" className="border-teal-500/30 text-teal-700 bg-teal-50/50 text-xs uppercase font-bold tracking-widest px-2 py-0.5">Live</Badge>
           </div>
           <p className="text-sm text-slate-500">Real-time content protection for {user?.orgName}.</p>
         </div>
@@ -132,7 +132,7 @@ export default function DashboardHomePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Discovery Online</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Discovery Online</span>
           </div>
           <Button
             variant="secondary"
@@ -167,7 +167,7 @@ export default function DashboardHomePage() {
         ].map((item) => (
           <div key={item.label} className={`relative group bg-white rounded-2xl border border-slate-200/60 border-l-4 ${item.accent} p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1`}>
             <div className="flex items-start justify-between mb-4">
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{item.label}</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{item.label}</p>
               <div className={`p-2 rounded-lg ${item.bg} ${item.color} group-hover:scale-105 transition-transform`}>
                 <item.icon className="w-4 h-4" />
               </div>
@@ -191,13 +191,13 @@ export default function DashboardHomePage() {
             </Button>
           }
         >
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto lg:overflow-x-visible">
             <table className="w-full text-left text-sm border-separate border-spacing-0">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100">Asset</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100">Platform</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100">Confidence</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">Asset</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">Platform</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">Confidence</th>
                   <th className="px-4 py-3 text-right border-b border-slate-100"></th>
                 </tr>
               </thead>
@@ -207,12 +207,12 @@ export default function DashboardHomePage() {
                     <tr key={v._id} className="group hover:bg-slate-50/50 transition-colors">
                       <td className="px-4 py-4">
                         <p className="font-bold text-slate-800 truncate max-w-[180px]">{v.assetId?.title || 'System Asset'}</p>
-                        <p className="text-[10px] text-slate-400 truncate max-w-[180px] italic">{v.sourceUrl}</p>
+                        <p className="text-xs text-slate-400 truncate max-w-[180px] italic">{v.sourceUrl}</p>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-100 w-fit">
                           {v.platform === 'youtube' ? <Play className="w-3.5 h-3.5 text-red-500 fill-red-500" /> : <Globe className="w-3.5 h-3.5 text-slate-400" />}
-                          <span className="capitalize text-[11px] font-bold text-slate-600">{v.platform}</span>
+                          <span className="capitalize text-xs font-bold text-slate-600">{v.platform}</span>
                         </div>
                       </td>
                       <td className="px-4 py-4">
@@ -260,8 +260,8 @@ export default function DashboardHomePage() {
                    </div>
                    <div className="flex-1 min-w-0">
                      <div className="flex justify-between items-center">
-                       <span className="text-[10px] uppercase font-bold text-teal-600 tracking-widest">{log.platform}</span>
-                       <span className="text-[10px] text-slate-400 font-mono">{log.time}</span>
+                       <span className="text-xs uppercase font-bold text-teal-600 tracking-wider">{log.platform}</span>
+                       <span className="text-xs text-slate-400 font-mono">{log.time}</span>
                      </div>
                      <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">{log.text}</p>
                    </div>
@@ -269,7 +269,7 @@ export default function DashboardHomePage() {
                ))}
              </div>
           </div>
-          <Button as={Link} to="/dashboard/scans" variant="secondary" className="w-full h-10 text-[10px] font-bold uppercase tracking-widest mt-6 rounded-xl bg-slate-50 border-slate-200 hover:bg-[var(--app-color-primary)] hover:text-white transition-all">
+          <Button as={Link} to="/dashboard/scans" variant="secondary" className="w-full h-10 text-xs font-bold uppercase tracking-wider mt-6 rounded-xl bg-slate-50 border-slate-200 hover:bg-[var(--app-color-primary)] hover:text-white transition-all">
             Audit Discovery History
           </Button>
         </Card>
@@ -289,10 +289,10 @@ export default function DashboardHomePage() {
                 <p.icon className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{p.name}</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider truncate">{p.name}</p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-xl font-bold text-slate-900">{data.coverage[p.key] || 0}</span>
-                  <span className="text-[10px] font-bold text-primary uppercase">Matched</span>
+                  <span className="text-xs font-bold text-primary uppercase">Matched</span>
                 </div>
               </div>
             </div>
@@ -304,14 +304,14 @@ export default function DashboardHomePage() {
             <div className="flex items-center gap-3">
               <BarChart className="w-4 h-4 text-slate-300" />
               <div>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Detection Efficiency</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Detection Efficiency</p>
                 <p className="text-xs font-bold text-slate-800">1.8 MINS MTTD</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Clock className="w-4 h-4 text-slate-300" />
               <div>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Uptime Reliability</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Uptime Reliability</p>
                 <p className="text-xs font-bold text-slate-800">99.9% ACTIVE</p>
               </div>
             </div>

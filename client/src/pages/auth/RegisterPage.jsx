@@ -111,7 +111,7 @@ export default function RegisterPage() {
 								</div>
 							</div>
 
-							<div className='absolute bottom-6 left-0 right-0 z-10 flex items-center justify-between px-10 text-[9px] font-black uppercase tracking-[0.3em] text-white/25'>
+							<div className='absolute bottom-6 left-0 right-0 z-10 flex items-center justify-between px-10 text-xs font-black uppercase tracking-[0.3em] text-white/25'>
 								<p>© 2026 Piractrix</p>
 								<p>Enterprise Protection</p>
 							</div>
@@ -180,14 +180,14 @@ export default function RegisterPage() {
 
 									<div className='relative my-4'>
 										<div className='absolute inset-0 flex items-center'><div className='w-full border-t border-(--app-color-border)/60'></div></div>
-										<div className='relative flex justify-center text-[10px] uppercase'><span className='bg-white px-3 text-(--app-color-text-muted) font-black tracking-widest'>OR</span></div>
+										<div className='relative flex justify-center text-xs uppercase'><span className='bg-white px-3 text-(--app-color-text-muted) font-black tracking-widest'>OR</span></div>
 									</div>
 
 									<div className='flex justify-center'>
 										<SignInwithGoogle />
 									</div>
 
-									<p className='mt-6 text-center text-[11px] text-(--app-color-text-muted)'>
+									<p className='mt-6 text-center text-xs text-(--app-color-text-muted)'>
 										Already have an account?{' '}
 										<Link to='/login' className='font-black text-(--app-color-primary) hover:text-(--app-color-primary-hover)'>
 											Sign in

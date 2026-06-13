@@ -163,19 +163,15 @@ export default function DashboardViolationsPage() {
 
 	return (
 		<div className='space-y-6'>
-			<div className='flex flex-wrap items-center justify-between gap-3'>
-				<div>
-					<h2 className='text-2xl font-semibold text-(--app-color-text)'>Violations</h2>
-					<p className='text-sm text-(--app-color-text-muted)'>Monitor matched infringement signals and manage case resolution workflow.</p>
-				</div>
-				<Badge variant='outline'>Open cases: {openCount}</Badge>
+			<div className='flex items-center justify-end gap-2 pb-2 border-b border-slate-200/60'>
+				<Badge variant='outline' className="font-bold border-red-200 bg-red-50 text-red-700">Open cases: {openCount}</Badge>
 			</div>
 
 			<section className='grid gap-6 sm:grid-cols-3'>
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-(--app-color-primary)/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Total listed</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Total listed</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{violations.length}</p>
 						</div>
 						<div className="h-12 w-12 rounded-2xl bg-(--app-color-primary-soft) flex items-center justify-center text-(--app-color-primary) group-hover:scale-110 transition-transform">
@@ -186,7 +182,7 @@ export default function DashboardViolationsPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-red-500/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Open cases</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Open cases</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{openCount}</p>
 						</div>
 						<div className="h-12 w-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
@@ -197,7 +193,7 @@ export default function DashboardViolationsPage() {
 				<Card className='border-(--app-color-border) shadow-sm group hover:border-emerald-500/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
-							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Resolved</p>
+							<p className='text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Resolved</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>
 								{violations.filter((item) => item.status === 'resolved').length}
 							</p>
@@ -235,7 +231,7 @@ export default function DashboardViolationsPage() {
 						}))}
 					/>
 					<div className="space-y-1">
-						<label className='block text-xs font-black uppercase tracking-widest text-(--app-color-text-muted)'>Min confidence (%)</label>
+						<label className='block text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Min confidence (%)</label>
 						<input
 							type='number'
 							min='0'
@@ -273,10 +269,10 @@ export default function DashboardViolationsPage() {
 				) : violations.length === 0 ? (
 					<EmptyState title='No violations found' message='Run scans and complete matching to detect infringement cases.' />
 				) : (
-					<div className='overflow-x-auto'>
+					<div className='overflow-x-auto lg:overflow-x-visible'>
 						<table className='min-w-full divide-y divide-(--app-color-border) text-sm'>
 							<thead>
-								<tr className='text-left text-xs uppercase tracking-[0.14em] text-(--app-color-text-muted)'>
+								<tr className='text-left text-xs font-semibold uppercase tracking-wider text-slate-500'>
 									<th className='px-2 py-2'>Platform</th>
 									<th className='px-2 py-2'>Asset</th>
 									<th className='px-2 py-2'>Source</th>
@@ -315,7 +311,7 @@ export default function DashboardViolationsPage() {
 												</Badge>
 											</td>
 											<td className='px-2 py-4'>
-												<Badge variant='outline' size='sm' className="font-bold uppercase tracking-widest text-[10px]">
+												<Badge variant='outline' size='sm' className="font-bold uppercase tracking-wider text-xs">
 													<div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${item.status === 'resolved' ? 'bg-emerald-500' : (item.status === 'reported' ? 'bg-amber-500' : 'bg-red-500')}`} />
 													{item.status.replace('_', ' ')}
 												</Badge>
@@ -333,7 +329,7 @@ export default function DashboardViolationsPage() {
 													<select
 														value={item.status}
 														onChange={(event) => updateStatus(item._id, event.target.value)}
-														className='rounded-lg border border-(--app-color-border) bg-(--app-color-surface) px-2 py-1 text-[10px] font-bold uppercase tracking-wider focus:border-(--app-color-primary) focus:outline-none'
+														className='rounded-lg border border-(--app-color-border) bg-(--app-color-surface) px-2 py-1.5 text-xs font-semibold uppercase tracking-wider focus:border-(--app-color-primary) focus:outline-none'
 													>
 														{statusOptions.map((status) => (
 															<option key={status} value={status}>
@@ -418,7 +414,7 @@ export default function DashboardViolationsPage() {
 
 							<div className='pt-6 border-t border-(--app-color-border)/50 space-y-6'>
 								<div>
-									<p className='mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Primary Enforcement</p>
+									<p className='mb-3 text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Primary Enforcement</p>
 									<button
 										onClick={handleDraftDmca}
 										disabled={isDraftingDmca}
@@ -431,13 +427,13 @@ export default function DashboardViolationsPage() {
 								</div>
 
 								<div>
-									<p className='mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Case Management</p>
+									<p className='mb-3 text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)'>Case Management</p>
 									<div className='inline-flex flex-wrap items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200'>
 										{['open', 'reported', 'resolved'].map((status) => (
 											<button
 												key={status}
 												onClick={() => updateStatus(selectedViolation._id, status)}
-												className={`px-4 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+												className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
 													selectedViolation.status === status 
 													? 'bg-[var(--app-color-primary)] text-white shadow-md' 
 													: 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
