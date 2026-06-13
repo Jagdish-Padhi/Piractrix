@@ -37,7 +37,7 @@ const featureCards = [
 		title: 'Public web discovery',
 		description: 'Scan social platforms, open web sources, and repeat offender domains with scheduled sweeps and coordinated monitoring.',
 		icon: Radar,
-		accent: 'from-emerald-500/20 to-teal-500/10',
+		accent: 'from-violet-500/20 to-indigo-500/10',
 	},
 	{
 		title: 'Evidence you can act on',
@@ -147,7 +147,7 @@ function TextLoop() {
 
 	return (
 		<div className='mt-2 h-6 overflow-hidden'>
-			<p key={index} className='animate-text-loop text-sm font-bold tracking-wide text-teal-500'>
+			<p key={index} className='animate-text-loop text-sm font-bold tracking-wide text-purple-600'>
 				{loopingPhrases[index]}
 			</p>
 		</div>
@@ -158,9 +158,9 @@ export default function LandingPage() {
 	useScrollReveal();
 
 	return (
-		<main className='min-h-screen overflow-x-hidden pt-16 bg-[radial-gradient(circle_at_top_left,rgba(23,92,211,0.14),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(15,95,115,0.16),transparent_28%),linear-gradient(180deg,var(--app-color-bg)_0%,#eef3f8_100%)] text-(--app-color-text)'>
+		<main className='min-h-screen overflow-x-hidden pt-16 bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.14),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(76,29,149,0.16),transparent_28%),linear-gradient(180deg,var(--app-color-bg)_0%,#eef3f8_100%)] text-(--app-color-text)'>
 			<Header
-				logo='SportShield'
+				logo='Piractrix'
 				navItems={navItems}
 				position='fixed'
 				className='backdrop-blur-xl'
@@ -190,18 +190,18 @@ export default function LandingPage() {
 						<div className='space-y-8'>
 							<Reveal className='inline-flex items-center gap-2 rounded-full border border-(--app-color-border) bg-(--app-color-surface-glass) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--app-color-text-muted) shadow-sm backdrop-blur-md'>
 								<ShieldCheck className='h-4 w-4 text-(--app-color-primary)' />
-								Digital rights command center
+								Autonomous enforcement agent
 							</Reveal>
 
 							<div className='space-y-5'>
 								<Reveal>
 									<h1 className='max-w-3xl text-4xl font-semibold tracking-tight text-(--app-color-text) sm:text-5xl lg:text-6xl'>
-										You Created It. <br /> <span className='text-teal-600 font-bold italic underline decoration-teal-500/40 underline-offset-4'>Don't Let</span> Someone Else Own It.
+										You Created It. <br /> <span className='text-purple-600 font-bold italic underline decoration-purple-500/40 underline-offset-4'>Don't Let</span> Someone Else Own It.
 									</h1>
 								</Reveal>
 								<Reveal>
 									<p className='max-w-2xl text-base leading-7 text-(--app-color-text-muted) sm:text-lg'>
-										The centralized hub for media rights protection. Register assets, scan the web, and take action on unauthorized re-posts before they spread.
+										The autonomous rights enforcement agent. Register assets, scan the web, analyze threats via explainable AI, and automatically issue legal takedowns.
 									</p>
 								</Reveal>
 							</div>
@@ -244,14 +244,14 @@ export default function LandingPage() {
 										<div className='flex w-full gap-3 pt-2'>
 											<div className='flex-1 rounded-2xl border border-(--app-color-border) bg-(--app-color-surface-panel) p-3 text-left'>
 												<div className='flex items-center gap-2'>
-													<div className='h-2 w-2 animate-pulse rounded-full bg-emerald-500' />
+													<div className='h-2 w-2 animate-pulse rounded-full bg-success' />
 													<p className='text-[9px] font-black uppercase tracking-widest text-(--app-color-text-muted)'>Asset Integrity</p>
 												</div>
 												<p className='mt-0.5 text-base font-bold text-(--app-color-text)'>Protected</p>
 											</div>
 											<div className='flex-1 rounded-2xl border border-(--app-color-border) bg-(--app-color-surface-panel) p-3 text-left'>
 												<div className='flex items-center gap-2'>
-													<div className='h-2 w-2 animate-pulse rounded-full bg-teal-500' />
+													<div className='h-2 w-2 animate-pulse rounded-full bg-accent' />
 													<p className='text-[9px] font-black uppercase tracking-widest text-(--app-color-text-muted)'>Web Scanning</p>
 												</div>
 												<p className='mt-0.5 text-base font-bold text-(--app-color-text)'>Active</p>
@@ -273,7 +273,7 @@ export default function LandingPage() {
 							Complete Content Protection Workflow.
 						</h2>
 						<p className='text-base leading-7 text-(--app-color-text-muted)'>
-							From initial registration to violation detection, SportShield provides the tools needed to identify and manage your media assets across the web.
+							From initial registration to violation detection, Piractrix provides the tools needed to identify and manage your media assets across the web.
 						</p>
 					</div>
 
@@ -334,8 +334,8 @@ export default function LandingPage() {
 
 			<section id='contact' className='border-t border-(--app-color-border) py-24 bg-(--app-color-surface) relative overflow-hidden'>
 				<div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
-					<div className="absolute -top-24 -right-24 w-96 h-96 bg-(--app-color-primary) rounded-full blur-3xl" />
-					<div className="absolute -bottom-24 -left-24 w-96 h-96 bg-(--app-color-success) rounded-full blur-3xl" />
+					<div className="absolute -top-24 -right-24 w-96 h-96 bg-primary rounded-full blur-3xl" />
+					<div className="absolute -bottom-24 -left-24 w-96 h-96 bg-accent rounded-full blur-3xl" />
 				</div>
 
 				<Container>
@@ -348,7 +348,7 @@ export default function LandingPage() {
 									<span className="text-(--app-color-primary)">Talk to our Experts.</span>
 								</h2>
 								<p className='text-base leading-7 text-(--app-color-text-muted) max-w-lg'>
-									Join the world's leading rights holders who trust SportShield to monitor their global digital footprint 24/7. Our team is ready to help you secure your content.
+									Join the world's leading rights holders who trust Piractrix to monitor their global digital footprint 24/7. Our team is ready to help you secure your content.
 								</p>
 							</div>
 
@@ -397,7 +397,7 @@ export default function LandingPage() {
 								</div>
 
 								<div className="flex items-center gap-3 text-xs font-bold text-(--app-color-text-muted) uppercase tracking-widest">
-									<span className="w-2 h-2 rounded-full bg-(--app-color-success) animate-pulse"></span>
+									<span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
 									Available for deployment
 								</div>
 							</div>

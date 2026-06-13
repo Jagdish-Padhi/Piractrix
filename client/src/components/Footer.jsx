@@ -9,10 +9,10 @@ export default function Footer() {
 				<div className='grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr] pb-16'>
 					<div className='space-y-6'>
 						<Link to='/' className='flex items-center gap-3 logo-brand group'>
-							<img src='/navlogo.png' alt='SportShield' className='h-10 w-10 object-contain transition-transform duration-500 group-hover:rotate-12' />
+							<img src='/navlogo.png' alt='Piractrix' className='h-10 w-10 object-contain transition-transform duration-500 group-hover:rotate-12' />
 							<div className="flex items-baseline gap-0.5">
-								<span className="text-(--app-color-text) text-xl!">Sport</span>
-								<span className="logo-shield text-xl!">Shield</span>
+								<span className="text-(--app-color-text) text-xl!">Pirac</span>
+								<span className="logo-shield text-xl!">trix</span>
 							</div>
 						</Link>
 						<p className='max-w-xs text-sm leading-7 text-(--app-color-text-muted)'>
@@ -76,7 +76,7 @@ export default function Footer() {
 
 				<div className='pt-10 border-t border-(--app-color-border) flex flex-col md:flex-row items-center justify-between gap-6'>
 					<p className='text-xs text-(--app-color-text-muted) font-medium'>
-						© {new Date().getFullYear()} SportShield. All rights reserved.
+						© {new Date().getFullYear()} Piractrix. All rights reserved.
 					</p>
 					<p className='text-xs text-(--app-color-text-muted)'>
 						Built with precision by <span className='font-bold text-(--app-color-text)'>Team Esc(Reality);</span>

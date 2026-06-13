@@ -332,13 +332,13 @@ export default function DashboardScansPage() {
 						</div>
 					</div>
 				</Card>
-				<Card className='border-(--app-color-border) shadow-sm group hover:border-emerald-500/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
+				<Card className='border-(--app-color-border) shadow-sm group hover:border-[var(--app-color-primary)]/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
 							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>Active scans</p>
 							<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{runningCount}</p>
 						</div>
-						<div className="h-12 w-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+						<div className="h-12 w-12 rounded-2xl bg-[var(--app-color-primary-soft)] flex items-center justify-center text-[var(--app-color-primary)] group-hover:scale-110 transition-transform">
 							<Activity size={22} className={runningCount > 0 ? 'animate-pulse' : ''} />
 						</div>
 					</div>

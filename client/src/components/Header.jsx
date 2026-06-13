@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
  */
 
 const Header = ({
-	logo = 'SportShield',
+	logo = 'Piractrix',
 	logoHref = '/',
 	navItems = [],
 	userMenu = null,
@@ -23,18 +23,18 @@ const Header = ({
 			className='flex items-center gap-3 logo-brand group'
 			onClick={onLogoClick}
 		>
-			<img src='/navlogo.png' alt='SportShield' className='h-12 w-12 object-contain transition-transform duration-500 group-hover:scale-110' />
+			<img src='/navlogo.png' alt='Piractrix' className='h-12 w-12 object-contain transition-transform duration-500 group-hover:scale-110' />
 			<div className="flex items-baseline gap-0.5">
-				<span className="text-(--app-color-text) text-2xl!">Sport</span>
-				<span className="logo-shield text-2xl!">Shield</span>
+				<span className="text-(--app-color-text) text-2xl!">Pirac</span>
+				<span className="logo-shield text-2xl!">trix</span>
 			</div>
 		</button>
 	) : (
 		<Link to={logoHref} className='flex items-center gap-3 logo-brand group'>
-			<img src='/navlogo.png' alt='SportShield' className='h-12 w-12 object-contain transition-transform duration-500 group-hover:scale-110' />
+			<img src='/navlogo.png' alt='Piractrix' className='h-12 w-12 object-contain transition-transform duration-500 group-hover:scale-110' />
 			<div className="flex items-baseline gap-0.5">
-				<span className="text-(--app-color-text) text-2xl!">Sport</span>
-				<span className="logo-shield text-2xl!">Shield</span>
+				<span className="text-(--app-color-text) text-2xl!">Pirac</span>
+				<span className="logo-shield text-2xl!">trix</span>
 			</div>
 		</Link>
 	);

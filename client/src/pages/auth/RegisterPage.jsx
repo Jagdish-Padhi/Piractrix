@@ -76,15 +76,15 @@ export default function RegisterPage() {
 							
 							<div className='relative z-10 flex flex-col items-center'>
 								<div className='flex flex-col items-center gap-6'>
-									<img src='/logo.png' alt='SportShield Logo' className='h-36 w-36 object-contain filter drop-shadow-2xl' />
-									<div className='h-[3px] w-16 rounded-full bg-emerald-400' />
+									<img src='/logo.png' alt='Piractrix Logo' className='h-36 w-36 object-contain filter drop-shadow-2xl' />
+									<div className='h-[3px] w-16 rounded-full bg-[var(--app-color-accent)]' />
 								</div>
 
 								<div className='mt-8'>
 									<h1 className='text-4xl font-black uppercase tracking-tighter lg:text-5xl italic skew-x-[-6deg]'>
 										You Created It. <br />
-										<span className='text-teal-400'>
-											<span className='text-white font-black italic underline decoration-teal-500/60 underline-offset-4'>Don't Let</span> Someone Else Own It.
+										<span className='text-purple-300'>
+											<span className='text-white font-black italic underline decoration-[var(--app-color-accent)]/60 underline-offset-4'>Don't Let</span> Someone Else Own It.
 										</span>
 									</h1>
 									<p className='mx-auto mt-4 max-w-sm text-lg font-bold leading-tight text-white/70'>
@@ -100,7 +100,7 @@ export default function RegisterPage() {
 										'Secure analytics'
 									].map((feature) => (
 										<div key={feature} className='flex items-center gap-2.5'>
-											<div className='flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400'>
+											<div className='flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--app-color-accent)]/20 text-[var(--app-color-accent)]'>
 												<svg className='h-3 w-3' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={4}>
 													<path strokeLinecap='round' strokeLinejoin='round' d='M5 13l4 4L19 7' />
 												</svg>
@@ -112,7 +112,7 @@ export default function RegisterPage() {
 							</div>
 
 							<div className='absolute bottom-6 left-0 right-0 z-10 flex items-center justify-between px-10 text-[9px] font-black uppercase tracking-[0.3em] text-white/25'>
-								<p>© 2026 SportShield</p>
+								<p>© 2026 Piractrix</p>
 								<p>Enterprise Protection</p>
 							</div>
 						</section>
@@ -136,7 +136,7 @@ export default function RegisterPage() {
 										value={formData.orgName}
 										onChange={handleChange}
 										required
-										placeholder='Example Sports Club'
+										placeholder='Example Media Corp'
 										className='h-10 rounded-xl border-(--app-color-border) bg-white text-sm focus:ring-2 focus:ring-(--app-color-primary)/20'
 									/>
 									<Input
@@ -146,7 +146,7 @@ export default function RegisterPage() {
 										value={formData.email}
 										onChange={handleChange}
 										required
-										placeholder='rights@clubname.com'
+										placeholder='rights@mediacorp.com'
 										className='h-10 rounded-xl border-(--app-color-border) bg-white text-sm focus:ring-2 focus:ring-(--app-color-primary)/20'
 									/>
 									<div className='grid grid-cols-2 gap-3'>

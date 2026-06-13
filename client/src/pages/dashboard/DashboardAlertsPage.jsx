@@ -91,12 +91,12 @@ export default function DashboardAlertsPage() {
 			loadAlerts();
 		};
 
-		window.addEventListener('sportshield:alerts:new', handleAlertsChanged);
-		window.addEventListener('sportshield:alerts:updated', handleAlertsChanged);
+		window.addEventListener('piractrix:alerts:new', handleAlertsChanged);
+		window.addEventListener('piractrix:alerts:updated', handleAlertsChanged);
 
 		return () => {
-			window.removeEventListener('sportshield:alerts:new', handleAlertsChanged);
-			window.removeEventListener('sportshield:alerts:updated', handleAlertsChanged);
+			window.removeEventListener('piractrix:alerts:new', handleAlertsChanged);
+			window.removeEventListener('piractrix:alerts:updated', handleAlertsChanged);
 		};
 	}, [loadAlerts]);
 

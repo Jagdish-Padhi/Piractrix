@@ -4,7 +4,7 @@
  * Required .env keys:
  *   BREVO_API_KEY        – Brevo dashboard → SMTP & API → API Keys → Create API Key
  *   BREVO_SENDER_EMAIL   – must be a verified sender in Brevo
- *   BREVO_SENDER_NAME    – display name, e.g. "SportShield"
+ *   BREVO_SENDER_NAME    – display name, e.g. "Piractrix"
  *   APP_URL              – e.g. http://localhost:5173
  *
  * No extra npm package needed — uses native fetch (Node 18+).
@@ -22,7 +22,7 @@ async function sendBrevoEmail({ to, subject, htmlContent }) {
     },
     body: JSON.stringify({
       sender: {
-        name: process.env.BREVO_SENDER_NAME || 'SportShield',
+        name: process.env.BREVO_SENDER_NAME || 'Piractrix',
         email: process.env.BREVO_SENDER_EMAIL,
       },
       to: [{ email: to }],
@@ -60,7 +60,7 @@ export async function sendViolationAlertEmail(orgEmail, violation) {
 			<div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a">
 				<h2 style="margin-bottom:4px">Unauthorized content detected</h2>
 				<p style="color:#555;margin-top:0">
-					SportShield detected your content being used without authorization.
+					Piractrix detected your content being used without authorization.
 				</p>
 				<table style="width:100%;border-collapse:collapse;margin:20px 0;font-size:14px">
 					<tr style="background:#f5f5f5">
@@ -88,7 +88,7 @@ export async function sendViolationAlertEmail(orgEmail, violation) {
 					View Evidence →
 				</a>
 				<p style="font-size:12px;color:#aaa;margin-top:24px">
-					You're receiving this because email alerts are enabled on your SportShield account.
+					You're receiving this because email alerts are enabled on your Piractrix account.
 				<a href="${process.env.CLIENT_URL}/dashboard/settings" style="color:#aaa">Manage preferences</a>
 				</p>
 			</div>
@@ -145,7 +145,7 @@ export async function sendWeeklyDigestEmail(org, violations) {
 
   await sendBrevoEmail({
     to: org.email,
-    subject: `SportShield Weekly Report — ${violations.length} violations detected`,
+    subject: `Piractrix Weekly Report — ${violations.length} violations detected`,
     htmlContent: `
 			<div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a">
 				<h2>Weekly piracy report</h2>

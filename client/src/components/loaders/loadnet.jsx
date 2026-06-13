@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Loader = ({ size = 1, color = '#10b981' }) => {
+const Loader = ({ size = 1, color = '#7c3aed' }) => {
   const wrapperStyle = {
     '--loader-color': color,
     '--loader-color-soft': `${color}66`,

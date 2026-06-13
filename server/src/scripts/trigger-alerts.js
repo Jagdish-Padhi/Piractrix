@@ -30,7 +30,7 @@ async function trigger() {
     await sendSurgeAlertEmail(targetEmail, {
       platform: 'twitter',
       count: 14,
-      orgName: 'SportShield Partner'
+      orgName: 'Piractrix Partner'
     });
     console.log('✅ Sent: Platform Piracy Surge Alert (Twitter)');
 

@@ -6,7 +6,7 @@ import {
 	registerOrganization,
 } from '../services/auth.service.js';
 
-const refreshCookieName = 'sportshield_refresh_token';
+const refreshCookieName = 'piractrix_refresh_token';
 const refreshCookieOptions = {
 	httpOnly: true,
 	sameSite: 'lax',

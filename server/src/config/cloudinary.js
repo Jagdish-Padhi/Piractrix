@@ -13,7 +13,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
 	cloudinary: cloudinary,
 	params: {
-		folder: 'sportshield_assets',
+		folder: 'piractrix_assets',
 		resource_type: 'auto', // Allows uploading videos and images
 		public_id: (req, file) => `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, '')}`,
 	},

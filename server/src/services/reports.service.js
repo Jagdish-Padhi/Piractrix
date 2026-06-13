@@ -17,7 +17,7 @@ function formatDateForTitle(date) {
 
 function buildDonutChart(breakdown) {
 	let currentAngle = -90; // Start at top
-	const colors = ['#0f766e', '#14b8a6', '#0ea5e9', '#6366f1'];
+	const colors = ['#4c1d95', '#7c3aed', '#6366f1', '#a855f7'];
 	
 	const segments = breakdown.map((item, i) => {
 		const angle = (item.percentage / 100) * 360;
@@ -52,7 +52,7 @@ function buildReportHtml({ organization, overview, timeline }) {
 				`<tr>
 					<td style="padding:9px 12px;border-bottom:1px solid #e8ecf0;font-weight:600;color:#0f172a;text-transform:capitalize;">${item.platform}</td>
 					<td style="padding:9px 12px;border-bottom:1px solid #e8ecf0;color:#334155;">${item.count}</td>
-					<td style="padding:9px 12px;border-bottom:1px solid #e8ecf0;"><span style="display:inline-block;background:#0f766e;color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;">${item.percentage}%</span></td>
+					<td style="padding:9px 12px;border-bottom:1px solid #e8ecf0;"><span style="display:inline-block;background:#4c1d95;color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;">${item.percentage}%</span></td>
 				</tr>`,
 		)
 		.join('');
@@ -86,15 +86,15 @@ function buildReportHtml({ organization, overview, timeline }) {
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>${overview.rangeLabel} — SportShield Intelligence Report</title>
+<title>${overview.rangeLabel} — Piractrix Intelligence Report</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
   html,body{width:210mm;font-family:'Inter',Arial,sans-serif;font-size:13px;color:#0f172a;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   @page{size:A4;margin:0;}
   .page{width:210mm;min-height:297mm;padding:28px 32px 24px;display:flex;flex-direction:column;gap:0;}
-  .header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:2.5px solid #0f766e;margin-bottom:20px;}
-  .brand{font-size:20px;font-weight:800;color:#0f766e;letter-spacing:-0.5px;}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:2.5px solid #4c1d95;margin-bottom:20px;}
+  .brand{font-size:20px;font-weight:800;color:#4c1d95;letter-spacing:-0.5px;}
   .brand span{color:#0f172a;}
   .brand-sub{font-size:10px;color:#64748b;margin-top:2px;letter-spacing:0.06em;text-transform:uppercase;}
   .header-center{text-align:center;flex:1;padding:0 16px;}
@@ -109,9 +109,9 @@ function buildReportHtml({ organization, overview, timeline }) {
   .kpi-value{font-size:24px;font-weight:800;color:#0f172a;line-height:1;}
   .kpi-value.red{color:#dc2626;}
   .kpi-value.green{color:#15803d;}
-  .kpi-value.teal{color:#0f766e;}
+  .kpi-value.teal{color:#4c1d95;}
   .kpi-sub{font-size:9px;color:#94a3b8;margin-top:3px;}
-  .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#0f766e;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #e2e8f0;}
+  .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#4c1d95;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #e2e8f0;}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:16px;}
   .one-col{margin-bottom:16px;}
   table{width:100%;border-collapse:collapse;font-size:12px;}
@@ -126,7 +126,7 @@ function buildReportHtml({ organization, overview, timeline }) {
 
   <div class="header">
     <div>
-      <div class="brand">Sport<span>Shield</span></div>
+      <div class="brand">Pirac<span>trix</span></div>
       <div class="brand-sub">AI-Powered Rights Intelligence</div>
     </div>
     <div class="header-center">
@@ -177,7 +177,7 @@ function buildReportHtml({ organization, overview, timeline }) {
       <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
          ${buildDonutChart(overview.platformBreakdown)}
          <div style="margin-top:15px;text-align:center;">
-           <div style="font-size:10px;font-weight:700;color:#0f766e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Risk Assessment</div>
+           <div style="font-size:10px;font-weight:700;color:#4c1d95;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Risk Assessment</div>
            <div style="font-size:11px;color:#64748b;line-height:1.5;max-width:200px;">
              ${overview.totalViolations > 50 
                ? 'Critical concentration detected on high-velocity platforms. Aggressive enforcement recommended.' 
@@ -205,7 +205,7 @@ function buildReportHtml({ organization, overview, timeline }) {
 
   <div class="footer">
     <div class="footer-text">
-      SportShield · AI-Powered Rights Protection · sportshield.com<br/>
+      Piractrix · AI-Powered Rights Protection · piractrix.com<br/>
       Auto-generated report. Data is accurate as of the generation date.
     </div>
     <div class="footer-text" style="text-align:right;">

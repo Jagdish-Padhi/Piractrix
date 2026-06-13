@@ -32,7 +32,7 @@ const useAuthStore = create(
       setExiting: (isExiting) => set({ isExiting }),
     }),
     {
-      name: 'sportshield-auth-store',
+      name: 'piractrix-auth-store',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,

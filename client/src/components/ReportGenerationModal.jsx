@@ -36,7 +36,7 @@ export default function ReportGenerationModal({ isGenerating, progress, report, 
 	};
 
 	const handleShare = (platform) => {
-		const text = encodeURIComponent(`SportShield Violation Intelligence Report: ${report.title}`);
+		const text = encodeURIComponent(`Piractrix Violation Intelligence Report: ${report.title}`);
 		const url = encodeURIComponent(reportUrl || window.location.href);
 		const links = {
 			mail: `mailto:?subject=${text}&body=${text}%0A${url}`,
@@ -60,7 +60,7 @@ export default function ReportGenerationModal({ isGenerating, progress, report, 
 				{!report && (
 					<div className='h-1.5 w-full bg-slate-100'>
 						<div 
-							className='h-full bg-teal-500 transition-all duration-700'
+							className='h-full bg-primary transition-all duration-700'
 							style={{ width: `${progress}%` }} 
 						/>
 					</div>
@@ -77,7 +77,7 @@ export default function ReportGenerationModal({ isGenerating, progress, report, 
 										cx='48' cy='48' r='42' fill='transparent' stroke='currentColor' strokeWidth='6' 
 										strokeDasharray='263.89' 
 										strokeDashoffset={263.89 - (263.89 * progress) / 100}
-										className='text-teal-500 transition-all duration-500 ease-out'
+										className='text-primary transition-all duration-500 ease-out'
 										strokeLinecap='round'
 									/>
 								</svg>
@@ -129,7 +129,7 @@ export default function ReportGenerationModal({ isGenerating, progress, report, 
 							<div className='flex gap-2 w-full mb-6'>
 								<button
 									onClick={handleView}
-									className='flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold transition-all active:scale-95 shadow-lg shadow-teal-600/20'
+									className='flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary hover:bg-primary-hover text-white text-sm font-bold transition-all active:scale-95 shadow-lg shadow-primary/20'
 								>
 									<ExternalLink size={16} /> View
 								</button>
@@ -156,10 +156,10 @@ export default function ReportGenerationModal({ isGenerating, progress, report, 
 											onClick={() => handleShare(p.id)} 
 											className='flex flex-col items-center gap-1.5 transition-all group'
 										>
-											<div className='w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-teal-50 group-hover:border-teal-200 transition-colors'>
-												{typeof p.icon === 'function' ? <span className='text-sm font-black'>{p.icon()}</span> : <p.icon size={16} className='text-slate-600 group-hover:text-teal-600' />}
+											<div className='w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-primary-soft group-hover:border-primary/20 transition-colors'>
+												{typeof p.icon === 'function' ? <span className='text-sm font-black'>{p.icon()}</span> : <p.icon size={16} className='text-slate-600 group-hover:text-primary' />}
 											</div>
-											<span className='text-[9px] font-bold text-slate-500 group-hover:text-teal-600 uppercase'>{p.label}</span>
+											<span className='text-[9px] font-bold text-slate-500 group-hover:text-primary uppercase'>{p.label}</span>
 										</button>
 									))}
 								</div>

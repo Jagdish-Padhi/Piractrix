@@ -47,14 +47,14 @@ export async function sendHighConfidenceViolationEmail({
 	}
 
 	const from = process.env.EMAIL_FROM;
-	const subject = `SportShield Alert: High-confidence violation on ${platform}`;
+	const subject = `Piractrix Alert: High-confidence violation on ${platform}`;
 	const textBody = [
 		`Organization: ${orgName}`,
 		`Platform: ${platform}`,
 		`Confidence: ${matchConfidence}%`,
 		`Source URL: ${sourceUrl}`,
 		'',
-		'Action recommended: review and mark as reported/resolved from the SportShield dashboard.',
+		'Action recommended: review and mark as reported/resolved from the Piractrix dashboard.',
 	].join('\n');
 
 	await mailer.sendMail({

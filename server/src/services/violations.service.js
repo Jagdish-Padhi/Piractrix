@@ -65,10 +65,9 @@ async function captureViolationScreenshot(sourceUrl) {
 			timeout: 30000,
 		});
 		const screenshotBuffer = await page.screenshot({ type: 'png', fullPage: false });
-		
 		return new Promise((resolve, reject) => {
 			const uploadStream = cloudinary.uploader.upload_stream(
-				{ folder: 'sportshield_screenshots', resource_type: 'image' },
+				{ folder: 'piractrix_screenshots', resource_type: 'image' },
 				(error, result) => {
 					if (error) return reject(error);
 					resolve(result.secure_url);
@@ -105,7 +104,7 @@ export async function createViolationScreenshot({ orgId, violationId }) {
 }
 
 function buildDmcaTemplate({ organizationName, violation }) {
-	const assetTitle = violation.assetId?.title || 'proprietary sports broadcast content';
+	const assetTitle = violation.assetId?.title || 'proprietary copyrighted content';
 	const platformName = (violation.platform || 'the platform').charAt(0).toUpperCase() + (violation.platform || 'the platform').slice(1);
 	const detectedDate = new Date(violation.detectedAt).toUTCString();
 	const matchType = (violation.matchType || 'near-duplicate').replace('-', ' ');
@@ -119,7 +118,7 @@ Pursuant to 17 U.S.C. § 512 (Digital Millennium Copyright Act)
 Date: ${new Date().toUTCString()}
 To: ${platformName} Copyright/Trust & Safety Team
 
-RE: Unauthorized Distribution of Copyrighted Sports Broadcast — "${assetTitle}"
+RE: Unauthorized Distribution of Copyrighted Content — "${assetTitle}"
 
 I. IDENTIFICATION OF RIGHTS HOLDER
 ${organizationName} is the exclusive rights holder and authorized distributor of the copyrighted work identified herein. This notice is issued on behalf of the rights holder pursuant to the protections afforded under the DMCA and applicable international copyright treaties.
@@ -133,7 +132,7 @@ The following URL hosts unauthorized content that is a ${matchType} of the prote
   Detection Time:     ${detectedDate}
 
 III. FORENSIC EVIDENCE OF INFRINGEMENT
-Our proprietary AI-powered Rights Detection System (SportShield) has confirmed infringement via multi-signal forensic analysis:
+Our proprietary AI-powered Rights Detection System (Piractrix) has confirmed infringement via multi-signal forensic analysis:
   - Match Confidence Score:  ${confidence}%
   - Match Classification:    ${matchType}
   - Perceptual Hash Distance: ${hammingDist} (lower = higher similarity)
@@ -167,7 +166,7 @@ async function generateDmcaWithGemini({ organizationName, violation }) {
 		return null;
 	}
 
-	const assetTitle = violation.assetId?.title || 'exclusive sports broadcast content';
+	const assetTitle = violation.assetId?.title || 'exclusive copyrighted content';
 	const platformName = (violation.platform || 'the platform').charAt(0).toUpperCase() + (violation.platform || 'the platform').slice(1);
 	const detectedDate = new Date(violation.detectedAt).toUTCString();
 	const matchType = (violation.matchType || 'near-duplicate').replace('-', ' ');
@@ -188,7 +187,7 @@ async function generateDmcaWithGemini({ organizationName, violation }) {
 		: '';
 
 	const model = process.env.GEMINI_MODEL?.trim() || 'gemini-1.5-flash';
-	const prompt = `You are the senior legal counsel for ${organizationName}, a premier sports broadcasting rights protection firm.
+	const prompt = `You are the senior legal counsel for ${organizationName}, a premier digital rights protection firm.
 
 Draft a formal, legally rigorous DMCA Takedown Notice for the specific copyright infringement case described below.
 
@@ -202,7 +201,7 @@ CASE DETAILS:
 - Match Classification: ${matchType} (${confidence}% confidence)
 ${repeatScore}
 
-FORENSIC EVIDENCE SUMMARY (from SportShield AI Detection Engine):
+FORENSIC EVIDENCE SUMMARY (from Piractrix AI Detection Engine):
 - Perceptual Hash (pHash) Hamming Distance: ${hammingDist} — a distance below 12 confirms near-identical content
 - Color DNA Similarity: ${colorSim} — spatial color fingerprint match across frames
 ${frameMatch ? `- Temporal Fingerprint: ${frameMatch}` : ''}
@@ -274,7 +273,7 @@ export async function draftDmcaNotice({ orgId, violationId }) {
 		throw error;
 	}
 
-	const organizationName = 'SportShield Rights Team';
+	const organizationName = 'Piractrix Rights Team';
 	const geminiDraft = await generateDmcaWithGemini({ organizationName, violation });
 
 	return {

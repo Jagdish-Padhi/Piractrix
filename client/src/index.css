@@ -90,7 +90,7 @@ select {
 	right: 8%;
 	width: 22rem;
 	height: 22rem;
-	background: radial-gradient(circle, rgba(23, 92, 211, 0.35), rgba(23, 92, 211, 0));
+	background: radial-gradient(circle, rgba(124, 58, 237, 0.35), rgba(124, 58, 237, 0));
 }
 
 .aurora-two {
@@ -98,7 +98,7 @@ select {
 	bottom: 10%;
 	width: 18rem;
 	height: 18rem;
-	background: radial-gradient(circle, rgba(15, 95, 115, 0.3), rgba(15, 95, 115, 0));
+	background: radial-gradient(circle, rgba(76, 29, 149, 0.3), rgba(76, 29, 149, 0));
 	animation-delay: -4s;
 }
 
@@ -263,9 +263,9 @@ select {
 }
 
 .net-loader-wrapper {
-	--loader-color: #10b981;
-	--loader-color-soft: rgba(16, 185, 129, 0.4);
-	--loader-color-faint: rgba(16, 185, 129, 0.1);
+	--loader-color: #7c3aed;
+	--loader-color-soft: rgba(124, 58, 237, 0.4);
+	--loader-color-faint: rgba(124, 58, 237, 0.1);
 	animation: net-entrance 0.5s ease-out forwards;
 	display: flex;
 	flex-direction: column;
@@ -370,7 +370,7 @@ select {
 
 .logo-shield {
 	font-family: 'Orbitron', sans-serif;
-	color: #10b981;
+	color: #7c3aed;
 	font-weight: 900;
 }
 
@@ -390,7 +390,7 @@ select {
 	left: 50%;
 	width: 0;
 	height: 2px;
-	background: #10b981;
+	background: #7c3aed;
 	transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 	transform: translateX(-50%);
 	border-radius: 2px;

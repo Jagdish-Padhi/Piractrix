@@ -26,7 +26,7 @@ const Sidebar = ({
 				<img src='/logo.png' alt='Logo' className='h-10 w-10 object-contain' />
 				{!isCollapsed && (
 					<span className='text-sm font-bold uppercase tracking-[0.2em] text-[var(--app-color-text)]'>
-						SportShield
+						Piractrix
 					</span>
 				)}
 			</Link>
@@ -74,7 +74,7 @@ const Sidebar = ({
 			{/* Footer */}
 			{!isCollapsed && (
 				<div className='border-t border-[var(--app-color-border)] p-4 text-xs text-[var(--app-color-text-muted)]'>
-					<p>© 2026 SportShield</p>
+					<p>© 2026 Piractrix</p>
 				</div>
 			)}
 		</aside>

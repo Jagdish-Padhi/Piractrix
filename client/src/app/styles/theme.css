@@ -1,8 +1,8 @@
 :root {
 	--app-font-sans: "IBM Plex Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 	--app-font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-	--app-rgb-primary: 15, 95, 115;
-	--app-rgb-accent: 23, 92, 211;
+	--app-rgb-primary: 76, 29, 149;
+	--app-rgb-accent: 124, 58, 237;
 	--app-color-bg: #f2f5f9;
 	--app-color-surface: #ffffff;
 	--app-color-surface-elevated: #e8eef4;
@@ -11,17 +11,17 @@
 	--app-color-text: #0b1422;
 	--app-color-text-muted: #516075;
 	--app-color-border: #c3d0de;
-	--app-color-primary: #0f5f73;
-	--app-color-primary-hover: #0b4a5a;
-	--app-color-primary-soft: #d8ecf2;
-	--app-color-accent: #175cd3;
-	--app-color-canvas-glow: #d8e2ee;
+	--app-color-primary: #4c1d95;
+	--app-color-primary-hover: #3b0764;
+	--app-color-primary-soft: #f3e8ff;
+	--app-color-accent: #7c3aed;
+	--app-color-canvas-glow: #f5f3ff;
 	--app-color-success: #15803d;
 	--app-color-warning: #b45309;
 	--app-color-danger: #b42318;
 	--app-gradient-shell: radial-gradient(circle at top left, rgba(var(--app-rgb-accent), 0.14), transparent 30%), radial-gradient(circle at bottom right, rgba(var(--app-rgb-primary), 0.12), transparent 24%), linear-gradient(180deg, #f2f5f9 0%, #e8eef4 100%);
-	--app-gradient-auth-login: linear-gradient(160deg, #0c1624 0%, #112638 58%, #11485c 100%);
-	--app-gradient-auth-register: linear-gradient(150deg, #093735 0%, #0f5f73 55%, #175cd3 100%);
+	--app-gradient-auth-login: linear-gradient(160deg, #1e1b4b 0%, #311042 58%, #4c1d95 100%);
+	--app-gradient-auth-register: linear-gradient(150deg, #2e1065 0%, #4c1d95 55%, #7c3aed 100%);
 	--app-shadow-elevated: 0 24px 40px rgba(11, 20, 34, 0.12);
 }
 

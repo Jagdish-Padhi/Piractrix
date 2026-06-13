@@ -132,11 +132,11 @@ function TrendLineChart({ items }) {
 					<defs>
 						<linearGradient id='analytics-line' x1='0%' y1='0%' x2='100%' y2='0%'>
 							<stop offset='0%' stopColor='var(--app-color-primary)' />
-							<stop offset='100%' stopColor='#0f766e' />
+							<stop offset='100%' stopColor='var(--app-color-accent)' />
 						</linearGradient>
 						<linearGradient id='analytics-area' x1='0%' y1='0%' x2='0%' y2='100%'>
 							<stop offset='0%' stopColor='var(--app-color-primary)' stopOpacity='0.15' />
-							<stop offset='100%' stopColor='#0f766e' stopOpacity='0' />
+							<stop offset='100%' stopColor='var(--app-color-accent)' stopOpacity='0' />
 						</linearGradient>
 					</defs>
 					
@@ -234,9 +234,9 @@ function TrendLineChart({ items }) {
 							className="overflow-visible pointer-events-none"
 						>
 							<div className="flex flex-col items-center justify-end h-full w-full animate-in fade-in zoom-in-95 duration-150">
-								<div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl shadow-xl shadow-teal-900/20 border border-slate-700/50 flex flex-col items-center">
+								<div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl shadow-xl shadow-purple-900/20 border border-slate-700/50 flex flex-col items-center">
 									<span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 whitespace-nowrap leading-none">{hoveredPoint.item.label}</span>
-									<span className="text-sm font-black text-teal-400 tabular-nums leading-tight mt-0.5">
+									<span className="text-sm font-black text-purple-300 tabular-nums leading-tight mt-0.5">
 										{hoveredPoint.item.count}
 										<span className="text-[8px] text-slate-500 font-bold ml-1">VIOLATIONS</span>
 									</span>
@@ -280,7 +280,7 @@ function PlatformBars({ items }) {
 					</div>
 					<div className='h-3 overflow-hidden rounded-full bg-(--app-color-surface)'>
 						<div
-							className='h-full rounded-full bg-[linear-gradient(90deg,var(--app-color-primary),#0f766e)]'
+							className='h-full rounded-full bg-[linear-gradient(90deg,var(--app-color-primary),var(--app-color-accent))]'
 							style={{ width: `${Math.max(8, item.percentage)}%` }}
 						/>
 					</div>
@@ -377,13 +377,13 @@ function KPIMetricsGrid({ kpis }) {
 				</p>
 			</Card>
 
-			<Card className='border-(--app-color-border) shadow-sm group hover:border-emerald-500/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
+			<Card className='border-(--app-color-border) shadow-sm group hover:border-[var(--app-color-primary)]/50 transition-all duration-300' style={{ backgroundColor: 'var(--app-color-surface-panel)' }}>
 				<div className="flex items-center justify-between">
 					<div className="space-y-1">
 						<p className='text-[10px] font-black uppercase tracking-[0.2em] text-(--app-color-text-muted)'>SLA Compliance</p>
 						<p className='text-3xl font-black text-(--app-color-text) tabular-nums'>{resolutionSLA.slaCompliancePercentage}%</p>
 					</div>
-					<div className="h-12 w-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+					<div className="h-12 w-12 rounded-2xl bg-[var(--app-color-primary-soft)] flex items-center justify-center text-[var(--app-color-primary)] group-hover:scale-110 transition-transform">
 						<ShieldCheck size={22} />
 					</div>
 				</div>
