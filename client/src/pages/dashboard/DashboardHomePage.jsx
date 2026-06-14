@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShieldCheck,
@@ -20,10 +20,11 @@ import {
   MessageSquare
 } from 'lucide-react';
 
-import { Card, Badge, Button, Loader } from '../../components';
+import { Card, Badge, Button, Loader, Modal } from '../../components';
 import api from '../../services/api.js';
 import useAuthStore from '../../store/auth.store.js';
 import { connectRealtime } from '../../services/realtime.js';
+import toast from 'react-hot-toast';
 
 export default function DashboardHomePage() {
   const user = useAuthStore((state) => state.user);
@@ -38,6 +39,8 @@ export default function DashboardHomePage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [liveLogs, setLiveLogs] = useState([]);
   const [agentStatus, setAgentStatus] = useState({ autonomousMode: false, status: 'assisted', lastRun: null, heartbeat: null });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingModeValue, setPendingModeValue] = useState(false);
 
   const loadDashboardData = async (silent = false) => {
     try {
@@ -131,6 +134,31 @@ export default function DashboardHomePage() {
     return 'text-slate-300';
   };
 
+  const handleToggleModeClick = () => {
+    setPendingModeValue(!agentStatus.autonomousMode);
+    setIsModalOpen(true);
+  };
+
+  const confirmToggleMode = async () => {
+    setIsModalOpen(false);
+    setIsSyncing(true);
+    try {
+      await api.patch('/agent/mode', { mode: pendingModeValue });
+      setAgentStatus(prev => ({ ...prev, autonomousMode: pendingModeValue }));
+      toast.success(
+        pendingModeValue
+          ? 'Autonomous Mode activated. ShieldAgent is live.'
+          : 'Autonomous Mode disabled. Manual review loop active.'
+      );
+      window.dispatchEvent(new CustomEvent('piractrix:agent:mode-changed'));
+    } catch (err) {
+      toast.error('Failed to update agent mode.');
+      console.error(err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
@@ -148,12 +176,39 @@ export default function DashboardHomePage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">Security Command Center</h1>
-            <Badge variant="outline" className="border-emerald-500/30 text-emerald-700 bg-emerald-50/50 text-xs uppercase font-extrabold tracking-widest px-2.5 py-0.5">Live Feed</Badge>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest bg-emerald-950/80 border border-emerald-500/30 rounded-full text-emerald-400">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
+              </span>
+              Live Feed
+            </div>
           </div>
           <p className="text-xs font-semibold text-slate-400">SOC operations panel for {user?.orgName || 'Piractrix Protection'}.</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Autonomous Mode Toggle */}
+          <div className={`flex items-center gap-2.5 border px-3.5 py-1.5 rounded-xl transition-all duration-300 ${
+            agentStatus.autonomousMode 
+              ? 'bg-purple-50/20 border-purple-500/40 shadow-[0_0_12px_rgba(147,51,234,0.15)]' 
+              : 'bg-slate-50 border-slate-200/80 shadow-xs'
+          }`}>
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Autonomous Shield</span>
+            <button
+              onClick={handleToggleModeClick}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                agentStatus.autonomousMode ? 'bg-purple-600 shadow-[0_0_8px_#8b5cf6]' : 'bg-slate-200'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  agentStatus.autonomousMode ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
           <Button
             variant="secondary"
             size="sm"
@@ -201,7 +256,7 @@ export default function DashboardHomePage() {
       {/* Main split dashboard view */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Column (2/3 width) - Active Leak Feed & coverage */}
+        {/* Left Column (2/3 width) - Active Leak Feed & Telemetry */}
         <div className="lg:col-span-2 space-y-6">
           <Card
             className="border-slate-200/60 bg-white shadow-xs"
@@ -244,65 +299,6 @@ export default function DashboardHomePage() {
             </div>
           </Card>
 
-          {/* Quick Actions Row */}
-          <div className="grid grid-cols-3 gap-4">
-            <Link to="/dashboard/scans" className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white rounded-2xl p-4 flex flex-col justify-between h-28 shadow-xs hover:scale-[1.02] active:scale-98 transition-all">
-              <Activity className="w-5 h-5 text-purple-400" />
-              <div>
-                <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Discovery Engine</p>
-                <p className="text-xs font-extrabold mt-0.5">Inspect Scans</p>
-              </div>
-            </Link>
-            <Link to="/dashboard/assets" className="bg-white border border-slate-200/60 hover:bg-slate-50 text-slate-800 rounded-2xl p-4 flex flex-col justify-between h-28 shadow-xs hover:scale-[1.02] active:scale-98 transition-all">
-              <Layers className="w-5 h-5 text-purple-600" />
-              <div>
-                <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Library Assets</p>
-                <p className="text-xs font-extrabold mt-0.5">Protect Content</p>
-              </div>
-            </Link>
-            <Link to="/dashboard/violations" className="bg-white border border-slate-200/60 hover:bg-slate-50 text-slate-800 rounded-2xl p-4 flex flex-col justify-between h-28 shadow-xs hover:scale-[1.02] active:scale-98 transition-all">
-              <Shield className="w-5 h-5 text-purple-600" />
-              <div>
-                <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Enforcement Cases</p>
-                <p className="text-xs font-extrabold mt-0.5">Takedown Queue</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Right Column (1/3 width) - Live telemetry log & agent settings indicator */}
-        <div className="space-y-6">
-          
-          {/* Agent Status Widget */}
-          <Card
-            className="border-slate-200/60 bg-white shadow-xs"
-            title="Agent Integration"
-            subtitle="ShieldAgent configurations status."
-          >
-            <div className="space-y-3.5">
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <span className={`h-2 w-2 rounded-full ${agentStatus.autonomousMode ? 'bg-violet-600 animate-pulse' : 'bg-slate-400'}`} />
-                  <span className="text-xs font-bold text-slate-800">Defense Status</span>
-                </div>
-                <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded ${agentStatus.autonomousMode ? 'bg-violet-100 text-violet-800' : 'bg-slate-200 text-slate-600'}`}>
-                  {agentStatus.autonomousMode ? 'Autonomous' : 'Assisted'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs px-2">
-                <span className="text-slate-400 font-bold">Decision Cycle:</span>
-                <span className="font-mono text-slate-600 font-bold">5 Min Interval</span>
-              </div>
-              <div className="flex items-center justify-between text-xs px-2 pb-1 border-b border-slate-100">
-                <span className="text-slate-400 font-bold">Protected Scope:</span>
-                <span className="font-mono text-slate-600 font-bold">{data.stats.totalAssets} Asset Profiles</span>
-              </div>
-              <Link to="/dashboard/agent" className="block text-center bg-slate-100 hover:bg-slate-200/80 text-slate-700 hover:text-slate-900 font-bold uppercase tracking-widest text-[9px] py-3 rounded-xl transition-all">
-                Access Agent Settings
-              </Link>
-            </div>
-          </Card>
-
           {/* Telemetry Terminal */}
           <Card
             className="border-slate-200/60 bg-white shadow-xs"
@@ -320,15 +316,54 @@ export default function DashboardHomePage() {
                     </div>
                   ))
                 ) : (
-                  <div className="flex items-center gap-2 text-slate-500 py-10">
-                    <span className="relative flex h-2 w-2 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-                    </span>
-                    <span className="font-bold">PIRACTRIX ONLINE — Monitoring {data.stats.totalAssets} assets. No threats queued.</span>
+                  <div className="flex items-center justify-center h-full py-10">
+                    <div className="flex items-center gap-2.5 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+                      <span className="relative flex h-2 w-2 shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500 shadow-[0_0_8px_#a855f7]"></span>
+                      </span>
+                      <span className="font-bold text-slate-300 tracking-wide">PIRACTRIX ONLINE — Monitoring {data.stats.totalAssets} assets. No threats queued.</span>
+                    </div>
                   </div>
                 )}
               </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Right Column (1/3 width) - Agent status and platform distribution */}
+        <div className="space-y-6">
+          
+          {/* Agent Status Widget */}
+          <Card
+            className="border-slate-200/60 bg-white shadow-xs"
+            title="Agent Integration"
+            subtitle="ShieldAgent configurations status."
+          >
+            <div className="space-y-3.5">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-2.5 w-2.5 shrink-0">
+                    <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${agentStatus.autonomousMode ? 'animate-ping bg-violet-400' : ''}`}></span>
+                    <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${agentStatus.autonomousMode ? 'bg-violet-500 shadow-[0_0_10px_#8b5cf6]' : 'bg-slate-400'}`}></span>
+                  </span>
+                  <span className="text-xs font-bold text-slate-800">Defense Status</span>
+                </div>
+                <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded ${agentStatus.autonomousMode ? 'bg-violet-100 text-violet-800' : 'bg-slate-200 text-slate-600'}`}>
+                  {agentStatus.autonomousMode ? 'Autonomous' : 'Assisted'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs px-2">
+                <span className="text-slate-400 font-bold">Decision Cycle:</span>
+                <span className="font-mono text-slate-600 font-bold">5 Min Interval</span>
+              </div>
+              <div className="flex items-center justify-between text-xs px-2 pb-1 border-b border-slate-100">
+                <span className="text-slate-400 font-bold">Protected Scope:</span>
+                <span className="font-mono text-slate-600 font-bold">{data.stats.totalAssets} Asset Profiles</span>
+              </div>
+              <Link to="/dashboard/agent" className="block text-center bg-slate-100 hover:bg-slate-200/80 text-slate-700 hover:text-slate-900 font-bold uppercase tracking-widest text-[9px] py-3 rounded-xl transition-all">
+                Access Agent Settings
+              </Link>
             </div>
           </Card>
 
@@ -366,9 +401,97 @@ export default function DashboardHomePage() {
           </Card>
 
         </div>
-
       </div>
 
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={pendingModeValue ? "Activate Autonomous Mode?" : "Deactivate Autonomous Mode?"}
+        size="md"
+        footer={
+          <div className="flex w-full gap-3 justify-end">
+            <Button
+              variant="secondary"
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 rounded-xl text-xs font-bold border-slate-200 hover:bg-slate-50 transition-all cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmToggleMode}
+              className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition-all cursor-pointer ${
+                pendingModeValue 
+                  ? 'bg-purple-600 hover:bg-purple-700 shadow-md shadow-purple-600/20' 
+                  : 'bg-red-600 hover:bg-red-700 shadow-md shadow-red-600/20'
+              }`}
+            >
+              {pendingModeValue ? 'Confirm Activation' : 'Confirm Deactivation'}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className={`p-4 rounded-2xl border flex gap-3.5 items-start ${
+            pendingModeValue 
+              ? 'bg-purple-50/50 border-purple-100 text-purple-900' 
+              : 'bg-amber-50/50 border-amber-100 text-amber-900'
+          }`}>
+            <div className={`p-2 rounded-xl shrink-0 ${
+              pendingModeValue ? 'bg-purple-100 text-purple-600' : 'bg-amber-100 text-amber-600'
+            }`}>
+              <AlertTriangle className="w-5 h-5 animate-pulse" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-xs font-black uppercase tracking-wider">
+                {pendingModeValue ? 'Safety & Liability Warning' : 'Response Delay Notice'}
+              </h4>
+              <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                {pendingModeValue 
+                  ? 'Autonomous Mode authorizes Piractrix ShieldAgent to issue legal takedown requests automatically. Ensure your whitelists are fully up-to-date.'
+                  : 'Manual approval overrides the automated defense grid. Any new infringements discovered will remain online until explicitly reviewed.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">System Consequences:</h3>
+            <ul className="space-y-2.5">
+              {pendingModeValue ? (
+                <>
+                  <li className="flex gap-2.5 text-xs text-slate-600 font-semibold items-start">
+                    <span className="h-1.5 w-1.5 rounded-full bg-purple-500 mt-1.5 shrink-0" />
+                    <span><strong>No Human Verification:</strong> Actions are fired instantly upon confidence thresholds match.</span>
+                  </li>
+                  <li className="flex gap-2.5 text-xs text-slate-600 font-semibold items-start">
+                    <span className="h-1.5 w-1.5 rounded-full bg-purple-500 mt-1.5 shrink-0" />
+                    <span><strong>Immediate Webhook Notice:</strong> Takedowns are transmitted live to Twilio, Telegram, or Slack.</span>
+                  </li>
+                  <li className="flex gap-2.5 text-xs text-slate-600 font-semibold items-start">
+                    <span className="h-1.5 w-1.5 rounded-full bg-purple-500 mt-1.5 shrink-0" />
+                    <span><strong>Automatic Case Management:</strong> Case timelines and DMCA drafts will be logged as executed.</span>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li className="flex gap-2.5 text-xs text-slate-600 font-semibold items-start">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                    <span><strong>Review Queue Hold:</strong> Inbound infringements will sit in the command queue.</span>
+                  </li>
+                  <li className="flex gap-2.5 text-xs text-slate-600 font-semibold items-start">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                    <span><strong>Manual Compliance Burden:</strong> Compliance officers must manually review and dispatch each case.</span>
+                  </li>
+                  <li className="flex gap-2.5 text-xs text-slate-600 font-semibold items-start">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                    <span><strong>Ecosystem Threat Exposure:</strong> Leaks will persist until an admin approves actions.</span>
+                  </li>
+                </>
+              )}
+            </ul>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

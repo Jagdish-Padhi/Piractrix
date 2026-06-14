@@ -22,9 +22,10 @@ import {
 	UploadCloud,
 	Layers,
 	FileText,
-	Music
+	Music,
+	Eye
 } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Loader, Modal, Spinner } from '../../components';
+import { Badge, Button, Card, EmptyState, Loader, Modal, Spinner, PremiumAudioPlayer, PremiumVideoPlayer } from '../../components';
 import api from '../../services/api.js';
 
 const acceptedFileTypes = 'video/mp4,video/quicktime,image/jpeg,image/png,audio/mpeg,audio/wav,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain';
@@ -49,20 +50,33 @@ function getFingerprintShortValue(value) {
 	return value.slice(-8);
 }
 
-const AssetThumbnail = ({ src, alt }) => {
+const AssetThumbnail = ({ src, alt, className = "mb-4 h-36 w-full" }) => {
 	const [isLoaded, setIsLoaded] = useState(false);
+	const [isError, setIsError] = useState(false);
+
+	if (isError) {
+		return (
+			<div className={`relative overflow-hidden rounded-lg flex flex-col items-center justify-center bg-slate-50 border border-slate-200 shrink-0 ${className}`}>
+				<div className="p-2 rounded-xl bg-slate-100 text-slate-400">
+					<ImageIcon size={20} />
+				</div>
+				<span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1">Preview Unavailable</span>
+			</div>
+		);
+	}
 	
 	return (
-		<div className="relative mb-4 h-36 w-full overflow-hidden rounded-lg bg-slate-100/50">
+		<div className={`relative overflow-hidden rounded-lg bg-slate-100/50 shrink-0 ${className}`}>
 			{!isLoaded && (
 				<div className="absolute inset-0 flex items-center justify-center opacity-30">
-					<Loader size={0.4} />
+					<Loader size={0.3} />
 				</div>
 			)}
 			<img
 				src={src}
 				alt={alt}
 				onLoad={() => setIsLoaded(true)}
+				onError={() => setIsError(true)}
 				className={`h-full w-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
 			/>
 		</div>
@@ -370,16 +384,50 @@ export default function DashboardAssetsPage() {
 								const progress = Math.min(Math.round((timeSinceUpload / expectedTime) * 100), 98);
 								const timeRemaining = Math.max(Math.round(expectedTime - timeSinceUpload), 1);
 
-								return (
+								return viewMode === 'grid' ? (
 									<Card
 										key={asset._id}
 										className={`border-(--app-color-border) shadow-sm transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-md hover:border-(--app-color-primary)/30 ${isProcessing ? 'opacity-80' : ''}`}
 										style={{ backgroundColor: 'var(--app-color-surface)' }}
 										onClick={() => !isProcessing && handleOpenDetail(asset)}
 									>
-										{(asset.thumbnailUrl || asset.gcsUrl) ? (
+										{asset.type === 'image' && (asset.thumbnailUrl || asset.gcsUrl) ? (
 											<AssetThumbnail src={asset.thumbnailUrl || asset.gcsUrl} alt={asset.title} />
-										) : null}
+										) : asset.thumbnailUrl ? (
+											<AssetThumbnail src={asset.thumbnailUrl} alt={asset.title} />
+										) : (
+											/* Styled Premium Fallback Illustration */
+											<div className="relative mb-4 h-36 w-full overflow-hidden rounded-lg flex flex-col items-center justify-center bg-slate-100 border border-slate-200/60 shadow-xs group-hover:scale-[1.01] transition-transform duration-300">
+												<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-500/5 via-transparent to-transparent opacity-60" />
+												
+												{asset.type === 'music' ? (
+													<>
+														<div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.05)] group-hover:scale-110 transition-transform">
+															<Music size={24} />
+														</div>
+														<span className="text-[9px] font-black uppercase tracking-widest text-indigo-500 mt-2.5">Audio Track</span>
+													</>
+												) : (asset.type === 'exam_paper' || asset.type === 'document') ? (
+													<>
+														<div className="p-3 rounded-2xl bg-slate-500/10 border border-slate-500/20 text-slate-500 shadow-[0_0_15px_rgba(148,163,184,0.05)] group-hover:scale-110 transition-transform">
+															<FileText size={24} />
+														</div>
+														<span className="text-[9px] font-black uppercase tracking-widest text-slate-500 mt-2.5">
+															{asset.type === 'exam_paper' ? 'Exam Paper' : 'Document'}
+														</span>
+													</>
+												) : (
+													<>
+														<div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.05)] group-hover:scale-110 transition-transform">
+															<FileVideo size={24} />
+														</div>
+														<span className="text-[9px] font-black uppercase tracking-widest text-purple-500 mt-2.5">
+															{asset.type === 'ott_content' ? 'OTT Stream' : 'Video Footage'}
+														</span>
+													</>
+												)}
+											</div>
+										)}
 
 										<div className='flex items-start justify-between gap-3'>
 											<div className="flex-1 min-w-0">
@@ -400,6 +448,13 @@ export default function DashboardAssetsPage() {
 															<RefreshCw size={14} />
 														</button>
 													)}
+													<button
+														onClick={(e) => { e.stopPropagation(); handleOpenDetail(asset); }}
+														className="p-1.5 rounded-lg bg-(--app-color-surface-elevated) text-(--app-color-text-muted) hover:text-(--app-color-text) hover:bg-(--app-color-border) transition-colors"
+														title="View Asset DNA & Preview"
+													>
+														<Eye size={14} />
+													</button>
 													<button
 														onClick={(e) => { e.stopPropagation(); handleOpenEdit(asset); }}
 														className="p-1.5 rounded-lg bg-(--app-color-surface-elevated) text-(--app-color-text-muted) hover:text-(--app-color-text) hover:bg-(--app-color-border) transition-colors"
@@ -461,6 +516,125 @@ export default function DashboardAssetsPage() {
 												</div>
 											</div>
 										)}
+									</Card>
+								) : (
+									<Card
+										key={asset._id}
+										className={`border-(--app-color-border) shadow-sm transition-all duration-300 cursor-pointer hover:shadow-md hover:border-(--app-color-primary)/30 flex flex-row items-center gap-6 p-4 ${isProcessing ? 'opacity-80' : ''}`}
+										style={{ backgroundColor: 'var(--app-color-surface)' }}
+										onClick={() => !isProcessing && handleOpenDetail(asset)}
+									>
+										{/* 1. Thumbnail Column (Fixed size) */}
+										<div className="w-24 h-16 shrink-0 overflow-hidden flex items-center justify-center">
+											{asset.type === 'image' && (asset.thumbnailUrl || asset.gcsUrl) ? (
+												<AssetThumbnail src={asset.thumbnailUrl || asset.gcsUrl} alt={asset.title} className="w-full h-full rounded-lg" />
+											) : asset.thumbnailUrl ? (
+												<AssetThumbnail src={asset.thumbnailUrl} alt={asset.title} className="w-full h-full rounded-lg" />
+											) : (
+												/* Fallback */
+												<div className="relative w-full h-full overflow-hidden rounded-lg flex flex-col items-center justify-center bg-slate-100 border border-slate-200/60 shadow-xs">
+													<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-500/5 via-transparent to-transparent opacity-60" />
+													{asset.type === 'music' ? (
+														<Music size={16} className="text-indigo-500" />
+													) : (asset.type === 'exam_paper' || asset.type === 'document') ? (
+														<FileText size={16} className="text-slate-500" />
+													) : (
+														<FileVideo size={16} className="text-purple-500" />
+													)}
+												</div>
+											)}
+										</div>
+
+										{/* 2. Core Details Column */}
+										<div className="flex-1 min-w-0">
+											<h3 className="text-sm font-semibold text-(--app-color-text) truncate">{asset.title}</h3>
+											<p className="mt-1 text-xs text-(--app-color-text-muted) line-clamp-1">{asset.description || 'No description'}</p>
+										</div>
+
+										{/* Content Layout: Processing Bar vs Metadata Columns */}
+										{isProcessing ? (
+											<div className="w-80 shrink-0 space-y-1.5 px-4">
+												<div className="flex justify-between text-[10px] uppercase tracking-wider font-bold text-(--app-color-text-muted)">
+													<span>AI Fingerprinting...</span>
+													<span>{progress}%</span>
+												</div>
+												<div className="h-1 w-full overflow-hidden rounded-full bg-(--app-color-surface-elevated)">
+													<div 
+														className="h-full bg-linear-to-r from-(--app-color-primary) to-[var(--app-color-accent)] transition-all duration-1000 ease-out" 
+														style={{ width: `${progress}%` }} 
+													/>
+												</div>
+											</div>
+										) : (
+											<>
+												{/* 3. Ingestion Metadata Column */}
+												<div className="w-32 shrink-0 flex flex-col gap-1 text-xs text-(--app-color-text-muted)">
+													<span className="flex items-center gap-1.5 uppercase tracking-wider text-[9px] font-black text-indigo-500">
+														{asset.type === 'image' ? <ImageIcon size={10} /> : 
+														 asset.type === 'music' ? <Music size={10} /> :
+														 (asset.type === 'exam_paper' || asset.type === 'document') ? <FileText size={10} /> :
+														 <FileVideo size={10} />}
+														{asset.type.replace('_', ' ')}
+													</span>
+													<span className="flex items-center gap-1.5 font-medium">
+														<Calendar size={10} />
+														{new Date(asset.uploadedAt).toLocaleDateString()}
+													</span>
+												</div>
+
+												{/* 4. Security DNA Column */}
+												<div className="w-40 shrink-0 flex flex-col gap-1 text-xs text-(--app-color-text-muted)">
+													<span className="flex items-center gap-1.5">
+														<AlertTriangle size={12} className={asset.violationsFound > 0 ? 'text-red-500' : 'text-emerald-500'} />
+														Violations: <span className={asset.violationsFound > 0 ? 'text-red-500 font-bold' : 'text-(--app-color-text) font-bold'}>{asset.violationsFound || 0}</span>
+													</span>
+													<span className="flex items-center gap-1.5">
+														<Fingerprint size={12} className="text-(--app-color-primary)" />
+														PHash: <span className="text-(--app-color-text) font-mono">{getFingerprintShortValue(asset.fingerprint?.pHash)}</span>
+													</span>
+												</div>
+											</>
+										)}
+
+										{/* 5. Status & Actions Column */}
+										<div className="w-48 shrink-0 flex items-center justify-between gap-4">
+											<Badge variant={getStatusBadgeVariant(asset.status)} size="sm" className="shrink-0">
+												{asset.status}
+											</Badge>
+
+											<div className="flex items-center gap-1.5 shrink-0">
+												{isFailed && (
+													<button
+														onClick={(e) => { e.stopPropagation(); handleRetryAsset(asset._id); }}
+														className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors cursor-pointer"
+														title="Retry Analysis"
+													>
+														<RefreshCw size={13} />
+													</button>
+												)}
+												<button
+													onClick={(e) => { e.stopPropagation(); handleOpenDetail(asset); }}
+													className="p-1.5 rounded-lg bg-(--app-color-surface-elevated) text-(--app-color-text-muted) hover:text-(--app-color-text) hover:bg-(--app-color-border) transition-colors cursor-pointer"
+													title="View Asset DNA & Preview"
+												>
+													<Eye size={13} />
+												</button>
+												<button
+													onClick={(e) => { e.stopPropagation(); handleOpenEdit(asset); }}
+													className="p-1.5 rounded-lg bg-(--app-color-surface-elevated) text-(--app-color-text-muted) hover:text-(--app-color-text) hover:bg-(--app-color-border) transition-colors cursor-pointer"
+													title="Edit Asset"
+												>
+													<Edit2 size={13} />
+												</button>
+												<button
+													onClick={(e) => { e.stopPropagation(); handleDeleteAsset(asset._id); }}
+													className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors cursor-pointer"
+													title="Delete Asset"
+												>
+													<Trash2 size={13} />
+												</button>
+											</div>
+										</div>
 									</Card>
 								);
 							})}
@@ -672,6 +846,74 @@ export default function DashboardAssetsPage() {
 									{selectedAsset.type}
 								</p>
 							</div>
+						</div>
+
+						{/* Real Data Preview Section */}
+						<div className="border-t border-slate-200/60 pt-6 mt-6">
+							{selectedAsset.type === 'image' && (selectedAsset.thumbnailUrl || selectedAsset.gcsUrl) ? (
+								<div className="space-y-2">
+									<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
+										<ImageIcon size={12} className="text-purple-500" />
+										Registered Image Preview
+									</p>
+									<div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center p-2">
+										<img
+											src={selectedAsset.thumbnailUrl || selectedAsset.gcsUrl}
+											alt={selectedAsset.title}
+											className="max-h-64 object-contain rounded-lg shadow-sm"
+										/>
+									</div>
+								</div>
+							) : (selectedAsset.type === 'video' || selectedAsset.type === 'ott_content' || selectedAsset.type === 'highlight') ? (
+								<div className="space-y-2">
+									<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
+										<FileVideo size={12} className="text-purple-500" />
+										Registered Video Player
+									</p>
+									<PremiumVideoPlayer
+										src={selectedAsset.gcsUrl}
+										poster={selectedAsset.thumbnailUrl}
+									/>
+								</div>
+							) : selectedAsset.type === 'music' ? (
+								<div className="space-y-2">
+									<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
+										<Music size={12} className="text-indigo-500" />
+										Audio Master Track
+									</p>
+									<PremiumAudioPlayer src={selectedAsset.gcsUrl} />
+								</div>
+							) : (
+								<div className="space-y-2">
+									<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted) flex items-center gap-1.5">
+										<FileText size={12} className="text-slate-500" />
+										Document / Exam Paper Content
+									</p>
+									{selectedAsset.gcsUrl && selectedAsset.gcsUrl.toLowerCase().endsWith('.pdf') ? (
+										<div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 h-64 shadow-inner mb-3">
+											<iframe
+												src={`${selectedAsset.gcsUrl}#toolbar=0`}
+												title={selectedAsset.title}
+												className="w-full h-full border-0"
+											/>
+										</div>
+									) : null}
+									<div className="p-4 rounded-xl border border-slate-200 bg-slate-50 max-h-40 overflow-y-auto font-mono text-xs text-slate-600 space-y-2.5 shadow-inner leading-relaxed">
+										<div className="border-b border-slate-200 pb-2 mb-2 flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-400">
+											<span>Encrypted Document Content Record</span>
+											<span className="text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-500/20">Verified</span>
+										</div>
+										<p className="font-bold text-slate-800">{selectedAsset.title}</p>
+										<p className="text-[11px] font-sans italic text-slate-500">{selectedAsset.description}</p>
+										<p className="pt-2 border-t border-slate-200/50">
+											[CONTENT BLOCK HASH: {selectedAsset.fingerprint?.pHash || 'N/A'}]
+										</p>
+										<p>
+											LEGAL DISCLAIMER: This document and its digital signature are monitored in real-time. Unauthorized copies, leaks, or public distribution will trigger automated DMCA notices to hosting systems.
+										</p>
+									</div>
+								</div>
+							)}
 						</div>
 					</div>
 				) : (

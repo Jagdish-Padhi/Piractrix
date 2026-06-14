@@ -26,44 +26,138 @@ const ASSET_TEMPLATES = [
   {
     title: 'IPL 2026 Final: KKR vs SRH Highlights',
     type: 'video',
-    description: 'Official highlights of the Indian Premier League 2026 Final match.',
+    description: 'Official highlights of the Indian Premier League 2026 Final match. Contains multi-angle cameras and clean broadcast feeds.',
     tags: ['IPL', 'Cricket', 'Final', 'KKR', 'SRH'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80',
+    gcsUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
   },
   {
     title: 'UEFA Champions League: Real Madrid vs Dortmund Final',
     type: 'video',
-    description: 'Exclusive broadcast rights for the UCL Final 2026.',
+    description: 'Exclusive broadcast rights for the UCL Final 2026. High-value sports property.',
     tags: ['UCL', 'Football', 'Final', 'Real Madrid', 'BVB'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&q=80',
+    gcsUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
   },
   {
     title: 'House of the Dragon - Season 2 Episode 1 [OTT Premiere]',
     type: 'ott_content',
-    description: 'High-value premium fantasy drama television series broadcast.',
+    description: 'High-value premium fantasy drama television series broadcast. Watermarked OTT release.',
     tags: ['OTT', 'HBO', 'House of the Dragon', 'HOTD', 'Premiere'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&q=80',
+    gcsUrl: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
   },
   {
     title: 'JEE Advanced Physics Mock Exam Paper 2026',
     type: 'exam_paper',
-    description: 'Leaked mock examination material and solutions package.',
+    description: 'Leaked mock examination material and solutions package. Restricted educational documentation.',
     tags: ['JEE', 'Physics', 'Exam', 'Leak', 'Education'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80',
+    gcsUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   },
   {
     title: 'Top Hits Remix: Exclusive Pop Track 2026',
     type: 'music',
-    description: 'Audio master copy of billboard release.',
+    description: 'Audio master copy of billboard release. Digital audio rights protection copy.',
     tags: ['Remix', 'Audio', 'Music', 'Pop', 'BillBoard'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80',
+    gcsUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
   },
   {
     title: 'Confidential Rights Bidding Strategy 2026.docx',
     type: 'document',
-    description: 'Internal documentation regarding rights bidding.',
+    description: 'Internal documentation regarding rights bidding and sports team acquisitions.',
     tags: ['Contract', 'Internal', 'Bidding', 'Acquisition', 'PDF'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?w=600&q=80',
+    gcsUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   },
   {
     title: 'Piractrix Brand Core Artwork.png',
     type: 'image',
     description: 'High-resolution logo and platform branding collateral.',
     tags: ['Brand', 'Artwork', 'Image', 'Asset', 'PNG'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&q=80',
+    gcsUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1080&q=80',
+  },
+  {
+    title: 'NBA Finals 2026: Lakers vs Celtics Game 7 Broadcast',
+    type: 'video',
+    description: 'Full match recording of the historic NBA Finals Game 7. Includes commentary tracks and live court feed.',
+    tags: ['NBA', 'Basketball', 'Finals', 'Lakers', 'Celtics'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=80',
+    gcsUrl: 'https://www.w3schools.com/html/movie.mp4',
+  },
+  {
+    title: 'Grand Theft Auto VI: Leaked Cinematic Trailer',
+    type: 'video',
+    description: 'Pre-release game marketing materials leaked on online forum. Strictly protected gaming asset.',
+    tags: ['GTAVI', 'Rockstar', 'Gaming', 'Trailer', 'Leak'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=600&q=80',
+    gcsUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
+  },
+  {
+    title: 'Taylor Swift: The Eras Tour Paris Concert Audio.wav',
+    type: 'music',
+    description: 'Soundboard line-in recording from live performance in Paris. Protected under Universal Music Group.',
+    tags: ['Concert', 'Live', 'ErasTour', 'Audio', 'TaylorSwift'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&q=80',
+    gcsUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+  },
+  {
+    title: 'Strategic Market Entry Plan Q3 2026.pdf',
+    type: 'document',
+    description: 'Confidential business roadmap planning for international market expansions.',
+    tags: ['Strategy', 'Marketing', 'Corporate', 'PDF'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80',
+    gcsUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+  },
+  {
+    title: 'USMLE Step 1 Answer Key & Recall Sheets.pdf',
+    type: 'exam_paper',
+    description: 'Unauthorized medical exam recall documents package. Academic integrity alert.',
+    tags: ['USMLE', 'Medical', 'Exam', 'AnswerKey'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&q=80',
+    gcsUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+  },
+  {
+    title: 'Corporate Headquarters Concept Blueprint.png',
+    type: 'image',
+    description: 'Architecture blueprints and structural layout diagrams for the new campus.',
+    tags: ['Architecture', 'Blueprint', 'Design', 'PNG'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1503387762-592ded58c45a?w=600&q=80',
+    gcsUrl: 'https://images.unsplash.com/photo-1503387762-592ded58c45a?w=1080&q=80',
+  },
+  {
+    title: 'The Weeknd - Exclusive Studio Session Vocals',
+    type: 'music',
+    description: 'Raw vocal stems exported from high-value album session. Unreleased studio cuts.',
+    tags: ['Stems', 'Vocals', 'Audio', 'Studio'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1484755560695-a4c7477ab95b?w=600&q=80',
+    gcsUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+  },
+  {
+    title: 'F1 Monaco Grand Prix 2026 Live Stream Feed',
+    type: 'video',
+    description: 'Pre-air clean satellite feed recording of the Formula 1 Monaco GP race day.',
+    tags: ['F1', 'Racing', 'Monaco', 'LiveStream', 'Motorsport'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=600&q=80',
+    gcsUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+  },
+  {
+    title: 'Avatar 3: The Seed Bearer Post-Production Render',
+    type: 'ott_content',
+    description: 'Exclusive unreleased feature film VFX sequence render. High-security studio asset.',
+    tags: ['Avatar', 'VFX', 'Movie', 'Unreleased', 'Disney'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&q=80',
+    gcsUrl: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+  },
+  {
+    title: 'Exclusive NFT Digital Art Collectible #401',
+    type: 'image',
+    description: 'High-value modern generative vector illustration block hash.',
+    tags: ['NFT', 'DigitalArt', 'Generative', 'Vector'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=600&q=80',
+    gcsUrl: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=1080&q=80',
   }
 ];
 
@@ -132,24 +226,35 @@ async function seed() {
     const createdAssets = [];
     for (const template of ASSET_TEMPLATES) {
       const ext = template.type === 'music' ? 'mp3' : (template.type === 'exam_paper' || template.type === 'document' ? 'pdf' : 'mp4');
+      
+      // Calculate a deterministic 16-char hex hash based on title
+      let seedHash = 0;
+      for (let k = 0; k < template.title.length; k++) {
+        seedHash = (seedHash << 5) - seedHash + template.title.charCodeAt(k);
+        seedHash |= 0;
+      }
+      const pHashVal = (Math.abs(seedHash).toString(16).padStart(8, 'e') + Math.abs(seedHash * 33).toString(16).padStart(8, 'f')).substring(0, 16);
+
       const asset = await Asset.create({
         orgId,
         ...template,
         status: 'active',
         violationsFound: 0,
         storageKey: `assets/${orgId}/${Date.now()}.${ext}`,
-        gcsUrl: `https://storage.googleapis.com/piractrix-assets/demo/${template.title.replace(/\s+/g, '_')}.${ext}`,
+        gcsUrl: template.gcsUrl || `https://storage.googleapis.com/piractrix-assets/demo/${template.title.replace(/\s+/g, '_')}.${ext}`,
         fileSize: template.type === 'exam_paper' ? 2400000 : (template.type === 'music' ? 6800000 : 45000000), 
         fingerprint: {
-          pHash: 'f0f0f0f0f0f0f0f0',
+          pHash: pHashVal,
           colorHistogram: Array.from({ length: 64 }, () => Math.random()),
-          frameHashes: ['a1a1', 'b2b2', 'c3c3'],
+          frameHashes: template.type === 'video' || template.type === 'ott_content' 
+            ? [pHashVal.substring(0, 4), pHashVal.substring(4, 8), pHashVal.substring(8, 12)]
+            : [],
         },
         createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       });
       createdAssets.push(asset);
     }
-    console.log(`✅ Seeded ${createdAssets.length} Brand Assets`);
+    console.log(`✅ Seeded ${createdAssets.length} Brand Assets with unique pHashes`);
 
     // 4. Create ThreatMemory entries
     const threatMemoryEntries = THREAT_DOMAINS.map(t => ({
@@ -314,7 +419,7 @@ async function seed() {
     console.log(`✅ Seeded ${createdDecisions.length} Agent Decision Logs (Agent v2.0)`);
 
     // 8. Create 5 active Alerts
-    const alerts = createdViolations.slice(0, 5).map((v, i) => ({
+    const alerts = createdViolations.slice(0, 5).map((v) => ({
       orgId,
       violationId: v._id,
       type: 'high_confidence',

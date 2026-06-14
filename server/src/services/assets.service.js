@@ -78,14 +78,15 @@ export function inferAssetType(mimeType = '', filename = '') {
 }
 
 export async function createAsset({ orgId, title, description, file, publicUrl }) {
+	const type = inferAssetType(file.mimetype, file.originalname || file.filename || '');
 	const asset = await Asset.create({
 		orgId,
 		title,
 		description: description || '',
-		type: inferAssetType(file.mimetype, file.originalname || file.filename || ''),
+		type,
 		storageKey: file.filename,
 		gcsUrl: publicUrl,
-		thumbnailUrl: null,
+		thumbnailUrl: type === 'image' ? publicUrl : null,
 		fileSize: file.size,
 		status: 'processing',
 		uploadedAt: new Date(),

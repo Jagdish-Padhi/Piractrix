@@ -4,7 +4,7 @@ import { Bot, Zap, Activity, WifiOff, ChevronRight, CheckCircle } from 'lucide-r
 import api from '../services/api.js';
 import useAuthStore from '../store/auth.store.js';
 import useAgentTraceStore from '../store/agentTrace.store.js';
-import { connectRealtime, getRealtimeSocket } from '../services/realtime.js';
+import { connectRealtime } from '../services/realtime.js';
 
 export default function AgentStatusBar() {
   const accessToken = useAuthStore((state) => state.accessToken);
@@ -35,9 +35,19 @@ export default function AgentStatusBar() {
   };
 
   useEffect(() => {
-    fetchStatus();
+    // Run asynchronously to prevent synchronous cascading render warnings
+    Promise.resolve().then(fetchStatus);
     const timer = setInterval(fetchStatus, 30000);
-    return () => clearInterval(timer);
+
+    const handleModeChange = () => {
+      fetchStatus();
+    };
+    window.addEventListener('piractrix:agent:mode-changed', handleModeChange);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('piractrix:agent:mode-changed', handleModeChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -45,7 +55,10 @@ export default function AgentStatusBar() {
     const socket = connectRealtime(accessToken);
     if (!socket) return;
 
-    setIsConnected(socket.connected);
+    // Run asynchronously to prevent synchronous cascading render warnings
+    Promise.resolve().then(() => {
+      setIsConnected(socket.connected);
+    });
 
     const onConnect = () => setIsConnected(true);
     const onDisconnect = () => setIsConnected(false);
@@ -145,7 +158,7 @@ export default function AgentStatusBar() {
             Last Action: <span className="font-extrabold text-violet-900 capitalize">{lastAction ? lastAction.replace('_', ' ') : 'None'}</span> {lastActionTime && `(${formatTime()})`}
           </div>
           <div className="hidden md:block text-violet-700 font-medium border-l border-violet-200/60 pl-6">
-            Channels: <span className="text-violet-900 font-extrabold">{Object.entries(channels).filter(([_, v]) => v).map(([k]) => k.toUpperCase()).join(' • ') || 'None'}</span>
+            Channels: <span className="text-violet-900 font-extrabold">{Object.entries(channels).filter(([, v]) => v).map(([k]) => k.toUpperCase()).join(' • ') || 'None'}</span>
           </div>
         </div>
         <Link to="/dashboard/agent" className="flex items-center gap-1 text-violet-700 hover:text-violet-950 transition-colors uppercase tracking-wider text-[10px] font-black">

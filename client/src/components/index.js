@@ -49,3 +49,7 @@ export { default as Skeleton } from './Skeleton';
 export { default as Collapse } from './Collapse';
 export { default as ProgressBar } from './ProgressBar';
 export { default as Chip } from './Chip';
+export { default as PremiumAudioPlayer } from './PremiumAudioPlayer';
+export { default as PremiumVideoPlayer } from './PremiumVideoPlayer';
+
+
