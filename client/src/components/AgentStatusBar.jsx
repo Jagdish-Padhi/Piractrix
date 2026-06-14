@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Bot, Zap, Activity, WifiOff, ChevronRight, CheckCircle } from 'lucide-react';
 import api from '../services/api.js';
 import useAuthStore from '../store/auth.store.js';
+import useAgentTraceStore from '../store/agentTrace.store.js';
 import { connectRealtime, getRealtimeSocket } from '../services/realtime.js';
 
 export default function AgentStatusBar() {
@@ -57,6 +58,12 @@ export default function AgentStatusBar() {
         setLastAction(decision.action);
         setLastActionTime(new Date());
       }
+      
+      // Auto-open thinking trace drawer for live actions
+      if (decision.logId) {
+        useAgentTraceStore.getState().openTrace(decision.logId);
+      }
+      
       // Re-fetch status to get updated queued numbers
       fetchStatus();
     };
