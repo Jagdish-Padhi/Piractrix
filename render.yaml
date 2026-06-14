@@ -2,10 +2,10 @@ services:
   # 1. Piractrix ML Service (Python / FastAPI)
   - type: web
     name: piractrix-ml-service
-    env: docker
+    runtime: python
     rootDir: ml-service
-    dockerfilePath: Dockerfile
-    dockerContext: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     plan: free
     envVars:
       - key: PORT
