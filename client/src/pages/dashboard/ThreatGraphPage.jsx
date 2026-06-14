@@ -182,9 +182,11 @@ export default function ThreatGraphPage() {
       return;
     }
 
-    // Create unique nodes
     const nodeMap = {};
-    const simulatedNodes = safeItems.map((item) => {
+    const platformMap = {};
+
+    // 1. Create Domain nodes and tally Platforms
+    const domainNodes = safeItems.map((item) => {
       const node = {
         id: item.domain,
         label: item.domain,
@@ -193,18 +195,34 @@ export default function ThreatGraphPage() {
         violations: item.totalViolations || 0,
         platforms: item.platforms || [],
         autoEscalate: item.autoEscalate || false,
-        rawData: item
+        rawData: item,
+        nodeType: 'domain'
       };
       nodeMap[item.domain] = node;
+
+      node.platforms.forEach(platform => {
+        if (!platformMap[platform]) platformMap[platform] = 0;
+        platformMap[platform] += 1;
+      });
+
       return node;
     });
 
-    // Create links between domains that share similar platforms or are in relatedDomains list
+    // 2. Create Platform Nodes
+    const platformNodes = Object.keys(platformMap).map((platform) => ({
+      id: `platform-${platform}`,
+      label: platform.toUpperCase(),
+      size: Math.max(20, Math.min(45, 15 + platformMap[platform] * 2)),
+      threatLevel: 'platform',
+      nodeType: 'platform',
+      domainCount: platformMap[platform]
+    }));
+
+    const simulatedNodes = [...platformNodes, ...domainNodes];
     const simulatedLinks = [];
     const linkSet = new Set();
-    
+
     const addLink = (sourceId, targetId, value, type) => {
-      // Sort alphabetically to deduplicate undirected links
       const pair = [sourceId, targetId].sort().join('::');
       if (!linkSet.has(pair)) {
         linkSet.add(pair);
@@ -212,26 +230,20 @@ export default function ThreatGraphPage() {
       }
     };
 
-    for (let i = 0; i < simulatedNodes.length; i++) {
-      const source = simulatedNodes[i];
-      
-      // 1. Link if domains share platforms
-      for (let j = i + 1; j < simulatedNodes.length; j++) {
-        const target = simulatedNodes[j];
-        const commonPlatforms = source.platforms.filter((platform) => target.platforms.includes(platform));
-        if (commonPlatforms.length > 0) {
-            addLink(source.id, target.id, commonPlatforms.length, `Shared: ${commonPlatforms.join(', ')}`);
-          }
-        }
+    domainNodes.forEach((domainNode) => {
+      // Link domain to its platforms
+      domainNode.platforms.forEach((platform) => {
+        addLink(domainNode.id, `platform-${platform}`, 1, 'Exploits Platform');
+      });
 
-        // 2. Link from related domains in model
-        const related = source.rawData.relatedDomains || [];
-        related.forEach((relDomain) => {
-          if (nodeMap[relDomain]) {
-            addLink(source.id, relDomain, 2, 'Direct Relation');
-          }
-        });
-    }
+      // Link to related domains
+      const related = domainNode.rawData.relatedDomains || [];
+      related.forEach((relDomain) => {
+        if (nodeMap[relDomain]) {
+          addLink(domainNode.id, relDomain, 2, 'Direct Relation');
+        }
+      });
+    });
 
     setNodes(simulatedNodes);
     setLinks(simulatedLinks);
@@ -242,6 +254,7 @@ export default function ThreatGraphPage() {
       case 'critical': return { bg: 'bg-rose-500', fill: '#f43f5e', stroke: '#be123c' };
       case 'high': return { bg: 'bg-orange-500', fill: '#f97316', stroke: '#c2410c' };
       case 'medium': return { bg: 'bg-amber-500', fill: '#eab308', stroke: '#a16207' };
+      case 'platform': return { bg: 'bg-slate-300', fill: '#e2e8f0', stroke: '#94a3b8' };
       default: return { bg: 'bg-sky-500', fill: '#0ea5e9', stroke: '#0369a1' };
     }
   };
@@ -417,7 +430,7 @@ export default function ThreatGraphPage() {
           </div>
 
           <div className="flex flex-1 min-h-0 flex-col px-4 py-4">
-            <div ref={containerRef} className="relative flex-1 min-h-0 overflow-hidden rounded-[28px] border border-white/10 bg-[#050816] shadow-[0_24px_80px_rgba(2,6,23,0.45)]">
+            <div ref={containerRef} style={{ minHeight: '600px' }} className="relative flex-1 min-h-0 overflow-hidden rounded-[28px] border border-white/10 bg-[#050816] shadow-[0_24px_80px_rgba(2,6,23,0.45)]">
               {loading ? (
                 <div className="flex h-full items-center justify-center gap-4">
                   <Loader size={0.85} />
@@ -425,34 +438,19 @@ export default function ThreatGraphPage() {
                 </div>
               ) : (
                 <>
-                  <div className="pointer-events-none absolute left-4 top-4 z-10 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/75 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 backdrop-blur">
+                  <div className="pointer-events-none absolute left-4 bottom-4 z-10 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/75 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 backdrop-blur">
                     <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-500" />Critical</span>
                     <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-orange-500" />High</span>
                     <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-500" />Medium</span>
                     <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-sky-500" />Low</span>
-                    <span className="hidden text-slate-400 lg:inline">Drag nodes. Click one to inspect its cluster.</span>
+                    <span className="hidden text-slate-400 lg:inline border-l border-white/10 pl-2">Hubs = Platforms</span>
                   </div>
-
-                  <div className="absolute inset-0">
-                    <svg className="absolute inset-0 pointer-events-none z-0" width="100%" height="100%">
-                      <defs>
-                        <radialGradient id="graphGlow" cx="50%" cy="45%" r="62%">
-                          <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.22" />
-                          <stop offset="65%" stopColor="#0f172a" stopOpacity="0.04" />
-                          <stop offset="100%" stopColor="#020617" stopOpacity="0" />
-                        </radialGradient>
-                      </defs>
-                      <rect x="0" y="0" width="100%" height="100%" fill="url(#graphGlow)" opacity="0.9" />
-                      <circle cx="50%" cy="50%" r="150" fill="none" stroke="#334155" strokeOpacity="0.35" strokeWidth="1.5" strokeDasharray="8 10" />
-                      <circle cx="50%" cy="50%" r="78" fill="#7c3aed" fillOpacity="0.08" stroke="#c4b5fd" strokeOpacity="0.2" />
-                      <circle cx="50%" cy="50%" r="12" fill="#c4b5fd" fillOpacity="0.9" />
-                    </svg>
 
                     <div className="absolute inset-0 z-10 overflow-hidden">
                       {nodes.length > 0 && dimensions.width > 0 && (
                         <ForceGraph2D
                           width={dimensions.width}
-                          height={dimensions.height}
+                          height={dimensions.height || 600}
                           backgroundColor="rgba(0,0,0,0)"
                           graphData={{ nodes, links }}
                           nodeRelSize={1}
@@ -476,12 +474,29 @@ export default function ThreatGraphPage() {
                             ctx.globalAlpha = isSelected || isHovered ? 1 : isRelevant ? 0.96 : 0.18;
                             
                             ctx.beginPath();
-                            ctx.arc(node.x, node.y, size, 0, 2 * Math.PI, false);
-                            ctx.fillStyle = colors.fill;
-                            ctx.fill();
-                            ctx.lineWidth = isSelected ? 2 / globalScale : 1 / globalScale;
-                            ctx.strokeStyle = isSelected ? '#ffffff' : colors.stroke;
-                            ctx.stroke();
+                            if (node.nodeType === 'platform') {
+                              // Platform hubs look distinct
+                              ctx.arc(node.x, node.y, size, 0, 2 * Math.PI, false);
+                              ctx.fillStyle = isSelected ? '#ffffff' : colors.fill;
+                              ctx.fill();
+                              ctx.lineWidth = isSelected ? 3 / globalScale : 1.5 / globalScale;
+                              ctx.strokeStyle = isSelected ? '#64748b' : colors.stroke;
+                              ctx.stroke();
+
+                              // Inner dot
+                              ctx.beginPath();
+                              ctx.arc(node.x, node.y, size * 0.4, 0, 2 * Math.PI, false);
+                              ctx.fillStyle = '#64748b';
+                              ctx.fill();
+                            } else {
+                              // Domain nodes
+                              ctx.arc(node.x, node.y, size, 0, 2 * Math.PI, false);
+                              ctx.fillStyle = colors.fill;
+                              ctx.fill();
+                              ctx.lineWidth = isSelected ? 2 / globalScale : 1 / globalScale;
+                              ctx.strokeStyle = isSelected ? '#ffffff' : colors.stroke;
+                              ctx.stroke();
+                            }
 
                             if (isSelected || isHovered) {
                               ctx.beginPath();
@@ -564,15 +579,15 @@ export default function ThreatGraphPage() {
                       </div>
                     )}
 
-                    <div className="pointer-events-none absolute inset-x-4 bottom-4 rounded-2xl border border-white/10 bg-slate-900/55 px-4 py-3 backdrop-blur-md">
+                    <div className="pointer-events-none absolute inset-x-4 top-4 rounded-2xl border border-white/10 bg-slate-900/55 px-4 py-3 backdrop-blur-md">
                       <div className="flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-200">
                         <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-violet-400" />{networkStats.total} domains</span>
                         <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-emerald-400" />{Math.max(0, connectedNodeIds.size - 1)} connected</span>
                         <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-rose-400" />{networkStats.autoEscalated} auto</span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-sky-400" />{networkStats.uniquePlatforms} platforms</span>
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-slate-400" />{networkStats.uniquePlatforms} platforms</span>
                       </div>
                       <p className="mt-2 text-[11px] leading-5 text-slate-400">
-                        Select a domain to inspect its cluster. Drag nodes to reshape relationships and keep the graph in focus.
+                        Select a domain or platform hub to inspect its cluster. Drag nodes to reshape relationships.
                       </p>
                     </div>
                   </div>
