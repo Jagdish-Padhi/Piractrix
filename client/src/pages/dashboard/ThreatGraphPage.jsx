@@ -57,14 +57,40 @@ const formatDate = (value) => {
   return date.toLocaleDateString();
 };
 
+const normalizeStringList = (value) => {
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => (typeof entry === 'string' ? entry.trim() : String(entry).trim()))
+      .filter(Boolean);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const normalizeThreatRecord = (item) => ({
+  ...item,
+  domain: typeof item?.domain === 'string' ? item.domain.trim().toLowerCase() : '',
+  platforms: normalizeStringList(item?.platforms),
+  relatedDomains: normalizeStringList(item?.relatedDomains),
+});
+
 export default function ThreatGraphPage() {
   const [threats, setThreats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
   const [sortBy, setSortBy] = useState('risk');
   const [showOnlyConnected, setShowOnlyConnected] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   
   // Custom force-directed simulation positions
   const [nodes, setNodes] = useState([]);
@@ -86,25 +112,37 @@ export default function ThreatGraphPage() {
     setLoading(true);
     try {
       const { data } = await api.get('/agent/threat-memory?limit=100');
-      const items = data.items || [];
+      const items = Array.isArray(data.items) ? data.items.map(normalizeThreatRecord).filter((item) => item.domain) : [];
       setThreats(items);
       initializeSimulation(items);
     } catch (err) {
       console.error('Failed to fetch threat memory', err);
+      toast.error('Unable to load threat graph.');
+      setThreats([]);
+      setNodes([]);
+      setLinks([]);
     } finally {
       setLoading(false);
     }
   };
 
   const initializeSimulation = (items) => {
-    const width = 800;
-    const height = 500;
+    const width = 1024;
+    const height = 680;
+
+    const safeItems = Array.isArray(items) ? items : [];
+
+    if (safeItems.length === 0) {
+      setNodes([]);
+      setLinks([]);
+      return;
+    }
 
     // Create unique nodes
     const nodeMap = {};
-    const simulatedNodes = items.map((item, index) => {
+    const simulatedNodes = safeItems.map((item, index) => {
       // Position nodes in a circle initially
-      const angle = (index / items.length) * 2 * Math.PI;
+      const angle = (index / safeItems.length) * 2 * Math.PI;
       const radius = 150 + Math.random() * 50;
       
       const node = {
@@ -133,7 +171,7 @@ export default function ThreatGraphPage() {
       // 1. Link if domains share platforms
       for (let j = i + 1; j < simulatedNodes.length; j++) {
         const target = simulatedNodes[j];
-        const commonPlatforms = source.platforms.filter(p => target.platforms.includes(p));
+        const commonPlatforms = source.platforms.filter((platform) => target.platforms.includes(platform));
         if (commonPlatforms.length > 0) {
           simulatedLinks.push({
             source: source.id,
@@ -145,7 +183,7 @@ export default function ThreatGraphPage() {
 
       // 2. Link from related domains in model
       const related = source.rawData.relatedDomains || [];
-      related.forEach(relDomain => {
+      related.forEach((relDomain) => {
         if (nodeMap[relDomain]) {
           simulatedLinks.push({
             source: source.id,
@@ -162,9 +200,9 @@ export default function ThreatGraphPage() {
     // Start simulation loop
     let alpha = 1.0;
     const decay = 0.985;
-    const gravity = 0.04;
-    const repulsion = 120;
-    const linkStrength = 0.05;
+    const gravity = 0.028;
+    const repulsion = 180;
+    const linkStrength = 0.04;
 
     const updatePhysics = () => {
       if (alpha < 0.01) {
@@ -230,7 +268,7 @@ export default function ThreatGraphPage() {
         });
 
         // 4. Gravity pulling to center & boundary clamping
-        return copiedNodes.map(node => {
+        return copiedNodes.map((node) => {
           if (draggingNodeRef.current?.id === node.id) {
             return node;
           }
@@ -276,6 +314,7 @@ export default function ThreatGraphPage() {
   const handleMouseDown = (e, node) => {
     e.preventDefault();
     draggingNodeRef.current = node;
+    setIsDragging(true);
   };
 
   const handleMouseMove = (e) => {
@@ -302,9 +341,11 @@ export default function ThreatGraphPage() {
 
   const handleMouseUpOrLeave = () => {
     draggingNodeRef.current = null;
+    setIsDragging(false);
   };
 
   const activeNode = useMemo(() => nodes.find((node) => node.id === selectedNode?.id) || selectedNode, [nodes, selectedNode]);
+  const highlightedNodeId = hoveredNodeId || activeNode?.id || null;
 
   const connectedNodeIds = useMemo(() => {
     if (!activeNode) return new Set();
@@ -420,7 +461,10 @@ export default function ThreatGraphPage() {
     }
   };
 
-  const handleClearSelection = () => setSelectedNode(null);
+  const handleClearSelection = () => {
+    setSelectedNode(null);
+    setHoveredNodeId(null);
+  };
 
   const toggleAutoEscalate = async (domain) => {
     try {
@@ -477,9 +521,9 @@ export default function ThreatGraphPage() {
                       ref={svgRef}
                       width="100%"
                       height="100%"
-                      viewBox="0 0 960 620"
+                      viewBox="0 0 1024 680"
                       preserveAspectRatio="xMidYMid meet"
-                      className="cursor-grab select-none"
+                      className={`select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
                       onMouseMove={handleMouseMove}
                       onMouseUp={handleMouseUpOrLeave}
                       onMouseLeave={handleMouseUpOrLeave}
@@ -492,17 +536,17 @@ export default function ThreatGraphPage() {
                         </radialGradient>
                       </defs>
 
-                      <rect x="0" y="0" width="960" height="620" fill="url(#graphGlow)" opacity="0.75" />
-                      <circle cx="480" cy="310" r="130" fill="none" stroke="#334155" strokeOpacity="0.35" strokeWidth="1.5" strokeDasharray="8 10" />
-                      <circle cx="480" cy="310" r="72" fill="#7c3aed" fillOpacity="0.08" stroke="#c4b5fd" strokeOpacity="0.2" />
-                      <circle cx="480" cy="310" r="12" fill="#c4b5fd" fillOpacity="0.9" />
+                      <rect x="0" y="0" width="1024" height="680" fill="url(#graphGlow)" opacity="0.9" />
+                      <circle cx="512" cy="340" r="150" fill="none" stroke="#334155" strokeOpacity="0.35" strokeWidth="1.5" strokeDasharray="8 10" />
+                      <circle cx="512" cy="340" r="78" fill="#7c3aed" fillOpacity="0.08" stroke="#c4b5fd" strokeOpacity="0.2" />
+                      <circle cx="512" cy="340" r="12" fill="#c4b5fd" fillOpacity="0.9" />
 
                       {links.map((link, idx) => {
                         const sourceNode = nodes.find((node) => node.id === link.source);
                         const targetNode = nodes.find((node) => node.id === link.target);
                         if (!sourceNode || !targetNode) return null;
 
-                        const isHighlighted = !activeNode || connectedNodeIds.has(sourceNode.id) || connectedNodeIds.has(targetNode.id);
+                        const isHighlighted = !highlightedNodeId || connectedNodeIds.has(sourceNode.id) || connectedNodeIds.has(targetNode.id);
 
                         return (
                           <line
@@ -521,29 +565,32 @@ export default function ThreatGraphPage() {
                       {nodes.map((node) => {
                         const colors = getThreatColor(node.threatLevel);
                         const isSelected = activeNode?.id === node.id;
-                        const isRelevant = !activeNode || connectedNodeIds.has(node.id);
+                        const isHovered = hoveredNodeId === node.id;
+                        const isRelevant = !highlightedNodeId || connectedNodeIds.has(node.id);
 
                         return (
                           <g
                             key={node.id}
                             transform={`translate(${node.x}, ${node.y})`}
                             className="transition-transform duration-75"
-                            opacity={isSelected ? 1 : isRelevant ? 0.96 : 0.2}
+                            opacity={isSelected || isHovered ? 1 : isRelevant ? 0.96 : 0.18}
+                            onMouseEnter={() => setHoveredNodeId(node.id)}
+                            onMouseLeave={() => setHoveredNodeId((current) => (current === node.id ? null : current))}
                           >
                             <circle
                               r={Math.max(node.size, 18)}
                               fill={colors.fill}
                               stroke={isSelected ? '#ffffff' : colors.stroke}
                               strokeWidth={isSelected ? 3 : 1.5}
-                              className="cursor-pointer transition-all hover:scale-110 filter drop-shadow-[0_6px_18px_rgba(0,0,0,0.55)]"
+                              className="cursor-pointer transition-all duration-200 hover:scale-110 filter drop-shadow-[0_6px_18px_rgba(0,0,0,0.55)]"
                               onMouseDown={(e) => handleMouseDown(e, node)}
                               onClick={() => setSelectedNode(node)}
                             />
                             <circle
                               r={Math.max(node.size, 18) + 8}
                               fill="none"
-                              stroke={isSelected ? '#ffffff' : 'transparent'}
-                              strokeOpacity="0.16"
+                              stroke={isSelected || isHovered ? '#ffffff' : 'transparent'}
+                              strokeOpacity={isSelected || isHovered ? '0.18' : '0'}
                               strokeWidth="1"
                             />
                             <text
@@ -559,6 +606,17 @@ export default function ThreatGraphPage() {
                         );
                       })}
                     </svg>
+
+                    {!loading && nodes.length === 0 && (
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-8 text-center">
+                        <div className="max-w-sm rounded-3xl border border-white/10 bg-slate-950/80 px-6 py-5 shadow-[0_20px_60px_rgba(2,6,23,0.45)] backdrop-blur">
+                          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-300">Graph idle</p>
+                          <p className="mt-2 text-sm leading-6 text-slate-400">
+                            No normalized domain nodes were available to render. Check the threat-memory records feeding this view.
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="pointer-events-none absolute inset-x-4 bottom-4 rounded-2xl border border-white/10 bg-slate-900/55 px-4 py-3 backdrop-blur-md">
                       <div className="flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-200">
@@ -587,9 +645,9 @@ export default function ThreatGraphPage() {
             <Badge variant="secondary">{filteredThreats.length}</Badge>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 pr-4 scrollbar-thin">
-            <div className="space-y-5">
-              <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 pr-3 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent graph-rail-scroll overscroll-contain">
+            <div className="space-y-4">
+              <div className="sticky top-0 z-20 space-y-3 rounded-2xl border border-slate-200 bg-white/96 p-3.5 shadow-sm backdrop-blur-xl">
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                   <input
@@ -601,7 +659,7 @@ export default function ThreatGraphPage() {
                   />
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                   {['all', 'critical', 'high', 'medium', 'low'].map((level) => {
                     const meta = level === 'all' ? null : getThreatMeta(level);
                     return (
@@ -609,7 +667,7 @@ export default function ThreatGraphPage() {
                         key={level}
                         type="button"
                         onClick={() => setLevelFilter(level)}
-                        className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] transition-colors ${
                           levelFilter === level
                             ? 'bg-slate-900 text-white shadow-sm'
                             : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
@@ -627,7 +685,7 @@ export default function ThreatGraphPage() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none focus:border-indigo-400"
                     >
                       <option value="risk">Risk</option>
                       <option value="violations">Violations</option>
@@ -638,7 +696,7 @@ export default function ThreatGraphPage() {
                   <button
                     type="button"
                     onClick={() => setShowOnlyConnected((current) => !current)}
-                    className={`flex h-full items-center justify-center rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
+                    className={`flex h-full items-center justify-center rounded-xl border px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] transition-colors ${
                       showOnlyConnected
                         ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                         : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
@@ -649,7 +707,7 @@ export default function ThreatGraphPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {loading ? (
                   <div className="flex items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 py-10">
                     <Loader size={0.55} />
@@ -669,7 +727,7 @@ export default function ThreatGraphPage() {
                         key={threat.domain}
                         type="button"
                         onClick={() => handleSelectThreat(threat.domain)}
-                        className={`w-full rounded-2xl border p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm ${
+                        className={`w-full rounded-2xl border p-2.5 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm ${
                           isActive
                             ? 'border-indigo-300 bg-indigo-50/80 shadow-sm'
                             : 'border-slate-200 bg-white hover:border-slate-300'
@@ -685,9 +743,9 @@ export default function ThreatGraphPage() {
                           <span className={`mt-1 h-3 w-3 rounded-full ${meta.dot}`} />
                         </div>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <div className="mt-2.5 flex flex-nowrap items-center gap-1.5 overflow-hidden">
                           <Badge variant={meta.badge} size="sm">{meta.label}</Badge>
-                          {threat.autoEscalate && <Badge variant="success" size="sm">Auto</Badge>}
+                          {threat.autoEscalate && <Badge variant="success" size="sm" className="whitespace-nowrap">Auto</Badge>}
                         </div>
                       </button>
                     );
@@ -763,12 +821,12 @@ export default function ThreatGraphPage() {
                 )}
               </div>
 
-              <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Related domains</span>
                   <span className="text-xs font-semibold text-slate-500">{connectedThreats.length}</span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {connectedThreats.slice(0, 5).map((threat) => {
                     const meta = getThreatMeta(threat.threatLevel);
                     return (
@@ -792,10 +850,10 @@ export default function ThreatGraphPage() {
               </div>
 
               {activeNode && (
-                <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Response actions</span>
-                    <Button variant="secondary" size="sm" onClick={handleCopyDomain}>
+                    <Button variant="secondary" size="sm" onClick={handleCopyDomain} className="h-8 px-2.5 text-[11px]">
                       Copy domain
                     </Button>
                   </div>
@@ -805,7 +863,7 @@ export default function ThreatGraphPage() {
                       variant={activeNode.autoEscalate ? 'primary' : 'secondary'}
                       size="sm"
                       onClick={() => toggleAutoEscalate(activeNode.id)}
-                      className="justify-center"
+                      className="h-9 justify-center px-3 text-xs"
                     >
                       <ToggleLeft className="h-4 w-4" />
                       {activeNode.autoEscalate ? 'Auto escalation on' : 'Enable auto escalation'}
@@ -814,7 +872,7 @@ export default function ThreatGraphPage() {
                       href={`https://who.is/whois/${activeNode.id}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50"
+                      className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-50"
                     >
                       <ExternalLink className="h-4 w-4" />
                       WHOIS lookup
