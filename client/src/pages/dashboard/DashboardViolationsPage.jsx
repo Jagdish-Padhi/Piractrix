@@ -144,14 +144,24 @@ export default function DashboardViolationsPage() {
 		setIsDraftingDmca(true);
 		try {
 			// Trigger DMCA generation on backend
-			await api.post(`/violations/${selectedViolation._id}/draft-dmca`);
+			const draftRes = await api.post(`/violations/${selectedViolation._id}/draft-dmca`);
+			const draftData = draftRes.data;
 			
-			// Refresh local state
-			const detailRes = await api.get(`/violations/${selectedViolation._id}`);
-			setSelectedViolation(detailRes.data.violation);
+			// Immediately merge draft content into local state so drawer has data right away
+			setSelectedViolation(prev => ({
+				...prev,
+				dmcaContent: draftData.draft || prev.dmcaContent,
+				dmcaContactEmail: draftData.contactEmail || prev.dmcaContactEmail,
+				dmcaGeneratedBy: draftData.generatedBy || prev.dmcaGeneratedBy,
+				caseStatus: 'dmca_drafted'
+			}));
 			
 			setIsDmcaDrawerOpen(true);
 			toast.success('DMCA drafted successfully by Piractrix Intelligence.');
+
+			// Background refresh for timeline sync
+			const detailRes = await api.get(`/violations/${selectedViolation._id}`);
+			setSelectedViolation(detailRes.data.violation);
 			await loadViolations();
 		} catch (requestError) {
 			const message = requestError.response?.data?.message || 'Failed to draft DMCA notice.';

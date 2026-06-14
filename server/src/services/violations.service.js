@@ -306,12 +306,32 @@ export async function draftDmcaNotice({ orgId, violationId }) {
 	const organizationName = 'Piractrix Rights Team';
 	const geminiDraft = await generateDmcaWithGemini({ organizationName, violation });
 
+	const draftContent = geminiDraft || buildDmcaTemplate({ organizationName, violation });
+	const generatedBy = geminiDraft ? 'gemini' : 'template';
+	const contactEmail = platformAbuseEmails[violation.platform.toLowerCase()] || 'abuse@platform.com';
+
+	// Persist the generated DMCA content back to the violation document
+	await Violation.findByIdAndUpdate(violationId, {
+		dmcaContent: draftContent,
+		dmcaContactEmail: contactEmail,
+		dmcaGeneratedAt: new Date(),
+		dmcaGeneratedBy: generatedBy,
+		caseStatus: 'dmca_drafted',
+		$push: {
+			caseTimeline: {
+				event: 'dmca_drafted',
+				description: `DMCA notice auto-drafted by ${generatedBy === 'gemini' ? 'Gemini AI' : 'template engine'}.`,
+				timestamp: new Date()
+			}
+		}
+	});
+
 	return {
 		violationId: violation._id.toString(),
 		platform: violation.platform,
 		sourceUrl: violation.sourceUrl,
-		draft: geminiDraft || buildDmcaTemplate({ organizationName, violation }),
-		generatedBy: geminiDraft ? 'gemini' : 'template',
-		contactEmail: platformAbuseEmails[violation.platform.toLowerCase()] || 'abuse@platform.com'
+		draft: draftContent,
+		generatedBy,
+		contactEmail
 	};
 }
