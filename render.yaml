@@ -1,0 +1,56 @@
+services:
+  # 1. Piractrix ML Service (Python / FastAPI)
+  - type: web
+    name: piractrix-ml-service
+    env: docker
+    rootDir: ml-service
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
+      - key: GOOGLE_VISION_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: GOOGLE_CSE_API_KEY
+        sync: false
+      - key: GOOGLE_CSE_CX
+        sync: false
+
+  # 2. Piractrix Backend Server (Node.js / Express)
+  - type: web
+    name: piractrix-backend-server
+    env: docker
+    rootDir: server
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: API_PREFIX
+        value: /api
+      - key: ML_SERVICE_URL
+        value: http://piractrix-ml-service:8000
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        value: alerts@piractrix.com
+      - key: BREVO_SENDER_NAME
+        value: Piractrix
