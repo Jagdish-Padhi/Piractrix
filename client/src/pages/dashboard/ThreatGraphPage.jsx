@@ -1,27 +1,70 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
-  Globe,
-  ShieldAlert,
-  Flame,
-  Clock,
   ExternalLink,
   RefreshCw,
   Search,
-  Layout,
   Network,
-  Zap,
   ToggleLeft,
-  CheckCircle,
   AlertTriangle
 } from 'lucide-react';
-import { Card, Button, Badge, Loader, Input, PageHeader } from '../../components';
+import { Card, Button, Badge, Loader } from '../../components';
+import toast from 'react-hot-toast';
 import api from '../../services/api.js';
+
+const threatMeta = {
+  critical: {
+    label: 'Critical',
+    badge: 'danger',
+    tone: 'text-rose-500',
+    dot: 'bg-rose-500',
+    panel: 'border-rose-500/20 bg-rose-500/10',
+    recommendation: 'Escalate immediately. This domain is a priority for takedown and legal review.',
+  },
+  high: {
+    label: 'High',
+    badge: 'orange',
+    tone: 'text-orange-500',
+    dot: 'bg-orange-500',
+    panel: 'border-orange-500/20 bg-orange-500/10',
+    recommendation: 'Queue for enforcement. Review platforms, related domains, and ownership evidence.',
+  },
+  medium: {
+    label: 'Medium',
+    badge: 'warning',
+    tone: 'text-amber-500',
+    dot: 'bg-amber-500',
+    panel: 'border-amber-500/20 bg-amber-500/10',
+    recommendation: 'Monitor closely. Keep the domain under observation and watch for cluster expansion.',
+  },
+  low: {
+    label: 'Low',
+    badge: 'primary',
+    tone: 'text-sky-500',
+    dot: 'bg-sky-500',
+    panel: 'border-sky-500/20 bg-sky-500/10',
+    recommendation: 'Track passively. Continue learning from the network and wait for stronger signals.',
+  },
+};
+
+const getThreatMeta = (level) => threatMeta[level?.toLowerCase()] || threatMeta.low;
+
+const formatDate = (value) => {
+  if (!value) return 'N/A';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'N/A';
+
+  return date.toLocaleDateString();
+};
 
 export default function ThreatGraphPage() {
   const [threats, setThreats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [levelFilter, setLevelFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('risk');
+  const [showOnlyConnected, setShowOnlyConnected] = useState(false);
   
   // Custom force-directed simulation positions
   const [nodes, setNodes] = useState([]);
@@ -229,20 +272,6 @@ export default function ThreatGraphPage() {
     }
   };
 
-  const toggleAutoEscalate = async (domain) => {
-    try {
-      const newAutoEscalate = !selectedNode.autoEscalate;
-      // PATCH call to toggles
-      await api.patch('/agent/mode', { domain, autoEscalate: newAutoEscalate });
-      
-      setSelectedNode(prev => ({ ...prev, autoEscalate: newAutoEscalate }));
-      setThreats(prev => prev.map(t => t.domain === domain ? { ...t, autoEscalate: newAutoEscalate } : t));
-      setNodes(prev => prev.map(n => n.id === domain ? { ...n, autoEscalate: newAutoEscalate } : n));
-    } catch (err) {
-      console.error('Failed to toggle auto escalate rule', err);
-    }
-  };
-
   // Drag interaction handlers
   const handleMouseDown = (e, node) => {
     e.preventDefault();
@@ -275,299 +304,536 @@ export default function ThreatGraphPage() {
     draggingNodeRef.current = null;
   };
 
-  const filteredThreats = threats.filter(t => 
-    t.domain.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const activeNode = useMemo(() => nodes.find((node) => node.id === selectedNode?.id) || selectedNode, [nodes, selectedNode]);
+
+  const connectedNodeIds = useMemo(() => {
+    if (!activeNode) return new Set();
+
+    const ids = new Set([activeNode.id]);
+    links.forEach((link) => {
+      if (link.source === activeNode.id) ids.add(link.target);
+      if (link.target === activeNode.id) ids.add(link.source);
+    });
+    return ids;
+  }, [activeNode, links]);
+
+  const selectedThreat = useMemo(() => threats.find((threat) => threat.domain === activeNode?.id) || null, [activeNode, threats]);
+
+  const networkStats = useMemo(() => {
+    const uniquePlatforms = new Set();
+    let critical = 0;
+    let high = 0;
+    let medium = 0;
+    let low = 0;
+    let autoEscalated = 0;
+
+    threats.forEach((threat) => {
+      (threat.platforms || []).forEach((platform) => uniquePlatforms.add(platform));
+
+      const level = threat.threatLevel?.toLowerCase() || 'low';
+      if (level === 'critical') critical += 1;
+      else if (level === 'high') high += 1;
+      else if (level === 'medium') medium += 1;
+      else low += 1;
+
+      if (threat.autoEscalate) autoEscalated += 1;
+    });
+
+    return {
+      total: threats.length,
+      uniquePlatforms: uniquePlatforms.size,
+      critical,
+      high,
+      medium,
+      low,
+      autoEscalated,
+    };
+  }, [threats]);
+
+  const filteredThreats = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    const items = threats.filter((threat) => {
+      const matchesQuery = !query || threat.domain.toLowerCase().includes(query);
+      const matchesLevel = levelFilter === 'all' || threat.threatLevel?.toLowerCase() === levelFilter;
+      const matchesConnection = !showOnlyConnected || !activeNode || connectedNodeIds.has(threat.domain);
+
+      return matchesQuery && matchesLevel && matchesConnection;
+    });
+
+    return items.sort((a, b) => {
+      if (sortBy === 'recent') {
+        return new Date(b.lastSeenAt || b.firstSeenAt || 0) - new Date(a.lastSeenAt || a.firstSeenAt || 0);
+      }
+
+      if (sortBy === 'connections') {
+        const aConnections = links.filter((link) => link.source === a.domain || link.target === a.domain).length;
+        const bConnections = links.filter((link) => link.source === b.domain || link.target === b.domain).length;
+        return bConnections - aConnections;
+      }
+
+      if (sortBy === 'violations') {
+        return (b.totalViolations || 0) - (a.totalViolations || 0);
+      }
+
+      const levelRank = { critical: 0, high: 1, medium: 2, low: 3 };
+      const rankDelta = (levelRank[a.threatLevel?.toLowerCase() || 'low'] ?? 3) - (levelRank[b.threatLevel?.toLowerCase() || 'low'] ?? 3);
+      if (rankDelta !== 0) return rankDelta;
+
+      return (b.totalViolations || 0) - (a.totalViolations || 0);
+    });
+  }, [activeNode, connectedNodeIds, levelFilter, links, searchQuery, showOnlyConnected, sortBy, threats]);
+
+  const connectedThreats = useMemo(() => {
+    if (!activeNode) return [];
+
+    return threats.filter((threat) => connectedNodeIds.has(threat.domain) && threat.domain !== activeNode.id);
+  }, [activeNode, connectedNodeIds, threats]);
+
+  const selectedPlatforms = activeNode?.platforms || selectedThreat?.platforms || [];
+  const responseMeta = getThreatMeta(activeNode?.threatLevel || selectedThreat?.threatLevel);
+
+  const selectedContext = useMemo(() => {
+    if (!activeNode) return null;
+
+    const threatScore = Math.min(100, (activeNode.violations || 0) * 8 + connectedThreats.length * 6 + selectedPlatforms.length * 4 + (activeNode.autoEscalate ? 8 : 0));
+    return {
+      score: threatScore,
+      relationshipCount: Math.max(0, connectedNodeIds.size - 1),
+      recommendation: responseMeta.recommendation,
+    };
+  }, [activeNode, connectedThreats.length, connectedNodeIds.size, responseMeta.recommendation, selectedPlatforms.length]);
+
+  const handleSelectThreat = (domain) => {
+    const matchedNode = nodes.find((node) => node.id === domain);
+    if (matchedNode) setSelectedNode(matchedNode);
+  };
+
+  const handleCopyDomain = async () => {
+    if (!activeNode?.id) return;
+
+    try {
+      await navigator.clipboard.writeText(activeNode.id);
+      toast.success('Domain copied to clipboard.');
+    } catch {
+      toast.error('Unable to copy domain.');
+    }
+  };
+
+  const handleClearSelection = () => setSelectedNode(null);
+
+  const toggleAutoEscalate = async (domain) => {
+    try {
+      const newAutoEscalate = !activeNode?.autoEscalate;
+      await api.patch('/agent/mode', { domain, autoEscalate: newAutoEscalate });
+
+      setSelectedNode((prev) => (prev && prev.id === domain ? { ...prev, autoEscalate: newAutoEscalate } : prev));
+      setThreats((prev) => prev.map((threat) => (threat.domain === domain ? { ...threat, autoEscalate: newAutoEscalate } : threat)));
+      setNodes((prev) => prev.map((node) => (node.id === domain ? { ...node, autoEscalate: newAutoEscalate } : node)));
+    } catch (err) {
+      console.error('Failed to toggle auto escalate rule', err);
+    }
+  };
 
   return (
-    <div className="w-full space-y-6 lg:space-y-8 animate-in fade-in duration-300 pb-12">
-      <PageHeader
-        title="Pirate Threat Graph"
-        subtitle="Visualizing organizational relationships, infrastructure networks, and repeat offender domains."
-      />
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_3fr_1.5fr]">
-        
-        {/* Domain Search Column */}
-        <div className="space-y-4">
-          <Card className="p-4 space-y-4 h-full flex flex-col">
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">Threat Domains</h3>
-            
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search domains..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:border-purple-500 transition-colors"
-              />
+    <div className="h-full min-h-0 overflow-hidden animate-in fade-in duration-300">
+      <section className="grid h-full min-h-0 gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(360px,2fr)]">
+        <Card className="flex min-h-0 flex-col overflow-hidden border-slate-200/80 bg-slate-950 p-0 text-slate-100 shadow-2xl">
+          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
+            <div className="flex items-center gap-2 text-slate-300">
+              <Network className="h-5 w-5 text-violet-400" />
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-200">Live graph workspace</span>
             </div>
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" size="sm" onClick={fetchThreatMemory} className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </Button>
+              <Button variant="secondary" size="sm" onClick={handleClearSelection} className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">
+                Clear
+              </Button>
+            </div>
+          </div>
 
-            {loading ? (
-              <div className="flex-1 flex flex-col items-center justify-center py-10">
-                <Loader size={0.5} />
+          <div className="flex flex-1 min-h-0 flex-col px-4 py-4">
+            <div className="relative flex-1 min-h-0 overflow-hidden rounded-[28px] border border-white/10 bg-[#050816] shadow-[0_24px_80px_rgba(2,6,23,0.45)]">
+              {loading ? (
+                <div className="flex h-full items-center justify-center gap-4">
+                  <Loader size={0.85} />
+                  <p className="text-xs font-mono text-slate-400">Resolving threat relationships...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="pointer-events-none absolute left-4 top-4 z-10 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/75 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 backdrop-blur">
+                    <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-500" />Critical</span>
+                    <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-orange-500" />High</span>
+                    <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-500" />Medium</span>
+                    <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-sky-500" />Low</span>
+                    <span className="hidden text-slate-400 lg:inline">Drag nodes. Click one to inspect its cluster.</span>
+                  </div>
+
+                  <div className="absolute inset-0">
+                    <svg
+                      ref={svgRef}
+                      width="100%"
+                      height="100%"
+                      viewBox="0 0 960 620"
+                      preserveAspectRatio="xMidYMid meet"
+                      className="cursor-grab select-none"
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={handleMouseUpOrLeave}
+                      onMouseLeave={handleMouseUpOrLeave}
+                    >
+                      <defs>
+                        <radialGradient id="graphGlow" cx="50%" cy="45%" r="62%">
+                          <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.22" />
+                          <stop offset="65%" stopColor="#0f172a" stopOpacity="0.04" />
+                          <stop offset="100%" stopColor="#020617" stopOpacity="0" />
+                        </radialGradient>
+                      </defs>
+
+                      <rect x="0" y="0" width="960" height="620" fill="url(#graphGlow)" opacity="0.75" />
+                      <circle cx="480" cy="310" r="130" fill="none" stroke="#334155" strokeOpacity="0.35" strokeWidth="1.5" strokeDasharray="8 10" />
+                      <circle cx="480" cy="310" r="72" fill="#7c3aed" fillOpacity="0.08" stroke="#c4b5fd" strokeOpacity="0.2" />
+                      <circle cx="480" cy="310" r="12" fill="#c4b5fd" fillOpacity="0.9" />
+
+                      {links.map((link, idx) => {
+                        const sourceNode = nodes.find((node) => node.id === link.source);
+                        const targetNode = nodes.find((node) => node.id === link.target);
+                        if (!sourceNode || !targetNode) return null;
+
+                        const isHighlighted = !activeNode || connectedNodeIds.has(sourceNode.id) || connectedNodeIds.has(targetNode.id);
+
+                        return (
+                          <line
+                            key={idx}
+                            x1={sourceNode.x}
+                            y1={sourceNode.y}
+                            x2={targetNode.x}
+                            y2={targetNode.y}
+                            stroke={isHighlighted ? '#64748b' : '#1e293b'}
+                            strokeWidth={link.value * 0.7 + 0.5}
+                            strokeOpacity={isHighlighted ? '0.52' : '0.08'}
+                          />
+                        );
+                      })}
+
+                      {nodes.map((node) => {
+                        const colors = getThreatColor(node.threatLevel);
+                        const isSelected = activeNode?.id === node.id;
+                        const isRelevant = !activeNode || connectedNodeIds.has(node.id);
+
+                        return (
+                          <g
+                            key={node.id}
+                            transform={`translate(${node.x}, ${node.y})`}
+                            className="transition-transform duration-75"
+                            opacity={isSelected ? 1 : isRelevant ? 0.96 : 0.2}
+                          >
+                            <circle
+                              r={Math.max(node.size, 18)}
+                              fill={colors.fill}
+                              stroke={isSelected ? '#ffffff' : colors.stroke}
+                              strokeWidth={isSelected ? 3 : 1.5}
+                              className="cursor-pointer transition-all hover:scale-110 filter drop-shadow-[0_6px_18px_rgba(0,0,0,0.55)]"
+                              onMouseDown={(e) => handleMouseDown(e, node)}
+                              onClick={() => setSelectedNode(node)}
+                            />
+                            <circle
+                              r={Math.max(node.size, 18) + 8}
+                              fill="none"
+                              stroke={isSelected ? '#ffffff' : 'transparent'}
+                              strokeOpacity="0.16"
+                              strokeWidth="1"
+                            />
+                            <text
+                              y={Math.max(node.size, 18) + 16}
+                              textAnchor="middle"
+                              fill={isSelected ? '#ffffff' : '#94a3b8'}
+                              className="text-[11px] font-semibold select-none font-mono"
+                              pointerEvents="none"
+                            >
+                              {node.label.length > 20 ? `${node.label.substring(0, 17)}...` : node.label}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+
+                    <div className="pointer-events-none absolute inset-x-4 bottom-4 rounded-2xl border border-white/10 bg-slate-900/55 px-4 py-3 backdrop-blur-md">
+                      <div className="flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-200">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-violet-400" />{networkStats.total} domains</span>
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-emerald-400" />{Math.max(0, connectedNodeIds.size - 1)} connected</span>
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-rose-400" />{networkStats.autoEscalated} auto</span>
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-sky-400" />{networkStats.uniquePlatforms} platforms</span>
+                      </div>
+                      <p className="mt-2 text-[11px] leading-5 text-slate-400">
+                        Select a domain to inspect its cluster. Drag nodes to reshape relationships and keep the graph in focus.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        <Card className="flex min-h-0 flex-col overflow-hidden border-slate-200/80 bg-white/95 shadow-sm">
+          <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-[0.18em] text-slate-900">Control rail</h3>
+              <p className="mt-1 text-xs text-slate-500">Search, filter, inspect, and act on the current cluster.</p>
+            </div>
+            <Badge variant="secondary">{filteredThreats.length}</Badge>
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 pr-4 scrollbar-thin">
+            <div className="space-y-5">
+              <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search domains..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white"
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {['all', 'critical', 'high', 'medium', 'low'].map((level) => {
+                    const meta = level === 'all' ? null : getThreatMeta(level);
+                    return (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => setLevelFilter(level)}
+                        className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                          levelFilter === level
+                            ? 'bg-slate-900 text-white shadow-sm'
+                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                        }`}
+                      >
+                        {level === 'all' ? 'All' : meta.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Sort by</span>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400"
+                    >
+                      <option value="risk">Risk</option>
+                      <option value="violations">Violations</option>
+                      <option value="connections">Connections</option>
+                      <option value="recent">Recent</option>
+                    </select>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowOnlyConnected((current) => !current)}
+                    className={`flex h-full items-center justify-center rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
+                      showOnlyConnected
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                        : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                    }`}
+                  >
+                    Connected only
+                  </button>
+                </div>
               </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto space-y-2 max-h-[400px] pr-1">
-                {filteredThreats.length === 0 ? (
-                  <div className="text-xs text-slate-400 text-center py-6">No threat domains found.</div>
+
+              <div className="space-y-2">
+                {loading ? (
+                  <div className="flex items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 py-10">
+                    <Loader size={0.55} />
+                  </div>
+                ) : filteredThreats.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-xs text-slate-400">
+                    No threat domains match the current filters.
+                  </div>
                 ) : (
                   filteredThreats.map((threat) => {
-                    const colors = getThreatColor(threat.threatLevel);
+                    const meta = getThreatMeta(threat.threatLevel);
+                    const isActive = activeNode?.id === threat.domain;
+                    const connectionCount = links.filter((link) => link.source === threat.domain || link.target === threat.domain).length;
+
                     return (
                       <button
                         key={threat.domain}
-                        onClick={() => {
-                          const matchedNode = nodes.find(n => n.id === threat.domain);
-                          if (matchedNode) {
-                            setSelectedNode(matchedNode);
-                          }
-                        }}
-                        className={`w-full p-3 text-left rounded-xl border transition-all flex items-center justify-between hover:scale-[1.01] active:scale-99 ${
-                          selectedNode?.id === threat.domain 
-                            ? 'bg-purple-50 border-purple-200' 
-                            : 'bg-white border-slate-100 hover:border-slate-200'
+                        type="button"
+                        onClick={() => handleSelectThreat(threat.domain)}
+                        className={`w-full rounded-2xl border p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm ${
+                          isActive
+                            ? 'border-indigo-300 bg-indigo-50/80 shadow-sm'
+                            : 'border-slate-200 bg-white hover:border-slate-300'
                         }`}
                       >
-                        <div className="space-y-0.5">
-                          <span className="text-xs font-bold text-slate-900 block truncate max-w-[130px]">
-                            {threat.domain}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            {threat.totalViolations} violations
-                          </span>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-slate-900">{threat.domain}</p>
+                            <p className="mt-1 text-[11px] text-slate-500">
+                              {threat.totalViolations || 0} violations · {connectionCount} links · {threat.platforms?.length || 0} platforms
+                            </p>
+                          </div>
+                          <span className={`mt-1 h-3 w-3 rounded-full ${meta.dot}`} />
                         </div>
-                        <span className={`h-2.5 w-2.5 rounded-full ${colors.bg}`} />
+
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <Badge variant={meta.badge} size="sm">{meta.label}</Badge>
+                          {threat.autoEscalate && <Badge variant="success" size="sm">Auto</Badge>}
+                        </div>
                       </button>
                     );
                   })
                 )}
               </div>
-            )}
-          </Card>
-        </div>
 
-        {/* Network Graph Interactive Card */}
-        <div className="space-y-4">
-          <Card className="p-6 relative overflow-hidden flex flex-col bg-slate-950 border-none text-slate-100">
-            <div className="flex justify-between items-center pb-4 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <Network className="h-5 w-5 text-purple-400 animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-wider text-slate-300">
-                  Infrastructure Relationship Graph
-                </span>
+              <div className={`rounded-2xl border p-4 ${activeNode ? responseMeta.panel : 'border-slate-200 bg-slate-50'}`}>
+                {activeNode ? (
+                  <>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Focused entity</p>
+                        <h3 className="break-all text-lg font-black text-slate-900">{activeNode.id}</h3>
+                      </div>
+                      <Badge variant={responseMeta.badge}>{responseMeta.label}</Badge>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="rounded-xl bg-white/80 p-3 shadow-sm">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Violations</p>
+                        <p className="mt-1 text-xl font-black text-slate-900 tabular-nums">{activeNode.violations}</p>
+                      </div>
+                      <div className="rounded-xl bg-white/80 p-3 shadow-sm">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Risk score</p>
+                        <p className="mt-1 text-xl font-black text-slate-900 tabular-nums">{selectedContext?.score || 0}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-2 rounded-xl bg-white/80 p-3 shadow-sm text-sm text-slate-600">
+                      <div className="flex justify-between gap-4 border-b border-slate-100 pb-2">
+                        <span>First detected</span>
+                        <span className="font-mono text-slate-900">{formatDate(activeNode.rawData?.firstSeenAt)}</span>
+                      </div>
+                      <div className="flex justify-between gap-4 border-b border-slate-100 pb-2">
+                        <span>Last active</span>
+                        <span className="font-mono text-slate-900">{formatDate(activeNode.rawData?.lastSeenAt)}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span>Observed on</span>
+                        <span className="font-mono text-slate-900">{selectedThreat?.platforms?.length || 0} platforms</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-2 rounded-xl bg-white/80 p-3 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Platforms</span>
+                        <span className="text-xs font-semibold text-slate-500">{selectedPlatforms.length} targets</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedPlatforms.length === 0 ? (
+                          <span className="text-sm text-slate-400">No platform metadata available.</span>
+                        ) : (
+                          selectedPlatforms.map((platform) => (
+                            <span
+                              key={platform}
+                              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-700"
+                            >
+                              {platform}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">No selection</p>
+                    <p className="text-sm leading-6 text-slate-500">
+                      Choose a node to pin the inspector, reveal connected domains, and access enforcement actions.
+                    </p>
+                  </div>
+                )}
               </div>
-              <Button 
-                variant="secondary" 
-                size="xs" 
-                onClick={fetchThreatMemory} 
-                className="bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 flex items-center gap-1.5"
-              >
-                <RefreshCw className="h-3 w-3" />
-                <span>Stabilize Graph</span>
-              </Button>
+
+              <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Related domains</span>
+                  <span className="text-xs font-semibold text-slate-500">{connectedThreats.length}</span>
+                </div>
+                <div className="space-y-2">
+                  {connectedThreats.slice(0, 5).map((threat) => {
+                    const meta = getThreatMeta(threat.threatLevel);
+                    return (
+                      <button
+                        key={threat.domain}
+                        type="button"
+                        onClick={() => handleSelectThreat(threat.domain)}
+                        className="flex w-full items-center justify-between rounded-xl border border-slate-200 px-3 py-2 text-left transition-colors hover:border-slate-300 hover:bg-slate-50"
+                      >
+                        <span className="min-w-0 truncate text-sm font-semibold text-slate-900">{threat.domain}</span>
+                        <span className={`ml-3 h-2.5 w-2.5 shrink-0 rounded-full ${meta.dot}`} />
+                      </button>
+                    );
+                  })}
+                  {connectedThreats.length === 0 && (
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm text-slate-400">
+                      No direct neighbors detected yet.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {activeNode && (
+                <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Response actions</span>
+                    <Button variant="secondary" size="sm" onClick={handleCopyDomain}>
+                      Copy domain
+                    </Button>
+                  </div>
+
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <Button
+                      variant={activeNode.autoEscalate ? 'primary' : 'secondary'}
+                      size="sm"
+                      onClick={() => toggleAutoEscalate(activeNode.id)}
+                      className="justify-center"
+                    >
+                      <ToggleLeft className="h-4 w-4" />
+                      {activeNode.autoEscalate ? 'Auto escalation on' : 'Enable auto escalation'}
+                    </Button>
+                    <a
+                      href={`https://who.is/whois/${activeNode.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      WHOIS lookup
+                    </a>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+                      <AlertTriangle className={`h-4 w-4 ${responseMeta.tone}`} />
+                      Recommended posture
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-700">{selectedContext?.recommendation}</p>
+                  </div>
+                </div>
+              )}
             </div>
-
-            {loading ? (
-              <div className="h-[480px] flex flex-col items-center justify-center gap-4">
-                <Loader size={0.8} />
-                <p className="text-xs font-mono text-slate-400">Loading neural relationships...</p>
-              </div>
-            ) : (
-              <div className="relative flex-1">
-                {/* SVG Visualizer */}
-                <svg
-                  ref={svgRef}
-                  width="100%"
-                  height="450"
-                  viewBox="0 0 800 500"
-                  className="cursor-grab select-none"
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUpOrLeave}
-                  onMouseLeave={handleMouseUpOrLeave}
-                >
-                  {/* Link connections */}
-                  {links.map((link, idx) => {
-                    const sourceNode = nodes.find(n => n.id === link.source);
-                    const targetNode = nodes.find(n => n.id === link.target);
-                    if (!sourceNode || !targetNode) return null;
-                    return (
-                      <line
-                        key={idx}
-                        x1={sourceNode.x}
-                        y1={sourceNode.y}
-                        x2={targetNode.x}
-                        y2={targetNode.y}
-                        stroke="#334155"
-                        strokeWidth={link.value * 0.8 + 0.5}
-                        strokeOpacity="0.45"
-                      />
-                    );
-                  })}
-
-                  {/* Domain nodes */}
-                  {nodes.map((node) => {
-                    const colors = getThreatColor(node.threatLevel);
-                    const isSelected = selectedNode?.id === node.id;
-                    return (
-                      <g 
-                        key={node.id}
-                        transform={`translate(${node.x}, ${node.y})`}
-                        className="transition-transform duration-75"
-                      >
-                        <circle
-                          r={node.size}
-                          fill={colors.fill}
-                          stroke={isSelected ? '#ffffff' : colors.stroke}
-                          strokeWidth={isSelected ? 3 : 1.5}
-                          className="transition-all hover:scale-110 cursor-pointer filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
-                          onMouseDown={(e) => handleMouseDown(e, node)}
-                          onClick={() => setSelectedNode(node)}
-                        />
-                        <text
-                          y={node.size + 14}
-                          textAnchor="middle"
-                          fill={isSelected ? '#ffffff' : '#94a3b8'}
-                          className="text-[10px] font-semibold select-none font-mono"
-                          pointerEvents="none"
-                        >
-                          {node.label.length > 20 ? node.label.substring(0, 17) + '...' : node.label}
-                        </text>
-                      </g>
-                    );
-                  })}
-                </svg>
-
-                {/* Graph Legend overlay */}
-                <div className="absolute bottom-4 left-4 p-3 bg-slate-900/95 border border-slate-800 rounded-xl flex flex-wrap gap-4 text-[10px] font-mono backdrop-blur-md">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-rose-500" />
-                    <span>Critical Threat</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-orange-500" />
-                    <span>High Threat</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-amber-500" />
-                    <span>Medium Threat</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-sky-500" />
-                    <span>Low Threat</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Card>
-        </div>
-
-        {/* Selected Domain details sidebar panel */}
-        <div className="space-y-4">
-          {!selectedNode ? (
-            <Card className="p-6 text-center space-y-4 h-full flex flex-col items-center justify-center min-h-[300px]">
-              <Globe className="h-8 w-8 text-slate-300 animate-bounce" />
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-slate-800">Select Threat Node</p>
-                <p className="text-[10px] text-slate-400 max-w-xs">
-                  Click on any node in the graph or list to inspect domain infrastructure, active platforms, and historical infringements.
-                </p>
-              </div>
-            </Card>
-          ) : (
-            <Card className="p-5 space-y-5 h-full flex flex-col justify-between border-l-4 border-l-purple-500 animate-in slide-in-from-right duration-200">
-              <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">Inspect Entity</span>
-                    <h3 className="text-sm font-black text-slate-900 break-all">{selectedNode.id}</h3>
-                  </div>
-                  <Badge 
-                    variant={
-                      selectedNode.threatLevel === 'critical' ? 'danger' :
-                      selectedNode.threatLevel === 'high' ? 'orange' :
-                      selectedNode.threatLevel === 'medium' ? 'warning' : 'primary'
-                    }
-                  >
-                    {selectedNode.threatLevel}
-                  </Badge>
-                </div>
-
-                <div className="space-y-3 pt-3 border-t border-slate-100 text-xs">
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-400">Total Violations:</span>
-                    <span className="font-bold text-slate-900">{selectedNode.violations}</span>
-                  </div>
-
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-400">First Detected:</span>
-                    <span className="font-mono text-slate-700">
-                      {selectedNode.rawData.firstSeenAt 
-                        ? new Date(selectedNode.rawData.firstSeenAt).toLocaleDateString() 
-                        : 'N/A'}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-400">Last Active Seen:</span>
-                    <span className="font-mono text-slate-700">
-                      {selectedNode.rawData.lastSeenAt 
-                        ? new Date(selectedNode.rawData.lastSeenAt).toLocaleDateString() 
-                        : 'N/A'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Platform targets */}
-                <div className="space-y-2 pt-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Platform Distribution</span>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedNode.platforms.map((platform, i) => (
-                      <span 
-                        key={i} 
-                        className="px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg text-[10px] font-bold uppercase tracking-wider"
-                      >
-                        {platform}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Auto Escalate Rule */}
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2 mt-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700">Auto-Escalate Takedowns</span>
-                    <input
-                      type="checkbox"
-                      checked={selectedNode.autoEscalate}
-                      onChange={() => toggleAutoEscalate(selectedNode.id)}
-                      className="rounded text-purple-600 focus:ring-purple-500 h-4 w-4"
-                    />
-                  </div>
-                  <p className="text-[10px] text-slate-400 leading-normal">
-                    When enabled, any violation matches originating from {selectedNode.id} bypass the review queue and trigger direct DMCA requests immediately.
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100">
-                <a 
-                  href={`https://who.is/whois/${selectedNode.id}`}
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="w-full text-xs font-bold py-2.5 text-center bg-white border border-slate-200 text-slate-800 rounded-xl hover:bg-slate-50 flex items-center justify-center gap-1.5 transition-colors"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  <span>Run External WHOIS lookup</span>
-                </a>
-              </div>
-
-            </Card>
-          )}
-        </div>
-
-      </div>
+          </div>
+        </Card>
+      </section>
     </div>
   );
 }
