@@ -55,10 +55,6 @@ const scanResultSchema = new mongoose.Schema(
 			type: String,
 			default: null,
 		},
-		discoveryKeyword: {
-			type: String,
-			default: null,
-		},
 		scrapedAt: {
 			type: Date,
 			default: Date.now,

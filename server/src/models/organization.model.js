@@ -46,6 +46,50 @@ const organizationSchema = new mongoose.Schema(
 				type: Boolean,
 				default: true,
 			},
+			whatsappEnabled: {
+				type: Boolean,
+				default: false,
+			},
+			whatsappNumber: {
+				type: String,
+				default: null,
+			},
+			telegramEnabled: {
+				type: Boolean,
+				default: false,
+			},
+			telegramChatId: {
+				type: String,
+				default: null,
+			},
+			slackEnabled: {
+				type: Boolean,
+				default: false,
+			},
+			slackWebhookUrl: {
+				type: String,
+				default: null,
+			},
+			pushEnabled: {
+				type: Boolean,
+				default: false,
+			},
+			pushSubscription: {
+				type: mongoose.Schema.Types.Mixed,
+				default: null,
+			},
+			alertMinSeverity: {
+				type: Number,
+				default: 3,
+				min: 1,
+				max: 5,
+			},
+			whatsappMinSeverity: {
+				type: Number,
+				default: 5,
+				min: 1,
+				max: 5,
+			},
 		},
 	},
 	{

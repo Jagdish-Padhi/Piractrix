@@ -76,6 +76,44 @@ const violationSchema = new mongoose.Schema(
 			enum: ['open', 'reported', 'resolved', 'false_positive'],
 			default: 'open',
 		},
+		caseStatus: {
+			type: String,
+			enum: ['open', 'agent_reviewing', 'dmca_drafted', 'dmca_sent', 'takedown_requested', 'resolved', 'false_positive'],
+			default: 'open',
+			index: true,
+		},
+		caseId: {
+			type: String,
+			default: null, // PIR-YYYYMMDD-XXXX
+		},
+		dmcaContent: {
+			type: String,
+			default: null,
+		},
+		dmcaContactEmail: {
+			type: String,
+			default: null,
+		},
+		dmcaGeneratedAt: {
+			type: Date,
+			default: null,
+		},
+		dmcaGeneratedBy: {
+			type: String,
+			enum: ['gemini', 'template', null],
+			default: null,
+		},
+		agentDecisionId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'AgentDecisionLog',
+			default: null,
+		},
+		caseTimeline: [{
+			event: String,       // 'detected', 'agent_classified', 'dmca_drafted', 'notified', 'takedown_sent'
+			description: String,
+			timestamp: { type: Date, default: Date.now },
+			meta: mongoose.Schema.Types.Mixed,
+		}],
 		evidenceBundle: {
 			hammingDistance: {
 				type: Number,
