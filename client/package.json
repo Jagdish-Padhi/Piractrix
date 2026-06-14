@@ -1,8 +1,8 @@
 {
-  "name": "sportshield-client",
+  "name": "piractrix-client",
   "private": true,
   "version": "1.0.0",
-  "description": "SportShield frontend app (React + Vite)",
+  "description": "Piractrix frontend app (React + Vite)",
   "type": "module",
   "scripts": {
     "dev": "vite",

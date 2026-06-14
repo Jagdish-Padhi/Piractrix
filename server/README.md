@@ -1,6 +1,6 @@
 # Server Service
 
-Express API service for SportShield.
+Express API service for Piractrix.
 
 ## Folder Intent
 

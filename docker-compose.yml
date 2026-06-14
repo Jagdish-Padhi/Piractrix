@@ -3,7 +3,7 @@ version: "3.9"
 services:
   mongo:
     image: mongo:7
-    container_name: sportshield-mongo
+    container_name: piractrix-mongo
     restart: unless-stopped
     ports:
       - "27017:27017"
@@ -13,7 +13,7 @@ services:
   ml-service:
     build:
       context: ./ml-service
-    container_name: sportshield-ml
+    container_name: piractrix-ml
     restart: unless-stopped
     # Use internal healthcheck to ensure it's ready
     healthcheck:
@@ -27,12 +27,12 @@ services:
   server:
     build:
       context: ./server
-    container_name: sportshield-api
+    container_name: piractrix-api
     restart: unless-stopped
     env_file:
       - ./server/.env
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/sportshield
+      - MONGODB_URI=mongodb://mongo:27017/piractrix
       - ML_SERVICE_URL=http://ml-service:8000
     ports:
       - "5000:5000"
@@ -43,7 +43,7 @@ services:
   client:
     build:
       context: ./client
-    container_name: sportshield-web
+    container_name: piractrix-web
     restart: unless-stopped
     ports:
       - "80:80"

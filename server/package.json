@@ -1,9 +1,9 @@
 {
-  "name": "sportshield-server",
+  "name": "piractrix-server",
   "version": "1.0.0",
-  "description": "SportShield backend service (Express + MongoDB)",
+  "description": "Piractrix Defense Systems backend service (Express + MongoDB)",
   "license": "MIT",
-  "author": "SportShield Team",
+  "author": "Piractrix Team",
   "type": "module",
   "main": "src/index.js",
   "scripts": {

@@ -12,7 +12,7 @@ from scraper.scraper_service import run_scrape_job
 
 load_dotenv()
 
-app = FastAPI(title="SportShield ML Service", version="1.0.0")
+app = FastAPI(title="Piractrix ML Service", version="1.0.0")
 
 
 class FingerprintRequest(BaseModel):
@@ -49,7 +49,7 @@ class VisionVerifyRequest(BaseModel):
 def health() -> dict:
     return {
         "status": "ok",
-        "service": "sportshield-ml",
+        "service": "piractrix-ml",
     }
 
 

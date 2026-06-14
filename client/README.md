@@ -1,6 +1,6 @@
 # Client Service
 
-React + Vite frontend for SportShield.
+React + Vite frontend for Piractrix.
 
 ## Folder Intent
 
