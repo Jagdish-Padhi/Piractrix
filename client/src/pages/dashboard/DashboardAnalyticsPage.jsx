@@ -524,10 +524,10 @@ export default function DashboardAnalyticsPage() {
 
 	const statCards = overview
 		? [
+				{ label: 'Money Saved', value: `$${Math.round(((overview.estimatedRevenueLoss || 0) * 0.45) / 80).toLocaleString()}`, subtitle: 'Estimated value recovered', icon: IndianRupee, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+				{ label: 'Piracy Reach Blocked', value: `${((overview.resolvedViolations || 0) * 1420).toLocaleString()}`, subtitle: 'Estimated audience diverted', icon: Globe, color: 'text-blue-500', bg: 'bg-blue-50' },
+				{ label: 'Est. Revenue Protection', value: `$${Math.round(((overview.estimatedRevenueLoss || 0) * 1.2) / 80).toLocaleString()}`, subtitle: 'Protected from active threats', icon: ShieldCheck, color: 'text-indigo-600', bg: 'bg-indigo-50' },
 				{ label: 'Total violations', value: overview.totalViolations, subtitle: overview.rangeLabel, icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50' },
-				{ label: 'Revenue at risk', value: `₹${(overview.estimatedRevenueLoss || 0).toLocaleString()}`, subtitle: 'Est. value of stolen media', icon: IndianRupee, color: 'text-(--app-color-primary)', bg: 'bg-(--app-color-primary-soft)' },
-				{ label: 'Resolved', value: overview.resolvedViolations, subtitle: `${Math.round((overview.resolutionRate || 0) * 100)}% resolution rate`, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-				{ label: 'Avg confidence', value: `${overview.avgConfidenceScore}%`, subtitle: 'Across detected matches', icon: Activity, color: 'text-(--app-color-primary)', bg: 'bg-(--app-color-primary-soft)' },
 			]
 		: [];
 

@@ -398,8 +398,8 @@ const seedData = async () => {
 				violationId: v._id,
 				type: 'high_confidence',
 				severity: 'critical',
-				title: 'Critical Infringement Detected',
-				message: `Exact match found on ${v.platform} with ${v.matchConfidence}% confidence.`,
+				title: 'High-Value Asset Leak Detected',
+				message: `Piractrix Agent identified an exact match for a protected asset on ${v.platform}. The source domain ${v.sourceDomain} has been flagged for immediate takedown.`,
 				channels: ['in-app', 'email'],
 				read: Math.random() > 0.5,
 				createdAt: new Date(v.detectedAt.getTime() + 2000)
@@ -411,11 +411,23 @@ const seedData = async () => {
 			orgId,
 			type: 'platform_surge',
 			severity: 'high',
-			title: 'Telegram Piracy Surge',
-			message: 'Detected 12 new violations on Telegram within the last hour.',
+			title: 'Telegram Piracy Ring Identified',
+			message: 'Piractrix Agent detected a coordinated cluster of 8 domains sharing Telegram sources within the last hour. Escalating to the enforcement queue.',
 			channels: ['in-app'],
 			read: false,
 			createdAt: randomDate(1, 2)
+		});
+
+		// Simulate an infrastructure alert
+		alertData.push({
+			orgId,
+			type: 'platform_surge',
+			severity: 'medium',
+			title: 'Shared Infrastructure Detected',
+			message: 'Agent identified 4 new streaming sites sharing the exact same Cloudflare IP block as a previously taken down target.',
+			channels: ['in-app'],
+			read: false,
+			createdAt: randomDate(3, 4)
 		});
 
 		await Alert.insertMany(alertData);
