@@ -50,7 +50,7 @@ function getFingerprintShortValue(value) {
 	return value.slice(-8);
 }
 
-const AssetThumbnail = ({ src, alt, className = "h-36 w-full" }) => {
+const AssetThumbnail = ({ src, alt, className = "mb-4 h-36 w-full" }) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [isError, setIsError] = useState(false);
 
@@ -392,9 +392,9 @@ export default function DashboardAssetsPage() {
 										onClick={() => !isProcessing && handleOpenDetail(asset)}
 									>
 										{asset.type === 'image' && (asset.thumbnailUrl || asset.gcsUrl) ? (
-											<AssetThumbnail src={asset.thumbnailUrl || asset.gcsUrl} alt={asset.title} className="mb-4 h-36 w-full" />
+											<AssetThumbnail src={asset.thumbnailUrl || asset.gcsUrl} alt={asset.title} />
 										) : asset.thumbnailUrl ? (
-											<AssetThumbnail src={asset.thumbnailUrl} alt={asset.title} className="mb-4 h-36 w-full" />
+											<AssetThumbnail src={asset.thumbnailUrl} alt={asset.title} />
 										) : (
 											/* Styled Premium Fallback Illustration */
 											<div className="relative mb-4 h-36 w-full overflow-hidden rounded-lg flex flex-col items-center justify-center bg-slate-100 border border-slate-200/60 shadow-xs group-hover:scale-[1.01] transition-transform duration-300">
@@ -450,10 +450,11 @@ export default function DashboardAssetsPage() {
 													)}
 													<button
 														onClick={(e) => { e.stopPropagation(); handleOpenDetail(asset); }}
-														className="p-1.5 rounded-lg bg-(--app-color-surface-elevated) text-(--app-color-text-muted) hover:text-(--app-color-text) hover:bg-(--app-color-border) transition-colors"
+														className="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg bg-(--app-color-primary)/10 text-(--app-color-primary) hover:bg-(--app-color-primary)/20 font-bold text-xs transition-colors"
 														title="View Asset DNA & Preview"
 													>
 														<Eye size={14} />
+														View Asset
 													</button>
 													<button
 														onClick={(e) => { e.stopPropagation(); handleOpenEdit(asset); }}
@@ -524,135 +525,133 @@ export default function DashboardAssetsPage() {
 										style={{ backgroundColor: 'var(--app-color-surface)' }}
 										onClick={() => !isProcessing && handleOpenDetail(asset)}
 									>
-										<div className="grid gap-4 p-4 lg:grid-cols-[112px_minmax(0,1fr)] lg:items-stretch">
-											<div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-(--app-color-border) bg-(--app-color-surface-elevated) shadow-sm lg:min-h-[112px] lg:aspect-auto">
-												{asset.type === 'image' && (asset.thumbnailUrl || asset.gcsUrl) ? (
-													<AssetThumbnail src={asset.thumbnailUrl || asset.gcsUrl} alt={asset.title} className="h-full w-full rounded-none" />
-												) : asset.thumbnailUrl ? (
-													<AssetThumbnail src={asset.thumbnailUrl} alt={asset.title} className="h-full w-full rounded-none" />
-												) : (
-													<div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-slate-100">
-														<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-500/5 via-transparent to-transparent opacity-60" />
-														{asset.type === 'music' ? (
-															<Music size={20} className="text-indigo-500" />
-														) : (asset.type === 'exam_paper' || asset.type === 'document') ? (
-															<FileText size={20} className="text-slate-500" />
-														) : (
-															<FileVideo size={20} className="text-purple-500" />
-														)}
-													</div>
-												)}
-											</div>
-
-											<div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-stretch">
-												<div className="min-w-0 space-y-3">
-													<div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-														<div className="min-w-0 space-y-1.5">
-															<div className="flex flex-wrap items-center gap-2">
-																<h3 className="min-w-0 truncate text-base font-semibold text-(--app-color-text)">{asset.title}</h3>
-																<Badge variant={getStatusBadgeVariant(asset.status)} size="sm" className="shrink-0">
-																	{asset.status}
-																</Badge>
+										<div className="flex flex-row items-center gap-6">
+											{/* Left Thumbnail (Fixed size, e.g. w-40 h-24) */}
+											<div className="w-40 h-24 shrink-0 overflow-hidden flex items-center justify-center">
+											{asset.type === 'image' && (asset.thumbnailUrl || asset.gcsUrl) ? (
+												<AssetThumbnail src={asset.thumbnailUrl || asset.gcsUrl} alt={asset.title} className="w-full h-full rounded-lg" />
+											) : asset.thumbnailUrl ? (
+												<AssetThumbnail src={asset.thumbnailUrl} alt={asset.title} className="w-full h-full rounded-lg" />
+											) : (
+												/* Fallback */
+												<div className="relative w-full h-full overflow-hidden rounded-lg flex flex-col items-center justify-center bg-slate-100 border border-slate-200/60 shadow-xs">
+													<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-500/5 via-transparent to-transparent opacity-60" />
+													{asset.type === 'music' ? (
+														<>
+															<div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-500">
+																<Music size={18} />
 															</div>
-															<p className="max-w-3xl text-sm leading-6 text-(--app-color-text-muted)">{asset.description || 'No description'}</p>
-														</div>
-
-														<div className="flex shrink-0 items-center gap-2 self-start">
-															{isFailed && (
-																<button
-																	onClick={(e) => { e.stopPropagation(); handleRetryAsset(asset._id); }}
-																	className="rounded-full border border-blue-500/20 bg-blue-500/10 p-2 text-blue-500 transition-colors hover:bg-blue-500/15"
-																	title="Retry analysis"
-																>
-																	<RefreshCw size={14} />
-																</button>
-															)}
-															<button
-																onClick={(e) => { e.stopPropagation(); handleOpenDetail(asset); }}
-																className="rounded-full border border-(--app-color-border) bg-(--app-color-surface-elevated) p-2 text-(--app-color-text-muted) transition-colors hover:border-(--app-color-primary)/30 hover:text-(--app-color-text)"
-																title="View asset"
-															>
-																<Eye size={14} />
-															</button>
-															<button
-																onClick={(e) => { e.stopPropagation(); handleOpenEdit(asset); }}
-																className="rounded-full border border-(--app-color-border) bg-(--app-color-surface-elevated) p-2 text-(--app-color-text-muted) transition-colors hover:border-(--app-color-primary)/30 hover:text-(--app-color-text)"
-																title="Edit asset"
-															>
-																<Edit2 size={14} />
-															</button>
-															<button
-																onClick={(e) => { e.stopPropagation(); handleDeleteAsset(asset._id); }}
-																className="rounded-full border border-red-500/15 bg-red-500/10 p-2 text-red-500 transition-colors hover:bg-red-500/15"
-																title="Delete asset"
-															>
-																<Trash2 size={14} />
-															</button>
-														</div>
-													</div>
-
-													<div className="flex flex-wrap items-center gap-2 text-xs text-(--app-color-text-muted)">
-														<span className="inline-flex items-center gap-1.5 rounded-full bg-(--app-color-surface-elevated) px-3 py-1 font-semibold uppercase tracking-wider text-[10px] text-indigo-500">
-															{asset.type === 'image' ? <ImageIcon size={10} /> : 
-															 asset.type === 'music' ? <Music size={10} /> :
-															 (asset.type === 'exam_paper' || asset.type === 'document') ? <FileText size={10} /> :
-															 <FileVideo size={10} />}
-															{asset.type.replace('_', ' ')}
-														</span>
-														<span className="inline-flex items-center gap-1.5 rounded-full bg-(--app-color-surface-elevated) px-3 py-1 font-medium">
-															<Calendar size={11} />
-															{new Date(asset.uploadedAt).toLocaleDateString()}
-														</span>
-														<span className="inline-flex items-center gap-1.5 rounded-full bg-(--app-color-surface-elevated) px-3 py-1 font-medium">
-															<AlertTriangle size={11} className={asset.violationsFound > 0 ? 'text-red-500' : 'text-emerald-500'} />
-															Violations: <span className={asset.violationsFound > 0 ? 'text-red-500 font-bold' : 'text-(--app-color-text) font-bold'}>{asset.violationsFound || 0}</span>
-														</span>
-														<span className="inline-flex items-center gap-1.5 rounded-full bg-(--app-color-surface-elevated) px-3 py-1 font-medium">
-															<Fingerprint size={11} className="text-(--app-color-primary)" />
-															PHash: <span className="font-mono text-(--app-color-text)">{getFingerprintShortValue(asset.fingerprint?.pHash)}</span>
-														</span>
-													</div>
-												</div>
-
-												<div className="flex flex-col justify-between gap-3 rounded-2xl border border-(--app-color-border) bg-(--app-color-surface-elevated)/80 p-4 shadow-sm">
-													{isProcessing ? (
-														<div className="space-y-2">
-															<div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-(--app-color-text-muted)">
-																<span>AI fingerprinting</span>
-																<span>{progress}%</span>
+															<span className="text-[8px] font-black uppercase tracking-widest text-indigo-500 mt-1">Audio Track</span>
+														</>
+													) : (asset.type === 'exam_paper' || asset.type === 'document') ? (
+														<>
+															<div className="p-2 rounded-xl bg-slate-500/10 border border-slate-500/20 text-slate-500">
+																<FileText size={18} />
 															</div>
-															<div className="h-1.5 w-full overflow-hidden rounded-full bg-(--app-color-border)/60">
-																<div
-																	className="h-full bg-linear-to-r from-(--app-color-primary) to-[var(--app-color-accent)] transition-all duration-1000 ease-out"
-																	style={{ width: `${progress}%` }}
-																/>
-															</div>
-															<p className="text-xs leading-5 text-(--app-color-text-muted)">
-																{timeSinceUpload > expectedTime ? 'Analysis taking longer than usual.' : `Estimated completion in ~${timeRemaining}s`}
-															</p>
-														</div>
+															<span className="text-[8px] font-black uppercase tracking-widest text-slate-500 mt-1">
+																{asset.type === 'exam_paper' ? 'Exam' : 'Document'}
+															</span>
+														</>
 													) : (
-														<div className="space-y-3">
-															<div className="flex items-center justify-between gap-3">
-																<p className="text-xs font-semibold uppercase tracking-wider text-(--app-color-text-muted)">Asset status</p>
-																<Badge variant={getStatusBadgeVariant(asset.status)} size="sm" className="shrink-0">
-																	{asset.status}
-																</Badge>
+														<>
+															<div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-500">
+																<FileVideo size={18} />
 															</div>
-															<div className="flex items-center justify-between gap-2 text-xs text-(--app-color-text-muted)">
-																<span className="flex items-center gap-1.5">
-																	<Calendar size={11} />
-																	{new Date(asset.uploadedAt).toLocaleDateString()}
-																</span>
-																<span className="flex items-center gap-1.5">
-																	<Fingerprint size={11} className="text-(--app-color-primary)" />
-																	{getFingerprintShortValue(asset.fingerprint?.pHash)}
-																</span>
-															</div>
-														</div>
+															<span className="text-[8px] font-black uppercase tracking-widest text-purple-500 mt-1">
+																{asset.type === 'ott_content' ? 'OTT' : 'Video'}
+															</span>
+														</>
 													)}
 												</div>
+											)}
+										</div>
+
+										{/* Right Info Column */}
+										<div className="flex-1 min-w-0 flex flex-col justify-between h-24 py-0.5">
+											{/* Top Row: Title, Description & Badges/Actions */}
+											<div className="flex items-start justify-between gap-4">
+												<div className="min-w-0 flex-1">
+													<h3 className="text-base font-semibold text-(--app-color-text) truncate">{asset.title}</h3>
+													<p className="mt-1 text-xs text-(--app-color-text-muted) line-clamp-1">{asset.description || 'No description'}</p>
+												</div>
+												<div className="flex items-center gap-3 shrink-0">
+													<Badge variant={getStatusBadgeVariant(asset.status)} size="sm">
+														{asset.status}
+													</Badge>
+													<div className="flex items-center gap-1">
+														{isFailed && (
+															<button
+																onClick={(e) => { e.stopPropagation(); handleRetryAsset(asset._id); }}
+																className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+																title="Retry Analysis"
+															>
+																<RefreshCw size={13} />
+															</button>
+														)}
+														<button
+															onClick={(e) => { e.stopPropagation(); handleOpenDetail(asset); }}
+															className="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg bg-(--app-color-primary)/10 text-(--app-color-primary) hover:bg-(--app-color-primary)/20 font-bold text-xs transition-colors"
+															title="View Asset DNA & Preview"
+														>
+															<Eye size={13} />
+															View Asset
+														</button>
+														<button
+															onClick={(e) => { e.stopPropagation(); handleOpenEdit(asset); }}
+															className="p-1.5 rounded-lg bg-(--app-color-surface-elevated) text-(--app-color-text-muted) hover:text-(--app-color-text) hover:bg-(--app-color-border) transition-colors"
+															title="Edit Asset"
+														>
+															<Edit2 size={13} />
+														</button>
+														<button
+															onClick={(e) => { e.stopPropagation(); handleDeleteAsset(asset._id); }}
+															className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+															title="Delete Asset"
+														>
+															<Trash2 size={13} />
+														</button>
+													</div>
+												</div>
 											</div>
+
+											{/* Bottom Row: Type, Date, Violations, PHash */}
+											{isProcessing ? (
+												<div className="space-y-1.5">
+													<div className="flex justify-between text-[10px] uppercase tracking-wider font-bold text-(--app-color-text-muted)">
+														<span>AI Fingerprinting...</span>
+														<span>{progress}%</span>
+													</div>
+													<div className="h-1 w-full overflow-hidden rounded-full bg-(--app-color-surface-elevated)">
+														<div 
+															className="h-full bg-linear-to-r from-(--app-color-primary) to-[var(--app-color-accent)] transition-all duration-1000 ease-out" 
+															style={{ width: `${progress}%` }} 
+														/>
+													</div>
+												</div>
+											) : (
+												<div className="flex flex-wrap items-center gap-y-1 gap-x-6 border-t border-(--app-color-border)/40 pt-2 text-xs text-(--app-color-text-muted)">
+													<span className="flex items-center gap-1.5 uppercase tracking-wider text-[10px] font-bold">
+														{asset.type === 'image' ? <ImageIcon size={12} /> : 
+														 asset.type === 'music' ? <Music size={12} /> :
+														 (asset.type === 'exam_paper' || asset.type === 'document') ? <FileText size={12} /> :
+														 <FileVideo size={12} />}
+														{asset.type.replace('_', ' ')}
+													</span>
+													<span className="flex items-center gap-1.5">
+														<Calendar size={12} />
+														{new Date(asset.uploadedAt).toLocaleDateString()}
+													</span>
+													<span className="flex items-center gap-1.5">
+														<AlertTriangle size={14} className={asset.violationsFound > 0 ? 'text-red-500' : 'text-emerald-500'} />
+														Violations: <span className={asset.violationsFound > 0 ? 'text-red-500 font-bold' : 'text-(--app-color-text) font-bold'}>{asset.violationsFound || 0}</span>
+													</span>
+													<span className="flex items-center gap-1.5">
+														<Fingerprint size={14} className="text-(--app-color-primary)" />
+														PHash: <span className="text-(--app-color-text) font-mono">{getFingerprintShortValue(asset.fingerprint?.pHash)}</span>
+													</span>
+												</div>
+											)}
+										</div>
 									</div>
 									</Card>
 								);

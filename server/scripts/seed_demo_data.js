@@ -29,7 +29,7 @@ const ASSET_TEMPLATES = [
     description: 'Official highlights of the Indian Premier League 2026 Final match. Contains multi-angle cameras and clean broadcast feeds.',
     tags: ['IPL', 'Cricket', 'Final', 'KKR', 'SRH'],
     thumbnailUrl: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80',
-    gcsUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
+    gcsUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
   },
   {
     title: 'UEFA Champions League: Real Madrid vs Dortmund Final',
@@ -37,7 +37,7 @@ const ASSET_TEMPLATES = [
     description: 'Exclusive broadcast rights for the UCL Final 2026. High-value sports property.',
     tags: ['UCL', 'Football', 'Final', 'Real Madrid', 'BVB'],
     thumbnailUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&q=80',
-    gcsUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    gcsUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
   },
   {
     title: 'House of the Dragon - Season 2 Episode 1 [OTT Premiere]',
@@ -85,7 +85,7 @@ const ASSET_TEMPLATES = [
     description: 'Full match recording of the historic NBA Finals Game 7. Includes commentary tracks and live court feed.',
     tags: ['NBA', 'Basketball', 'Finals', 'Lakers', 'Celtics'],
     thumbnailUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=80',
-    gcsUrl: 'https://www.w3schools.com/html/movie.mp4',
+    gcsUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
   },
   {
     title: 'Grand Theft Auto VI: Leaked Cinematic Trailer',
@@ -93,7 +93,7 @@ const ASSET_TEMPLATES = [
     description: 'Pre-release game marketing materials leaked on online forum. Strictly protected gaming asset.',
     tags: ['GTAVI', 'Rockstar', 'Gaming', 'Trailer', 'Leak'],
     thumbnailUrl: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=600&q=80',
-    gcsUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
+    gcsUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
   },
   {
     title: 'Taylor Swift: The Eras Tour Paris Concert Audio.wav',
@@ -141,7 +141,7 @@ const ASSET_TEMPLATES = [
     description: 'Pre-air clean satellite feed recording of the Formula 1 Monaco GP race day.',
     tags: ['F1', 'Racing', 'Monaco', 'LiveStream', 'Motorsport'],
     thumbnailUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=600&q=80',
-    gcsUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    gcsUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
   },
   {
     title: 'Avatar 3: The Seed Bearer Post-Production Render',

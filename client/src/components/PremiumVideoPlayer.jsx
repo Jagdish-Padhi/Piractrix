@@ -65,7 +65,8 @@ export default function PremiumVideoPlayer({ src, poster }) {
 				poster={poster}
 				controls
 				playsInline
-				className="w-full h-full object-contain max-h-[300px]"
+				crossOrigin="anonymous"
+				className="w-full h-full object-contain max-h-[300px] outline-none"
 			/>
 
 			{/* Glassmorphic Buffering Overlay (pointer-events-none ensures controls are not blocked) */}
