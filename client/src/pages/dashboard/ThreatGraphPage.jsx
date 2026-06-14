@@ -82,6 +82,41 @@ const normalizeThreatRecord = (item) => ({
   relatedDomains: normalizeStringList(item?.relatedDomains),
 });
 
+const calculateThreatScore = (node, connectionCount) => {
+  if (!node) return 0;
+  let score = 0;
+  // Violations (up to 40 points)
+  score += Math.min(40, (node.violations || 0) * 4);
+  // Connections (up to 30 points)
+  score += Math.min(30, connectionCount * 5);
+  // Platforms (up to 20 points)
+  score += Math.min(20, (node.platforms?.length || 0) * 10);
+  // Repeat Offender / Auto Escalate bonus
+  if (node.autoEscalate) score += 10;
+  
+  return Math.min(100, score);
+};
+
+const generateAIExplanation = (node, connectionCount, score) => {
+  if (!node) return [];
+  const reasons = [];
+  
+  if (node.violations > 5) reasons.push(`Critical volume: ${node.violations} active violations`);
+  else if (node.violations > 0) reasons.push(`Confirmed: ${node.violations} active violations`);
+  
+  if (node.platforms?.includes('telegram')) reasons.push('High-risk encrypted distribution (Telegram)');
+  if (node.platforms?.length > 1) reasons.push(`Cross-platform syndication (${node.platforms.length} networks)`);
+  
+  if (connectionCount > 3) reasons.push(`Core hub sharing infrastructure with ${connectionCount} pirate domains`);
+  else if (connectionCount > 0) reasons.push(`Linked to ${connectionCount} known threat vectors`);
+  
+  if (node.autoEscalate) reasons.push('Repeat offender flagged for auto-escalation');
+  
+  if (reasons.length === 0) reasons.push('Monitored for suspicious traffic spikes');
+  
+  return reasons;
+};
+
 export default function ThreatGraphPage() {
   const [threats, setThreats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -174,25 +209,27 @@ export default function ThreatGraphPage() {
         const target = simulatedNodes[j];
         const commonPlatforms = source.platforms.filter((platform) => target.platforms.includes(platform));
         if (commonPlatforms.length > 0) {
-          simulatedLinks.push({
-            source: source.id,
-            target: target.id,
-            value: commonPlatforms.length
-          });
+            simulatedLinks.push({
+              source: source.id,
+              target: target.id,
+              value: commonPlatforms.length,
+              type: `Shared: ${commonPlatforms.join(', ')}`
+            });
+          }
         }
-      }
 
-      // 2. Link from related domains in model
-      const related = source.rawData.relatedDomains || [];
-      related.forEach((relDomain) => {
-        if (nodeMap[relDomain]) {
-          simulatedLinks.push({
-            source: source.id,
-            target: relDomain,
-            value: 2
-          });
-        }
-      });
+        // 2. Link from related domains in model
+        const related = source.rawData.relatedDomains || [];
+        related.forEach((relDomain) => {
+          if (nodeMap[relDomain]) {
+            simulatedLinks.push({
+              source: source.id,
+              target: relDomain,
+              value: 2,
+              type: 'Direct Relation'
+            });
+          }
+        });
     }
 
     setNodes(simulatedNodes);
@@ -216,8 +253,10 @@ export default function ThreatGraphPage() {
 
     const ids = new Set([activeNode.id]);
     links.forEach((link) => {
-      if (link.source === activeNode.id) ids.add(link.target);
-      if (link.target === activeNode.id) ids.add(link.source);
+      const srcId = typeof link.source === 'object' ? link.source.id : link.source;
+      const tgtId = typeof link.target === 'object' ? link.target.id : link.target;
+      if (srcId === activeNode.id) ids.add(tgtId);
+      if (tgtId === activeNode.id) ids.add(srcId);
     });
     return ids;
   }, [activeNode, links]);
@@ -298,6 +337,18 @@ export default function ThreatGraphPage() {
   const selectedPlatforms = activeNode?.platforms || selectedThreat?.platforms || [];
   const responseMeta = getThreatMeta(activeNode?.threatLevel || selectedThreat?.threatLevel);
 
+  const activeNodeConnections = useMemo(() => {
+    if (!activeNode) return 0;
+    return links.filter((link) => {
+      const srcId = typeof link.source === 'object' ? link.source.id : link.source;
+      const tgtId = typeof link.target === 'object' ? link.target.id : link.target;
+      return srcId === activeNode.id || tgtId === activeNode.id;
+    }).length;
+  }, [activeNode, links]);
+
+  const activeNodeScore = calculateThreatScore(activeNode, activeNodeConnections);
+  const activeNodeAI = generateAIExplanation(activeNode, activeNodeConnections, activeNodeScore);
+
   const selectedContext = useMemo(() => {
     if (!activeNode) return null;
 
@@ -333,7 +384,7 @@ export default function ThreatGraphPage() {
   const toggleAutoEscalate = async (domain) => {
     try {
       const newAutoEscalate = !activeNode?.autoEscalate;
-      await api.patch('/agent/mode', { domain, autoEscalate: newAutoEscalate });
+      await api.patch('/agent/threat-memory/escalate', { domain, autoEscalate: newAutoEscalate });
 
       setSelectedNode((prev) => (prev && prev.id === domain ? { ...prev, autoEscalate: newAutoEscalate } : prev));
       setThreats((prev) => prev.map((threat) => (threat.domain === domain ? { ...threat, autoEscalate: newAutoEscalate } : threat)));
@@ -405,6 +456,12 @@ export default function ThreatGraphPage() {
                           nodeRelSize={1}
                           nodeVal={node => node.size}
                           nodeLabel=""
+                          linkDirectionalParticles={2}
+                          linkDirectionalParticleWidth={1.5}
+                          d3VelocityDecay={0.3}
+                          d3AlphaDecay={0.02}
+                          onEngineStop={() => {}}
+                          cooldownTicks={100}
                           nodeCanvasObject={(node, ctx, globalScale) => {
                             const isSelected = activeNode?.id === node.id;
                             const isHovered = hoveredNodeId === node.id;
@@ -440,6 +497,38 @@ export default function ThreatGraphPage() {
                             const label = node.label.length > 20 ? `${node.label.substring(0, 17)}...` : node.label;
                             ctx.fillText(label, node.x, node.y + size + fontSize + 2/globalScale);
                           }}
+                          linkCanvasObjectMode={() => 'after'}
+                          linkCanvasObject={(link, ctx, globalScale) => {
+                            const srcId = typeof link.source === 'object' ? link.source.id : link.source;
+                            const tgtId = typeof link.target === 'object' ? link.target.id : link.target;
+                            const isHighlighted = !highlightedNodeId || connectedNodeIds.has(srcId) || connectedNodeIds.has(tgtId);
+                            
+                            if (isHighlighted && globalScale > 1.2 && link.type) {
+                              const MAX_FONT_SIZE = 4;
+                              const LABEL_NODE_MARGIN = 6;
+                              const start = link.source;
+                              const end = link.target;
+                              if (typeof start !== 'object' || typeof end !== 'object') return;
+
+                              const textPos = Object.assign(...['x', 'y'].map(c => ({
+                                [c]: start[c] + (end[c] - start[c]) / 2
+                              })));
+                              const relLink = { x: end.x - start.x, y: end.y - start.y };
+                              let textAngle = Math.atan2(relLink.y, relLink.x);
+                              if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle);
+                              if (textAngle < -Math.PI / 2) textAngle = -(-Math.PI - textAngle);
+
+                              ctx.font = `${MAX_FONT_SIZE}px Sans-Serif`;
+                              ctx.fillStyle = 'rgba(148, 163, 184, 0.8)';
+                              ctx.save();
+                              ctx.translate(textPos.x, textPos.y);
+                              ctx.rotate(textAngle);
+                              ctx.textAlign = 'center';
+                              ctx.textBaseline = 'middle';
+                              ctx.fillText(link.type, 0, -3);
+                              ctx.restore();
+                            }
+                          }}
                           linkColor={link => {
                             const srcId = typeof link.source === 'object' ? link.source.id : link.source;
                             const tgtId = typeof link.target === 'object' ? link.target.id : link.target;
@@ -452,6 +541,10 @@ export default function ThreatGraphPage() {
                           }}
                           onNodeHover={node => setHoveredNodeId(node ? node.id : null)}
                           onBackgroundClick={() => handleClearSelection()}
+                          d3Force={(d3ForceName, force) => {
+                            if (d3ForceName === 'charge' && force) force.strength(-300);
+                            if (d3ForceName === 'link' && force) force.distance(60);
+                          }}
                         />
                       )}
                     </div>
@@ -611,8 +704,11 @@ export default function ThreatGraphPage() {
                         <p className="mt-1 text-xl font-black text-slate-900 tabular-nums">{activeNode.violations}</p>
                       </div>
                       <div className="rounded-xl bg-white/80 p-3 shadow-sm">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Risk score</p>
-                        <p className="mt-1 text-xl font-black text-slate-900 tabular-nums">{selectedContext?.score || 0}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Threat score</p>
+                        <div className="mt-1 flex items-baseline gap-1">
+                          <p className="text-xl font-black text-slate-900 tabular-nums">{activeNodeScore}</p>
+                          <p className="text-xs font-semibold text-slate-400">/100</p>
+                        </div>
                       </div>
                     </div>
 
@@ -720,12 +816,20 @@ export default function ThreatGraphPage() {
                     </a>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">
-                      <AlertTriangle className={`h-4 w-4 ${responseMeta.tone}`} />
-                      Recommended posture
+                  <div className="rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/50 to-white p-4 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 mb-3">
+                      <AlertTriangle className="h-4 w-4" />
+                      AI Analyst Reasoning
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-700">{selectedContext?.recommendation}</p>
+                    <ul className="space-y-2">
+                      {activeNodeAI.map((reason, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-[13px] leading-5 text-slate-700">
+                          <span className="mt-0.5 text-indigo-500 font-bold">✓</span>
+                          {reason}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               )}
