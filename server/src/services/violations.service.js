@@ -43,9 +43,39 @@ export async function getViolationById({ orgId, violationId }) {
 }
 
 export async function updateViolationStatus({ orgId, violationId, status }) {
+	let caseStatus = 'open';
+	let eventDescription = 'Status updated';
+	let timelineEvent = 'status_changed';
+	
+	if (status === 'open') {
+		caseStatus = 'open';
+		eventDescription = 'Case marked open.';
+		timelineEvent = 'detected';
+	} else if (status === 'reported') {
+		caseStatus = 'takedown_requested';
+		eventDescription = 'Takedown notice sent to platform abuse team.';
+		timelineEvent = 'takedown_sent';
+	} else if (status === 'resolved') {
+		caseStatus = 'resolved';
+		eventDescription = 'Violation resolved. Content successfully removed.';
+		timelineEvent = 'resolved';
+	} else if (status === 'false_positive') {
+		caseStatus = 'false_positive';
+		eventDescription = 'Case dismissed as false positive.';
+		timelineEvent = 'resolved';
+	}
+
 	const update = {
 		status,
+		caseStatus,
 		resolvedAt: status === 'resolved' ? new Date() : null,
+		$push: {
+			caseTimeline: {
+				event: timelineEvent,
+				description: eventDescription,
+				timestamp: new Date()
+			}
+		}
 	};
 
 	return Violation.findOneAndUpdate({ _id: violationId, orgId }, update, { new: true }).lean();

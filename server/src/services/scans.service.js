@@ -4,6 +4,7 @@ import { createAlertFromViolation } from './alerts.service.js';
 import ScanJob from '../models/scanJob.model.js';
 import ScanResult from '../models/scanResult.model.js';
 import Violation from '../models/violation.model.js';
+import QueryIntelligence from '../models/queryIntelligence.model.js';
 import { runAgentOnScanComplete } from '../agents/orchestrator.agent.js';
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
@@ -332,6 +333,42 @@ async function runMatchingForScan({ scanJob, results }) {
 				},
 			});
 
+			// Deduplication: check if the same sourceUrl + orgId already exists from the last 24h
+			const existing = await Violation.findOne({
+				orgId: scanJob.orgId,
+				sourceUrl: scanResult.sourceUrl,
+				detectedAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+			});
+
+			if (existing) {
+				await Violation.findByIdAndUpdate(existing._id, {
+					$inc: { sourceSeenCount: 1 },
+					sourceLastSeenAt: new Date(),
+					matchConfidence: Math.max(existing.matchConfidence, confidence),
+				});
+				
+				// Query Intelligence Logging (Duplicate hit)
+				if (scanResult.discoveryKeyword) {
+					try {
+						const doc = await QueryIntelligence.findOneAndUpdate(
+							{ orgId: scanJob.orgId, keyword: scanResult.discoveryKeyword, platform: scanResult.platform },
+							{ 
+								$inc: { timesUsed: 1, violationsFound: 1 },
+								$set: { lastUsedAt: new Date() }
+							},
+							{ upsert: true, new: true }
+						);
+						if (doc) {
+							doc.hitRate = doc.violationsFound / Math.max(1, doc.timesUsed);
+							await doc.save();
+						}
+					} catch (e) {
+						// ignore
+					}
+				}
+				continue;
+			}
+
 			if (confidence > 70) {
 				violationsCount += 1;
 				const violation = await Violation.create({
@@ -350,6 +387,12 @@ async function runMatchingForScan({ scanJob, results }) {
 					matchConfidence: confidence,
 					matchType: match.matchType || 'partial',
 					status: 'open',
+					caseStatus: 'open',
+					caseTimeline: [{
+						event: 'detected',
+						description: `Violation identified by scan job #${scanJob._id.toString().slice(-6).toUpperCase()} on ${scanResult.platform}. Confidence: ${confidence}%`,
+						timestamp: new Date()
+					}],
 					evidenceBundle: {
 						hammingDistance: match.evidenceBundle?.hammingDistance ?? null,
 						colorSimilarity: match.evidenceBundle?.colorSimilarity ?? null,
@@ -368,6 +411,46 @@ async function runMatchingForScan({ scanJob, results }) {
 					matchConfidence: confidence,
 					sourceUrl: scanResult.sourceUrl,
 				});
+
+				// Query Intelligence Logging (New hit)
+				if (scanResult.discoveryKeyword) {
+					try {
+						const doc = await QueryIntelligence.findOneAndUpdate(
+							{ orgId: scanJob.orgId, keyword: scanResult.discoveryKeyword, platform: scanResult.platform },
+							{ 
+								$inc: { timesUsed: 1, violationsFound: 1 },
+								$set: { lastUsedAt: new Date() }
+							},
+							{ upsert: true, new: true }
+						);
+						if (doc) {
+							doc.hitRate = doc.violationsFound / Math.max(1, doc.timesUsed);
+							await doc.save();
+						}
+					} catch (e) {
+						// ignore
+					}
+				}
+			} else {
+				// Query Intelligence Logging (Miss)
+				if (scanResult.discoveryKeyword) {
+					try {
+						const doc = await QueryIntelligence.findOneAndUpdate(
+							{ orgId: scanJob.orgId, keyword: scanResult.discoveryKeyword, platform: scanResult.platform },
+							{ 
+								$inc: { timesUsed: 1 },
+								$set: { lastUsedAt: new Date() }
+							},
+							{ upsert: true, new: true }
+						);
+						if (doc) {
+							doc.hitRate = doc.violationsFound / Math.max(1, doc.timesUsed);
+							await doc.save();
+						}
+					} catch (e) {
+						// ignore
+					}
+				}
 			}
 		} catch (error) {
 			console.error(`Matching failed for result ${scanResult._id}:`, error);

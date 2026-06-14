@@ -10,9 +10,12 @@ router.use(verifyToken);
 router.get('/status', AgentController.getStatus);
 router.get('/decisions', AgentController.listDecisions);
 router.get('/decisions/:id', AgentController.getDecision);
+router.get('/decisions/:id/trace', AgentController.getDecisionTrace);
 router.get('/threat-memory', AgentController.listThreatMemory);
 router.patch('/mode', AgentController.setMode);
 router.post('/approve/:decisionId', AgentController.approveDecision);
 router.get('/stats', AgentController.getStats);
+router.get('/predict', AgentController.getPrediction);
+router.get('/query-intelligence', AgentController.getQueryIntelligence);
 
 export default router;

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import fetch from 'node-fetch';
 import Asset from '../models/asset.model.js';
 import { runConfidenceCascade } from './confidenceCascade.agent.js';
@@ -8,8 +9,28 @@ import { decideForViolation } from './decision.agent.js';
 import { getAgentStatus } from '../services/agent.service.js';
 import { executeAction } from './executor.agent.js';
 import { emitAgentDecision } from '../config/socket.js';
+import { detectPlatformSurge } from './surge.agent.js';
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8001';
+
+function fallbackSeverity(confidence, platform, matchType, threatEntry) {
+  let sev = 1;
+  if (confidence >= 85) sev = 5;
+  else if (confidence >= 70) sev = 4;
+  else if (confidence >= 50) sev = 3;
+  else if (confidence >= 30) sev = 2;
+  
+  // Platform risk boost
+  if (platform === 'telegram') sev = Math.min(5, sev + 1);
+  
+  // Repeat offender boost
+  if (threatEntry?.totalViolations >= 5) sev = Math.min(5, sev + 1);
+  
+  // Match type boost
+  if (matchType === 'exact') sev = Math.min(5, sev + 1);
+  
+  return sev;
+}
 
 export async function runAgentOnScanComplete({ orgId, scanJobId, violations }) {
   try {
@@ -27,6 +48,8 @@ export async function runAgentOnScanComplete({ orgId, scanJobId, violations }) {
 
         // 0. Enrich scan/violation with asset and run confidence cascade
         let severityResult = null;
+        let usedFallback = false;
+
         try {
           const asset = violation.assetId ? await Asset.findById(violation.assetId).lean() : null;
         
@@ -59,19 +82,43 @@ export async function runAgentOnScanComplete({ orgId, scanJobId, violations }) {
               });
               if (resp.ok) {
                 severityResult = await resp.json();
-                // attach cascade meta for logging
                 severityResult.meta = { ...(severityResult.meta || {}), cascade: cascade.meta || {} };
               } else {
-                // fallback to rule-based mapping if classifier fails
-                severityResult = { severity: Math.min(5, Math.max(1, Math.round(classifierPayload.confidence / 20))), reasoning: 'Classifier unavailable, used fallback mapping', meta: { cascade: cascade.meta || {} } };
+                usedFallback = true;
+                const domain = violation.sourceDomain || null;
+                const threatEntry = await findThreatByDomain({ orgId: violation.orgId || orgId, domain });
+                const calculatedSev = fallbackSeverity(classifierPayload.confidence, violation.platform, violation.matchType, threatEntry);
+                severityResult = {
+                  severity: calculatedSev,
+                  threatCategory: asset?.type === 'exam_paper' ? 'leak_forum' : 'stream_ripper',
+                  reasoning: 'Classifier unavailable, used rule-based fallback mapping',
+                  meta: { cascade: cascade.meta || {}, usedFallback: true }
+                };
               }
             } catch (e) {
-              severityResult = { severity: Math.min(5, Math.max(1, Math.round((classifierPayload.confidence || 0) / 20))), reasoning: 'Classifier request failed, used fallback mapping', meta: { cascade: cascade.meta || {}, error: String(e) } };
+              usedFallback = true;
+              const domain = violation.sourceDomain || null;
+              const threatEntry = await findThreatByDomain({ orgId: violation.orgId || orgId, domain });
+              const calculatedSev = fallbackSeverity(classifierPayload.confidence, violation.platform, violation.matchType, threatEntry);
+              severityResult = {
+                severity: calculatedSev,
+                threatCategory: asset?.type === 'exam_paper' ? 'leak_forum' : 'stream_ripper',
+                reasoning: 'Classifier request failed, used rule-based fallback mapping',
+                meta: { cascade: cascade.meta || {}, error: String(e), usedFallback: true }
+              };
             }
           }
         } catch (e) {
-          // On cascade errors, fall back to rule-based
-          severityResult = { severity: Math.min(5, Math.max(1, Math.round((violation.matchConfidence || 0) / 20))), reasoning: 'Cascade failed, used fallback mapping', meta: { error: String(e) } };
+          usedFallback = true;
+          const domain = violation.sourceDomain || null;
+          const threatEntry = await findThreatByDomain({ orgId: violation.orgId || orgId, domain });
+          const calculatedSev = fallbackSeverity(violation.matchConfidence || 0, violation.platform, violation.matchType, threatEntry);
+          severityResult = {
+            severity: calculatedSev,
+            threatCategory: 'unknown',
+            reasoning: 'Cascade failed, used rule-based fallback mapping',
+            meta: { error: String(e), usedFallback: true }
+          };
         }
 
         // 2) Check ThreatMemory
@@ -90,11 +137,21 @@ export async function runAgentOnScanComplete({ orgId, scanJobId, violations }) {
           autonomousMode: Boolean(autonomousMode),
         });
 
-        // 4) Execute action
-        const execResult = await executeAction({ orgId: violation.orgId || orgId, violationId: violation._id, action: decision.action });
+        // 4) Pre-generate agent decision log ID to pass into execution action
+        const agentDecisionId = new mongoose.Types.ObjectId();
 
-        // 5) Write AgentDecisionLog
-        await AgentDecisionLog.create({
+        // 5) Execute action
+        const execResult = await executeAction({
+          orgId: violation.orgId || orgId,
+          violationId: violation._id,
+          action: decision.action,
+          severity: decision.severity || severityResult?.severity || 3,
+          agentDecisionId,
+        });
+
+        // 6) Write AgentDecisionLog (version 2.0)
+        const savedLog = await AgentDecisionLog.create({
+          _id: agentDecisionId,
           orgId: violation.orgId || orgId,
           assetId: violation.assetId || null,
           violationId: violation._id,
@@ -103,12 +160,12 @@ export async function runAgentOnScanComplete({ orgId, scanJobId, violations }) {
           reasoning: decision.reasoning || (severityResult && severityResult.reasoning) || '',
           action: decision.action,
           outcome: execResult?.outcome || 'pending',
-          agentVersion: '1.0',
+          agentVersion: '2.0',
           autonomousMode: decision.autonomousMode || false,
-          meta: { severityResult, execResult },
+          meta: { severityResult, execResult, usedFallback },
         });
 
-        // 6) Update ThreatMemory
+        // 7) Update ThreatMemory
         try {
           if (domain) {
             await upsertThreat({ orgId: violation.orgId || orgId, domain, platform: violation.platform });
@@ -117,16 +174,51 @@ export async function runAgentOnScanComplete({ orgId, scanJobId, violations }) {
           // ignore
         }
 
-        // 7) Emit socket event
+        // 8) Emit enriched socket event trace payload
         try {
-          emitAgentDecision({ orgId: violation.orgId || orgId, decision: { violationId: violation._id, action: decision.action, reasoning: decision.reasoning } });
+          emitAgentDecision({
+            orgId: violation.orgId || orgId,
+            decision: {
+              logId: savedLog._id,
+              violationId: violation._id,
+              action: decision.action,
+              reasoning: decision.reasoning,
+              autonomousMode: decision.autonomousMode,
+              outcome: execResult?.outcome || 'pending',
+              input: payload,
+              trace: {
+                platform: violation.platform,
+                matchConfidence: violation.matchConfidence,
+                cascadeStages: severityResult?.meta?.cascade?.stages || [],
+                classifierResult: {
+                  severity: severityResult?.severity,
+                  threatCategory: severityResult?.threatCategory,
+                },
+                threatMemoryHit: Boolean(threatEntry),
+                repeatOffenderCount: threatEntry?.totalViolations || 0,
+                decisionRule: `sev_${severityResult?.severity}_rule${threatEntry ? '+repeat_offender' : ''}`,
+                totalMs: execResult?.totalMs || null,
+                usedFallback,
+              },
+              executionResult: execResult,
+              timestamp: new Date().toISOString(),
+            }
+          });
         } catch (e) {
-          // ignore emit errors
+          console.error('[orchestrator] socket emit failure:', e.message);
         }
       } catch (inner) {
         console.error('[orchestrator] failure processing violation:', inner);
       }
     }
+
+    // 9) Detect Platform Surge after batch completion
+    try {
+      await detectPlatformSurge({ orgId, recentViolations: violations });
+    } catch (e) {
+      console.error('[orchestrator] failed to trigger platform surge detection:', e.message);
+    }
+
   } catch (error) {
     console.error('[orchestrator] runAgentOnScanComplete failed:', error);
   }

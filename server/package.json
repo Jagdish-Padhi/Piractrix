@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon --watch src --watch .env src/index.js",
-    "seed": "node scripts/seed.js",
+    "seed": "node scripts/seed_demo_data.js",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
@@ -31,7 +31,10 @@
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.4",
     "puppeteer": "^24.8.2",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "telegraf": "^4.16.3",
+    "twilio": "^6.0.2",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

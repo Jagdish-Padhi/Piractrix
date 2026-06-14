@@ -1,16 +1,22 @@
 import AgentDecisionLog from '../models/agentDecisionLog.model.js';
 import ThreatMemory from '../models/threatMemory.model.js';
+import AgentStatus from '../models/agentStatus.model.js';
+import QueryIntelligence from '../models/queryIntelligence.model.js';
 import { executeAction } from '../agents/executor.agent.js';
 import { emitAgentDecision } from '../config/socket.js';
 
-// In-memory mode store per org. For demo/demo seed this is fine.
-const modeByOrg = new Map();
-
 export async function getAgentStatus(orgId) {
-  const mode = modeByOrg.get(String(orgId)) || false;
-  // find last decision timestamp
+  let statusDoc = await AgentStatus.findOne({ orgId }).lean();
+  if (!statusDoc) {
+    statusDoc = await AgentStatus.create({ orgId, autonomousMode: false });
+  }
   const lastDecision = await AgentDecisionLog.findOne({ orgId }).sort({ createdAt: -1 }).lean();
-  return { autonomousMode: Boolean(mode), lastRun: lastDecision ? lastDecision.createdAt : null };
+  return {
+    autonomousMode: statusDoc.autonomousMode || false,
+    status: statusDoc.autonomousMode ? 'active' : 'assisted',
+    lastRun: statusDoc.lastRun || (lastDecision ? lastDecision.createdAt : null),
+    heartbeat: statusDoc.lastHeartbeat || null
+  };
 }
 
 export async function listDecisions({ orgId, page = 1, limit = 20 }) {
@@ -37,9 +43,13 @@ export async function listThreatMemory({ orgId, page = 1, limit = 50 }) {
   return { items, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)) };
 }
 
-export function setMode({ orgId, mode }) {
-  modeByOrg.set(String(orgId), Boolean(mode));
-  return { autonomousMode: Boolean(mode) };
+export async function setMode({ orgId, mode }) {
+  const statusDoc = await AgentStatus.findOneAndUpdate(
+    { orgId },
+    { autonomousMode: Boolean(mode) },
+    { upsert: true, new: true }
+  );
+  return { autonomousMode: statusDoc.autonomousMode };
 }
 
 export async function approveDecision({ orgId, decisionId }) {
@@ -54,7 +64,9 @@ export async function approveDecision({ orgId, decisionId }) {
   const action = decision.action;
   const violationId = decision.violationId;
 
-  const result = await executeAction({ orgId, violationId, action });
+  // Pass severity & log reference to the executor
+  const severity = decision.meta?.severityResult?.severity || 3;
+  const result = await executeAction({ orgId, violationId, action, severity, agentDecisionId: decisionId });
 
   decision.outcome = result?.outcome || 'pending';
   await decision.save();
@@ -80,4 +92,13 @@ export async function getStats({ orgId }) {
   const threatDomainsCount = await ThreatMemory.countDocuments({ orgId });
 
   return { totalDecisions: total, actionsTaken, decisionsLast24h, breakdown, threatDomainsCount };
+}
+
+export async function listQueryIntelligence({ orgId, page = 1, limit = 20 }) {
+  const skip = (page - 1) * limit;
+  const [items, total] = await Promise.all([
+    QueryIntelligence.find({ orgId }).sort({ hitRate: -1, timesUsed: -1 }).skip(skip).limit(limit).lean(),
+    QueryIntelligence.countDocuments({ orgId }),
+  ]);
+  return { items, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)) };
 }

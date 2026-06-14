@@ -98,7 +98,21 @@ export function emitAlertsUpdated({ orgId, unreadCount }) {
 }
 
 export function emitAgentDecision({ orgId, decision }) {
-    if (!io) return;
+	if (!io) return;
+	io.to(getSocketRoom(orgId)).emit('agent:decision', { decision });
+}
 
-    io.to(getSocketRoom(orgId)).emit('agent:decision', { decision });
+export function emitAgentPerception({ orgId, event }) {
+	if (!io) return;
+	io.to(getSocketRoom(orgId)).emit('agent:perception', { event });
+}
+
+export function emitAgentHeartbeat({ orgId, status }) {
+	if (!io) return;
+	io.to(getSocketRoom(orgId)).emit('agent:heartbeat', { status, ts: new Date().toISOString() });
+}
+
+export function emitEnforcementExecuted({ orgId, enforcement }) {
+	if (!io) return;
+	io.to(getSocketRoom(orgId)).emit('agent:enforcement', { enforcement });
 }

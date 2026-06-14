@@ -298,9 +298,19 @@ export async function getOrganizationById(organizationId) {
 
 export async function updateOrganizationNotificationPrefs({ organizationId, payload = {} }) {
 	const normalizedPrefs = {
-		emailOnHighConfidence: Boolean(payload.emailOnHighConfidence),
+		emailOnHighConfidence: payload.emailOnHighConfidence !== undefined ? Boolean(payload.emailOnHighConfidence) : true,
 		emailDigest: Boolean(payload.emailDigest),
-		inAppAlerts: payload.inAppAlerts === undefined ? true : Boolean(payload.inAppAlerts),
+		inAppAlerts: payload.inAppAlerts !== undefined ? Boolean(payload.inAppAlerts) : true,
+		whatsappEnabled: Boolean(payload.whatsappEnabled),
+		whatsappNumber: payload.whatsappNumber || null,
+		telegramEnabled: Boolean(payload.telegramEnabled),
+		telegramChatId: payload.telegramChatId || null,
+		slackEnabled: Boolean(payload.slackEnabled),
+		slackWebhookUrl: payload.slackWebhookUrl || null,
+		pushEnabled: Boolean(payload.pushEnabled),
+		pushSubscription: payload.pushSubscription || null,
+		alertMinSeverity: Number(payload.alertMinSeverity ?? 3),
+		whatsappMinSeverity: Number(payload.whatsappMinSeverity ?? 5),
 	};
 
 	return Organization.findByIdAndUpdate(

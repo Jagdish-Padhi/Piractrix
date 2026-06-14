@@ -28,6 +28,7 @@ organizationRouter.get('/me', async (req, res, next) => {
 				createdAt: organization.createdAt,
 				lastLoginAt: organization.lastLoginAt,
 			},
+			vapidPublicKey: process.env.VAPID_PUBLIC_KEY || null,
 		});
 	} catch (error) {
 		return next(error);
