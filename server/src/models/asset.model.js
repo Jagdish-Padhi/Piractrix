@@ -35,7 +35,7 @@ const assetSchema = new mongoose.Schema(
 		],
 		type: {
 			type: String,
-			enum: ['video', 'image', 'highlight', 'exam_paper', 'document', 'music', 'ott_content', 'livestream'],
+			enum: ['video', 'image', 'highlight', 'exam_paper', 'document', 'music', 'ott_content', 'livestream', 'software', 'audio'],
 			required: true,
 		},
 		livestreamUrl: {

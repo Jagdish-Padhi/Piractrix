@@ -37,7 +37,7 @@ const alertSchema = new mongoose.Schema(
     },
     channels: {
       type: [String],
-      enum: ['in-app', 'email'],
+      enum: ['in-app', 'email', 'whatsapp', 'slack', 'telegram'],
       default: ['in-app'],
     },
     // Used by platform_surge alerts for dedup logic

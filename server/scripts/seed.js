@@ -36,45 +36,51 @@ const randomDate = (startDaysAgo, endDaysAgo) => {
 	return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
-const platforms = ['youtube', 'twitter', 'telegram', 'web'];
+const platforms = ['youtube', 'twitter', 'telegram', 'web', 'reddit'];
 
-// Real discoverable piracy/unofficial stream URLs for demo realism
-// These are real pages that load and demonstrate the kind of content Piractrix detects
-const realViolationUrls = {
-	youtube: [
-		{ url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', title: 'UCL Final 2024 Highlights [UNOFFICIAL]' },
-		{ url: 'https://www.youtube.com/watch?v=9bZkp7q19f0', title: 'NBA Finals Game 7 Full Match Free' },
-		{ url: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk', title: 'Champions League Goals Compilation' },
-		{ url: 'https://www.youtube.com/watch?v=JGwWNGJdvx8', title: 'IPL 2024 Best Moments Watch Free' },
-		{ url: 'https://www.youtube.com/watch?v=hT_nvWreIhg', title: 'Olympics 100m Sprint Full Replay' },
-		{ url: 'https://www.youtube.com/watch?v=OPf0YbXqDm0', title: 'Man City Kit 24/25 Unofficial Review' },
+// Unified lists of threat domains and their relationships to form 3 beautiful visual clusters
+const threatClusters = {
+	sports_iptv: [
+		{ domain: 'sportsurge.net', level: 'critical', platforms: ['web', 'twitter'], related: ['daddylive.eu', 'footybite.cc'] },
+		{ domain: 'daddylive.eu', level: 'critical', platforms: ['web', 'telegram'], related: ['sportsurge.net', 'weakspell.org', 'methstreams.com'] },
+		{ domain: 'footybite.cc', level: 'high', platforms: ['web'], related: ['sportsurge.net', 'weakspell.org'] },
+		{ domain: 'weakspell.org', level: 'high', platforms: ['web'], related: ['daddylive.eu', 'footybite.cc', 'methstreams.com', 'cricfree.live'] },
+		{ domain: 'methstreams.com', level: 'medium', platforms: ['web', 'twitter'], related: ['daddylive.eu', 'weakspell.org', 'cricfree.live'] },
+		{ domain: 'cricfree.live', level: 'medium', platforms: ['web'], related: ['weakspell.org', 'methstreams.com', 'vipbox.lc'] },
+		{ domain: 'vipbox.lc', level: 'low', platforms: ['web'], related: ['cricfree.live'] }
 	],
-	twitter: [
-		{ url: 'https://x.com/search?q=ucl+final+live+stream+free', title: 'UCL Final Live Free Streaming Links' },
-		{ url: 'https://x.com/search?q=nba+finals+watch+free', title: 'NBA Finals Watch Free Twitter Thread' },
-		{ url: 'https://x.com/search?q=champions+league+pirate+stream', title: 'Champions League Unofficial Stream' },
-		{ url: 'https://x.com/search?q=ipl+free+stream+2024', title: 'IPL 2024 Free Stream - Twitter' },
-		{ url: 'https://x.com/search?q=sports+highlights+leaked', title: 'Leaked Sports Highlights - Twitter' },
+	p2p_torrent: [
+		{ domain: '1337x.to', level: 'critical', platforms: ['web', 'reddit'], related: ['thepiratebay.org', 'yts.mx'] },
+		{ domain: 'thepiratebay.org', level: 'critical', platforms: ['web'], related: ['1337x.to', 'rarbg.to', 'eztv.re'] },
+		{ domain: 'yts.mx', level: 'high', platforms: ['web'], related: ['1337x.to', 'nyaa.si'] },
+		{ domain: 'nyaa.si', level: 'high', platforms: ['web', 'reddit'], related: ['yts.mx', 'rutracker.org'] },
+		{ domain: 'rarbg.to', level: 'medium', platforms: ['web'], related: ['thepiratebay.org', 'eztv.re'] },
+		{ domain: 'eztv.re', level: 'medium', platforms: ['web'], related: ['thepiratebay.org', 'rarbg.to'] },
+		{ domain: 'rutracker.org', level: 'low', platforms: ['web'], related: ['nyaa.si'] }
 	],
-	web: [
-		{ url: 'https://www.reddit.com/r/soccerstreams', title: 'Reddit SoccerStreams - Free UCL Streams' },
-		{ url: 'https://www.reddit.com/r/nbastreams', title: 'Reddit NBA Streams - Watch Free' },
-		{ url: 'https://archive.org/search?query=sports+highlights', title: 'Archive.org Unauthorized Sports Uploads' },
-		{ url: 'https://vimeo.com/search?q=ucl+final', title: 'Vimeo UCL Final Unauthorized Upload' },
-		{ url: 'https://vimeo.com/search?q=nba+finals+highlights', title: 'Vimeo NBA Finals Unofficial Highlights' },
-		{ url: 'https://www.dailymotion.com/search/ucl+final+2024', title: 'Dailymotion UCL Final Free Watch' },
-		{ url: 'https://www.dailymotion.com/search/nba+finals+highlights', title: 'Dailymotion NBA Finals Full Match' },
-		{ url: 'https://www.facebook.com/watch/search/?q=ucl+final+stream', title: 'Facebook UCL Final Live Stream' },
-	],
-	telegram: [
-		{ url: 'https://t.me/s/sportsstreams', title: 'Telegram Sports Streams Channel' },
-		{ url: 'https://t.me/s/freesportslinks', title: 'Telegram Free Sports Links Group' },
-		{ url: 'https://t.me/s/footballstreams24', title: 'Telegram Football Streams 24/7' },
-	],
+	direct_download: [
+		{ domain: 'mega.nz', level: 'high', platforms: ['web', 'telegram'], related: ['mediafire.com', 'rapidgator.net'] },
+		{ domain: 'mediafire.com', level: 'high', platforms: ['web'], related: ['mega.nz', 'fitgirl-repacks.site'] },
+		{ domain: 'rapidgator.net', level: 'medium', platforms: ['web'], related: ['mega.nz', 'kemono.party'] },
+		{ domain: 'fitgirl-repacks.site', level: 'medium', platforms: ['web', 'reddit'], related: ['mediafire.com', 'steamunlocked.net'] },
+		{ domain: 'steamunlocked.net', level: 'low', platforms: ['web'], related: ['fitgirl-repacks.site'] },
+		{ domain: 'kemono.party', level: 'low', platforms: ['web', 'telegram'], related: ['rapidgator.net'] }
+	]
 };
 
-const domains = ['youtube.com', 'x.com', 't.me', 'reddit.com', 'vimeo.com', 'dailymotion.com', 'facebook.com', 'archive.org'];
-const highRiskDomains = ['t.me', 'reddit.com', 'vimeo.com', 'dailymotion.com']; // Repeat offenders
+const allThreatDomains = [
+	...threatClusters.sports_iptv,
+	...threatClusters.p2p_torrent,
+	...threatClusters.direct_download
+];
+
+const violationUrls = {
+	youtube: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+	twitter: 'https://x.com/search?q=leak+download+mega',
+	telegram: 'https://t.me/s/PremiumLeaksHD',
+	reddit: 'https://reddit.com/r/Piracy/comments/mega_thread_2026/',
+	web: 'https://fmovies.to/film/watch-online-free-hd'
+};
 
 const seedData = async () => {
 	try {
@@ -82,7 +88,6 @@ const seedData = async () => {
 		await mongoose.connect(MONGO_URI);
 		console.log('Connected.');
 
-		// 1. Clear existing data for demo org
 		console.log('Clearing existing demo data...');
 		const existingOrg = await Organization.findOne({ email: 'demo@piractrix.com' });
 		if (existingOrg) {
@@ -93,114 +98,160 @@ const seedData = async () => {
 				ScanResult.deleteMany({ orgId }),
 				Violation.deleteMany({ orgId }),
 				Alert.deleteMany({ orgId }),
-				ThreatMemory.deleteMany({ orgId }),
-				Organization.deleteOne({ _id: orgId })
+				ThreatMemory.deleteMany({ orgId })
 			]);
+			await Organization.deleteOne({ _id: orgId });
 		}
 
-		// 2. Create Demo Organization
 		console.log('Creating demo organization...');
 		const passwordHash = await bcrypt.hash('Piractrix@2026', 10);
 		const demoOrg = await Organization.create({
-			orgName: 'Piractrix Defense Systems',
+			orgName: 'Piractrix Enterprise Demo',
 			email: 'demo@piractrix.com',
 			passwordHash,
 			plan: 'pro',
-			createdAt: randomDate(45, 45) // Org created 45 days ago
+			createdAt: randomDate(60, 60),
+			notificationPrefs: {
+				whatsappEnabled: true,
+				emailOnHighConfidence: true
+			}
 		});
 		const orgId = demoOrg._id;
 
-		// 3. Create Broad Variety of Assets
-		console.log('Seeding diverse sports assets...');
+		console.log('Seeding curated Enterprise Assets with working URLs and previews...');
 		const assetData = [
+			// Videos
 			{
-				title: 'UEFA Champions League Final: Real Madrid vs Dortmund',
-				description: 'Official 4K broadcast highlights of the 2024 UEFA Champions League Final. Contains exclusive multi-angle camera feeds, post-match celebrations, and official trophy lift. Protected under UEFA Global Rights division.',
+				title: 'Dune: Part Two (2024)',
+				description: 'Official theatrical release of Dune: Part Two in 4K HDR. Distributed by Warner Bros.',
 				type: 'video',
-				gcsUrl: 'https://res.cloudinary.com/diqmfvdzi/video/upload/v1714030000/demo/ucl.mp4',
-				// Football/soccer stadium & match - verified Unsplash ID
-				thumbnailUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=800',
+				gcsUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=80'
 			},
 			{
-				title: 'NBA Finals: Lakers vs Celtics Game 7',
-				description: 'Full match recording of the historic NBA Finals Game 7. Includes official broadcast graphics, commentary audio tracks, and halftime show. Extremely high-value asset strictly monitored for unauthorized re-streaming.',
+				title: 'Deadpool & Wolverine (2024)',
+				description: 'Marvel Studios summer blockbuster. High-priority tracking for leaks.',
 				type: 'video',
-				gcsUrl: 'https://res.cloudinary.com/diqmfvdzi/video/upload/v1714030000/demo/nba.mp4',
-				// Basketball game action - verified Unsplash ID
-				thumbnailUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&q=80&w=800',
+				gcsUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1608889174637-3c44f6326f1a?w=600&auto=format&fit=crop&q=80'
 			},
 			{
-				title: "Wimbledon Men's Final Match Point",
-				description: "The defining match point of the Wimbledon Men's Singles Final. Short-form clip highly susceptible to social media piracy (Twitter/X and Telegram). Protected by All England Lawn Tennis Club.",
+				title: 'The Bear - Season 3',
+				description: 'FX on Hulu complete season drop. Binge-watching format leakage monitoring.',
+				type: 'video',
+				gcsUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80'
+			},
+			// OTT Content
+			{
+				title: 'House of the Dragon - Season 2',
+				description: 'HBO Max flagship series. Pre-broadcast leak protection active.',
+				type: 'ott_content',
+				gcsUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?w=600&auto=format&fit=crop&q=80'
+			},
+			// Highlight
+			{
+				title: 'UEFA Champions League Final Highlight',
+				description: 'Official broadcast highlights. Exclusive rights distribution.',
 				type: 'highlight',
-				gcsUrl: 'https://res.cloudinary.com/diqmfvdzi/video/upload/v1714030000/demo/tennis.mp4',
-				// Tennis player serving on grass court - verified Unsplash ID
-				thumbnailUrl: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&q=80&w=800',
+				gcsUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&auto=format&fit=crop&q=80'
+			},
+			// Music (Audio master tracks)
+			{
+				title: 'Taylor Swift - The Tortured Poets Department',
+				description: 'Studio master album tracking. Heavily targeted by leak sites.',
+				type: 'music',
+				gcsUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80'
 			},
 			{
-				title: 'UFC 300: Heavyweight Championship Knockout',
-				description: 'Pay-per-view main event knockout sequence from UFC 300. This 30-second clip is the most highly pirated segment of the event. Monitored strictly across Reddit, Telegram, and illegal IPTV streams.',
-				type: 'highlight',
-				gcsUrl: 'https://res.cloudinary.com/diqmfvdzi/video/upload/v1714030000/demo/ufc.mp4',
-				// MMA / boxing gloves - verified Unsplash ID
-				thumbnailUrl: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&q=80&w=800',
+				title: 'Kendrick Lamar - Not Like Us',
+				description: 'Viral studio single. Audio fingerprint monitoring active.',
+				type: 'music',
+				gcsUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80'
 			},
+			// Images
 			{
-				title: 'Formula 1: Red Bull RB20 Official Reveal',
-				description: 'Pre-season confidential imagery of the Red Bull Racing RB20 aerodynamics package. High risk of industrial espionage and unauthorized publication by independent motorsport blogs.',
+				title: 'Piractrix Official Concept Art Logo',
+				description: 'High-res transparent SVG/PNG design assets.',
 				type: 'image',
-				gcsUrl: 'https://res.cloudinary.com/diqmfvdzi/image/upload/v1714030000/demo/f1.jpg',
-				// Formula 1 race car on track - verified Unsplash ID
-				thumbnailUrl: 'https://images.unsplash.com/photo-1541417904950-b855846fe074?auto=format&fit=crop&q=80&w=800',
+				gcsUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80'
 			},
 			{
-				title: 'ICC Cricket World Cup 2024 Official Promo Poster',
-				description: 'High-resolution promotional artwork for the ICC T20 World Cup. Frequently used without license by unauthorized ticket resellers and unverified merchandise manufacturers.',
+				title: 'Marvel Studios Deadpool 3 Poster Design',
+				description: 'Marketing distribution image asset.',
 				type: 'image',
-				gcsUrl: 'https://res.cloudinary.com/diqmfvdzi/image/upload/v1714030000/demo/cricket.jpg',
-				// Cricket match, batsman hitting - verified Unsplash ID
-				thumbnailUrl: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&q=80&w=800',
+				gcsUrl: 'https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?w=600&auto=format&fit=crop&q=80',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?w=600&auto=format&fit=crop&q=80'
+			},
+			// Education/Exam Paper
+			{
+				title: 'SAT National Exam Paper 2026',
+				description: 'Highly confidential examination script bundle.',
+				type: 'exam_paper',
+				gcsUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80'
+			},
+			// Document
+			{
+				title: 'GTA VI Source Code Document',
+				description: 'Development details and architecture schema.',
+				type: 'document',
+				gcsUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1610116306796-6fea9f4fae38?w=600&auto=format&fit=crop&q=80'
+			},
+			// Software
+			{
+				title: 'Adobe Premiere Pro 2024 Pre-Activated',
+				description: 'Creative desktop application installer package.',
+				type: 'software',
+				gcsUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=600&auto=format&fit=crop&q=80'
+			},
+			// Livestreams (Monitored separately in streams hub)
+			{
+				title: 'Arsenal vs Chelsea Live Stream',
+				description: 'Premier League live feed monitoring.',
+				type: 'livestream',
+				livestreamUrl: 'https://www.twitch.tv/arsenal-vs-chelsea-live',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&auto=format&fit=crop&q=80'
 			},
 			{
-				title: 'Manchester City Official Home Kit 24/25',
-				description: 'Licensed apparel imagery used for counterfeit detection. The PHash and color histogram of this asset are actively matched against suspected fake merchandise listings on e-commerce platforms.',
-				type: 'image',
-				gcsUrl: 'https://res.cloudinary.com/diqmfvdzi/image/upload/v1714030000/demo/jersey.jpg',
-				// Sports jersey / kit on hanger - verified Unsplash ID
-				thumbnailUrl: 'https://images.unsplash.com/photo-1580087256394-dc596e1c8f4f?auto=format&fit=crop&q=80&w=800',
-			},
-			{
-				title: 'Player Exclusive Sneaker Release (Merch)',
-				description: 'Unreleased limited-edition player signature sneaker. Monitored strictly to prevent pre-release leaks and unauthorized manufacturing by overseas counterfeit operations.',
-				type: 'image',
-				gcsUrl: 'https://res.cloudinary.com/diqmfvdzi/image/upload/v1714030000/demo/sneaker.jpg',
-				// Sports sneaker close-up - verified Unsplash ID
-				thumbnailUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800',
+				title: 'F1 Monaco Grand Prix Broadcast',
+				description: 'Formula 1 live event feed auditing.',
+				type: 'livestream',
+				livestreamUrl: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
+				thumbnailUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=600&auto=format&fit=crop&q=80'
 			}
 		];
 
 		const assets = await Asset.insertMany(assetData.map((data, index) => ({
 			orgId,
 			...data,
-			storageKey: `demo_asset_${index}`,
+			storageKey: data.type !== 'livestream' ? `demo_asset_${index}` : undefined,
 			status: 'active',
-			createdAt: new Date(Date.now() - (index * 86400000 * 5)), // Make videos (first items) the newest
-			fileSize: data.type === 'video' ? randomInt(100, 2000) * 1024 * 1024 : randomInt(1, 10) * 1024 * 1024,
+			createdAt: new Date(Date.now() - (index * 86400000 * 2)),
+			fileSize: data.type !== 'livestream' ? (data.type === 'video' || data.type === 'ott_content' ? randomInt(100, 800) * 1024 * 1024 : randomInt(1, 10) * 1024 * 1024) : undefined,
 			fingerprint: {
 				pHash: Math.random().toString(16).substring(2, 18),
-				videoHash: data.type !== 'image' ? Math.random().toString(16).substring(2, 18) : undefined,
-				colorHistogram: [Math.random(), Math.random(), Math.random(), Math.random()],
+				videoHash: (data.type === 'video' || data.type === 'ott_content' || data.type === 'highlight') ? Math.random().toString(16).substring(2, 18) : undefined,
+				colorHistogram: [Math.random(), Math.random(), Math.random(), Math.random()]
 			},
-			violationsFound: 0 // Will update later
+			violationsFound: 0
 		})));
 
-		// 4. Create Historical Scan Jobs
-		console.log('Seeding 30-day historical scan jobs...');
+		console.log('Seeding 25 Scan Jobs...');
 		const scanJobsData = [];
-		for (let i = 0; i < 40; i++) {
-			const asset = randomElement(assets);
-			const startedAt = randomDate(1, 30);
-			const durationMins = randomInt(2, 15);
+		const nonLivestreamAssets = assets.filter(a => a.type !== 'livestream');
+		
+		for (let i = 0; i < 25; i++) {
+			const asset = randomElement(nonLivestreamAssets);
+			const startedAt = randomDate(1, 15);
+			const durationMins = randomInt(5, 20);
 			const completedAt = new Date(startedAt.getTime() + durationMins * 60000);
 			
 			scanJobsData.push({
@@ -208,134 +259,110 @@ const seedData = async () => {
 				assetId: asset._id,
 				status: 'completed',
 				platforms: [randomElement(platforms), randomElement(platforms)],
-				keywords: [`${asset.title.split(' ')[0]} live`, `watch ${asset.title.split(' ')[1]} free`],
-				resultsCount: randomInt(10, 150),
-				violationsCount: 0, // Will update later
+				keywords: [`${asset.title.split(' ')[0]} download`, `watch ${asset.title.split(' ')[0]} free`, `${asset.title.split(' ')[0]} leak`],
+				resultsCount: randomInt(30, 150),
+				violationsCount: 0,
 				startedAt,
 				completedAt
 			});
 		}
 		const scanJobs = await ScanJob.insertMany(scanJobsData);
 
-		// 4.5. Seed ThreatMemory (30 Interconnected Domains)
-		console.log('Seeding Threat Memory network...');
-		const hackathonDomains = [
-			'animehub.to', 'streamverse.cc', 'sportshd.live', 'matchzone.xyz',
-			'piratestreamhd.com', 'crackstreams.me', 'sportsleak.telegram', 'streamhd.xyz',
-			'watchsports.cc', 'freematch.net', 'buffstreams.sx', 'footybite.to',
-			'soccerstreams.net', 'nbastreams.xyz', 'ufcstreams.net', 'boxingstreams.cc',
-			'f1streams.live', 'cricketstreams.xyz', 'tennistv.free', 'sportspass.live',
-			'vipbox.tv', 'firstrow.sports', 'rojadirecta.me', 'totalsportek.to',
-			'hesgoal.com', 'yalla-shoot.io', 'kora-live.tv', 'beinmatch.cc',
-			'stream2watch.tv', 'cricfree.sc'
-		];
-		
-		const threatMemoryData = hackathonDomains.map((domain, index) => {
-			const threatLevel = index < 4 ? 'critical' : index < 12 ? 'high' : index < 22 ? 'medium' : 'low';
-			const related = [];
-			const numRelated = index < 8 ? randomInt(3, 6) : randomInt(0, 2);
-			for (let i = 0; i < numRelated; i++) {
-				const rel = randomElement(hackathonDomains);
-				if (rel !== domain && !related.includes(rel)) related.push(rel);
-			}
-			
-			const platformCount = index < 8 ? randomInt(2, 4) : randomInt(1, 2);
-			const domainPlatforms = [];
-			for (let i = 0; i < platformCount; i++) {
-				const p = randomElement(platforms);
-				if (!domainPlatforms.includes(p)) domainPlatforms.push(p);
-			}
-
+		console.log('Seeding structured Threat Memory network (20 nodes in 3 rings)...');
+		const threatMemoryDocs = allThreatDomains.map((item) => {
 			return {
 				orgId,
-				domain,
-				firstSeenAt: randomDate(30, 40),
-				lastSeenAt: randomDate(0, 5),
-				totalViolations: randomInt(1, index < 5 ? 25 : 10),
-				platforms: domainPlatforms,
-				threatLevel,
-				autoEscalate: index < 3,
-				relatedDomains: related,
+				domain: item.domain,
+				firstSeenAt: randomDate(30, 45),
+				lastSeenAt: randomDate(0, 3),
+				totalViolations: randomInt(15, item.level === 'critical' ? 120 : item.level === 'high' ? 60 : 25),
+				platforms: item.platforms,
+				threatLevel: item.level,
+				autoEscalate: item.level === 'critical',
+				relatedDomains: item.related,
 				meta: {
-					ipAddresses: [`104.21.${randomInt(10, 99)}.${randomInt(10, 250)}`, `172.67.${randomInt(10, 99)}.${randomInt(10, 250)}`],
-					registrar: randomElement(['NameCheap', 'Cloudflare', 'Tucows', 'GoDaddy']),
-					hostingProvider: randomElement(['Cloudflare', 'DigitalOcean', 'Amazon AWS', 'OVH']),
-					abuseEmail: `abuse@${domain}`
+					ipAddresses: [`104.21.32.${randomInt(10, 250)}`, `172.67.96.${randomInt(10, 250)}`],
+					registrar: randomElement(['Cloudflare', 'NameCheap', 'Tucows', 'Njalla']),
+					hostingProvider: randomElement(['Cloudflare', 'DigitalOcean', 'AWS', 'OVH']),
+					abuseEmail: `abuse@${item.domain}`
 				}
 			};
 		});
-		await ThreatMemory.insertMany(threatMemoryData);
+		await ThreatMemory.insertMany(threatMemoryDocs);
 
-		// 5. Create Realistic Violations (100+ over 30 days)
-		console.log('Seeding 100+ realistic violations across all cases...');
+		console.log('Seeding 55 highly realistic violations...');
 		const violationData = [];
 		const assetViolationCounts = {};
 		const scanViolationCounts = {};
 
-		for (let i = 0; i < 120; i++) {
+		for (let i = 0; i < 55; i++) {
 			const scanJob = randomElement(scanJobs);
 			const asset = assets.find(a => a._id.toString() === scanJob.assetId.toString());
-			const detectedAt = new Date(scanJob.completedAt.getTime() - randomInt(0, 60000));
+			const detectedAt = new Date(scanJob.completedAt.getTime() - randomInt(0, 30000));
 			
-			// Simulate Repeat Offenders (pick from hackathon domains)
-			const domain = randomElement(hackathonDomains);
-			const platform = domain.includes('telegram') ? 'telegram' : randomElement(platforms);
+			// Select domain and match platform from threat database or fallbacks
+			const threat = randomElement(allThreatDomains);
+			const domain = threat.domain;
+			const platform = randomElement(threat.platforms);
 			
-			// Realistic statuses
 			const statusRand = Math.random();
 			let status = 'open';
+			let caseStatus = 'open';
 			let resolvedAt = null;
-			let matchConfidence = randomInt(40, 99);
-			let matchType = matchConfidence > 90 ? 'exact' : matchConfidence > 70 ? 'near-duplicate' : 'partial';
+			let matchConfidence = randomInt(70, 99);
+			let matchType = matchConfidence > 90 ? 'exact' : 'near-duplicate';
 
 			if (statusRand < 0.15) {
 				status = 'false_positive';
-				matchConfidence = randomInt(30, 60);
+				caseStatus = 'false_positive';
+				matchConfidence = randomInt(45, 60);
 				matchType = 'partial';
-			} else if (statusRand < 0.35) {
+			} else if (statusRand < 0.45) {
 				status = 'resolved';
-				// SLA Realistic: Resolved 2 to 48 hours after detection
-				resolvedAt = new Date(detectedAt.getTime() + randomInt(2, 48) * 3600000);
-			} else if (statusRand < 0.5) {
+				caseStatus = 'resolved';
+				resolvedAt = new Date(detectedAt.getTime() + randomInt(1, 24) * 3600000);
+			} else if (statusRand < 0.70) {
 				status = 'reported';
+				caseStatus = 'dmca_sent';
 			}
 
-			// Generate screenshots based on asset type
+			// Point screenshot to the asset's high-res Unsplash thumbnail (forces 100% successful loading)
 			const screenshotUrl = asset.thumbnailUrl;
-
-			// Pick a real URL from the pool based on platform
-			const urlPool = realViolationUrls[platform] || realViolationUrls.web;
-			const pickedUrl = randomElement(urlPool);
+			const baseUrl = violationUrls[platform] || violationUrls.web;
 
 			violationData.push({
 				orgId,
 				assetId: asset._id,
 				scanJobId: scanJob._id,
 				platform,
-				sourceUrl: pickedUrl.url,
-				sourceDomain: new URL(pickedUrl.url).hostname,
+				sourceUrl: baseUrl.replace(/^[https://]+[^/]+/, `https://${domain}`),
+				sourceDomain: domain,
 				matchConfidence,
 				matchType,
 				status,
+				caseStatus,
+				caseId: `PIR-${new Date(detectedAt).toISOString().slice(0,10).replace(/-/g,'')}-${randomInt(1000, 9999)}`,
 				resolvedAt,
 				screenshotUrl,
 				evidenceBundle: {
-					hammingDistance: randomInt(0, 15),
-					colorSimilarity: Number((Math.random() * 0.5 + 0.5).toFixed(2)),
-					frameMatchCount: asset.type !== 'image' ? randomInt(1, 20) : undefined,
+					hammingDistance: randomInt(0, 10),
+					colorSimilarity: Number((Math.random() * 0.3 + 0.7).toFixed(2)),
+					frameMatchCount: (asset.type === 'video' || asset.type === 'ott_content') ? randomInt(3, 15) : undefined,
+					visionLabelOverlapScore: randomInt(60, 95),
+					visionConfidenceBoost: randomInt(5, 15),
+					visionLabels: ['broadcast_logo', 'watermark', 'action_scene', 'sports_broadcast']
 				},
 				detectedAt,
-				repeatOffenderScore: randomInt(0, 95)
+				repeatOffenderScore: randomInt(20, 95)
 			});
 
-			// Accumulate counts
 			assetViolationCounts[asset._id] = (assetViolationCounts[asset._id] || 0) + 1;
 			scanViolationCounts[scanJob._id] = (scanViolationCounts[scanJob._id] || 0) + 1;
 		}
 
 		const violations = await Violation.insertMany(violationData);
 
-		// Update counts in Assets and ScanJobs
+		// Synchronize counts
 		for (const asset of assets) {
 			await Asset.findByIdAndUpdate(asset._id, { violationsFound: assetViolationCounts[asset._id] || 0 });
 		}
@@ -343,98 +370,86 @@ const seedData = async () => {
 			await ScanJob.findByIdAndUpdate(job._id, { violationsCount: scanViolationCounts[job._id] || 0 });
 		}
 
-		// 6. Create ScanResult records so the results page shows discovered URLs
-		const pageTitles = [
-			'UCL Final 2024 Full Match Free Watch',
-			'NBA Finals Game 7 Live Stream',
-			'Watch Football Free Online HD',
-			'Pirate Sports Stream Tonight',
-			'Live Sport Free Crackstream',
-			'Man City Kit Replica Buy Cheap',
-			'Bootleg Jersey Shop Online',
-			'Watch Champions League Free',
-			'IPL Live Streaming Free 2024',
-			'Olympics Highlights Unlisted Upload',
-		];
+		console.log('Generating Scan Results data...');
 		const scanResultData = [];
 		for (const job of scanJobs) {
 			const asset = assets.find(a => a._id.toString() === job.assetId.toString());
 			const resultCount = randomInt(4, 12);
 			for (let r = 0; r < resultCount; r++) {
-				const platform = randomElement(Object.keys(realViolationUrls));
-				const urlPool = realViolationUrls[platform];
-				const pickedUrl = randomElement(urlPool);
+				const threat = randomElement(allThreatDomains);
+				const platform = randomElement(threat.platforms);
+				const baseUrl = violationUrls[platform] || violationUrls.web;
+				const sourceUrl = baseUrl.replace(/^[https://]+[^/]+/, `https://${threat.domain}`);
 				const confidence = randomInt(35, 99);
-				const resultStatus = confidence > 85 ? 'matched' : confidence < 50 ? 'no_match' : 'pending_match';
+				const resultStatus = confidence > 85 ? 'matched' : confidence < 55 ? 'no_match' : 'pending_match';
+				
 				scanResultData.push({
 					scanJobId: job._id,
 					orgId,
 					assetId: asset._id,
-					sourceUrl: pickedUrl.url,
-					sourceDomain: new URL(pickedUrl.url).hostname,
+					sourceUrl,
+					sourceDomain: threat.domain,
 					platform,
-					pageTitle: pickedUrl.title,
+					pageTitle: `${asset.title} - Free Streaming Link`,
 					status: resultStatus,
 					matchConfidence: confidence,
 					matchType: confidence > 90 ? 'exact' : confidence > 70 ? 'near-duplicate' : 'partial',
-					scrapedAt: new Date(job.completedAt.getTime() - randomInt(0, 120000)),
+					scrapedAt: new Date(job.completedAt.getTime() - randomInt(0, 60000)),
 					evidenceBundle: {
-						hammingDistance: randomInt(0, 20),
-						colorSimilarity: Number((Math.random() * 0.5 + 0.5).toFixed(2)),
-					},
+						hammingDistance: randomInt(0, 15),
+						colorSimilarity: Number((Math.random() * 0.4 + 0.6).toFixed(2))
+					}
 				});
 			}
 		}
 		await ScanResult.insertMany(scanResultData);
 
-		// 7. Create Alerts (Spikes and High Confidence)
-		console.log('Seeding strategic alerts...');
+		console.log('Seeding curated strategic Alerts...');
 		const alertData = [];
-		const highConfViolations = violations.filter(v => v.matchConfidence >= 90 && v.status === 'open').slice(0, 15);
+		const openHighConfViolations = violations.filter(v => v.matchConfidence >= 90 && v.status === 'open').slice(0, 10);
 		
-		for (const v of highConfViolations) {
+		for (const v of openHighConfViolations) {
 			alertData.push({
 				orgId,
 				violationId: v._id,
 				type: 'high_confidence',
 				severity: 'critical',
 				title: 'High-Value Asset Leak Detected',
-				message: `Piractrix Agent identified an exact match for a protected asset on ${v.platform}. The source domain ${v.sourceDomain} has been flagged for immediate takedown.`,
-				channels: ['in-app', 'email'],
-				read: Math.random() > 0.5,
-				createdAt: new Date(v.detectedAt.getTime() + 2000)
+				message: `Automated DNA analysis identified a direct ${v.matchConfidence}% match for your asset on ${v.platform}. Target domain ${v.sourceDomain} has been prioritized.`,
+				channels: ['in-app', 'email', 'whatsapp'],
+				read: false,
+				createdAt: new Date(v.detectedAt.getTime() + 1000)
 			});
 		}
 
-		// Simulate a platform surge alert
+		// Add platform surge alerts
 		alertData.push({
 			orgId,
 			type: 'platform_surge',
 			severity: 'high',
-			title: 'Telegram Piracy Ring Identified',
-			message: 'Piractrix Agent detected a coordinated cluster of 8 domains sharing Telegram sources within the last hour. Escalating to the enforcement queue.',
-			channels: ['in-app'],
+			title: 'IPTV Streaming Ring Triggered',
+			message: 'System detected a platform surge: 4 related IPTV domains (daddylive.eu, sportsurge.net, footybite.cc, weakspell.org) are sharing identical live feeds.',
+			channels: ['in-app', 'slack'],
 			read: false,
-			createdAt: randomDate(1, 2)
+			createdAt: new Date()
 		});
-
-		// Simulate an infrastructure alert
+		
 		alertData.push({
 			orgId,
 			type: 'platform_surge',
 			severity: 'medium',
-			title: 'Shared Infrastructure Detected',
-			message: 'Agent identified 4 new streaming sites sharing the exact same Cloudflare IP block as a previously taken down target.',
+			title: 'Coordinated Torrent Distribution',
+			message: 'Cross-syndication detected: yts.mx and nyaa.si are syndicating the exact same movie hashes.',
 			channels: ['in-app'],
-			read: false,
-			createdAt: randomDate(3, 4)
+			read: true,
+			createdAt: new Date(Date.now() - 86400000)
 		});
 
 		await Alert.insertMany(alertData);
 
-		console.log('\n✅ ROBUST SEEDING COMPLETED SUCCESSFULLY!');
+		console.log('\n✅ ROBUST CURATED DEMO SEEDING COMPLETED SUCCESSFULLY!');
 		console.log('-----------------------------------');
-		console.log(`Seeded 1 Org, ${assets.length} Assets, ${scanJobs.length} Scans, ${scanResultData.length} Results, ${violations.length} Violations, ${alertData.length} Alerts, ${threatMemoryData.length} Threats.`);
+		console.log(`Seeded 1 Org, ${assets.length} Assets, ${scanJobs.length} Scans, ${scanResultData.length} Results, ${violations.length} Violations, ${alertData.length} Alerts, ${allThreatDomains.length} Threats.`);
 		console.log('Demo Credentials:');
 		console.log('Email: demo@piractrix.com');
 		console.log('Password: Piractrix@2026');
