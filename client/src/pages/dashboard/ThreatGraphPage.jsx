@@ -6,7 +6,9 @@ import {
   Search,
   Network,
   ToggleLeft,
-  AlertTriangle
+  AlertTriangle,
+  Maximize,
+  Minimize
 } from 'lucide-react';
 import { Card, Button, Badge, Loader } from '../../components';
 import toast from 'react-hot-toast';
@@ -134,6 +136,25 @@ export default function ThreatGraphPage() {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement && containerRef.current) {
+      containerRef.current.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  };
 
   useEffect(() => {
     if (containerRef.current) {
@@ -429,8 +450,35 @@ export default function ThreatGraphPage() {
             </div>
           </div>
 
-          <div className="flex flex-1 min-h-0 flex-col px-4 py-4">
-            <div ref={containerRef} style={{ minHeight: '600px' }} className="relative flex-1 min-h-0 overflow-hidden rounded-[28px] border border-white/10 bg-[#050816] shadow-[0_24px_80px_rgba(2,6,23,0.45)]">
+          <div className="flex flex-1 min-h-0 flex-col px-4 py-4 space-y-4">
+            <div ref={containerRef} style={{ minHeight: '600px' }} className="relative flex-1 min-h-0 overflow-hidden rounded-[28px] border border-white/10 bg-[#050816] shadow-[0_24px_80px_rgba(2,6,23,0.45)] group">
+              {/* Full Screen Toggle */}
+              <button 
+                onClick={toggleFullscreen} 
+                className="absolute right-4 top-4 z-50 p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                title="Toggle Full Screen"
+              >
+                {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+              </button>
+
+              {/* Full-Screen Node Tooltip */}
+              {isFullscreen && activeNode && (
+                <div className="pointer-events-none absolute left-6 top-6 z-40 max-w-sm rounded-3xl border border-white/10 bg-slate-950/80 p-5 shadow-[0_20px_60px_rgba(2,6,23,0.45)] backdrop-blur animate-in fade-in slide-in-from-left-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className={`h-3 w-3 rounded-full ${getThreatColor(activeNode.threatLevel).bg}`} />
+                    <h3 className="text-sm font-bold text-slate-100 tracking-wide truncate">{activeNode.label}</h3>
+                  </div>
+                  {activeNode.nodeType === 'platform' ? (
+                    <p className="text-xs text-slate-400 font-mono">{activeNode.domainCount} Domains Linked</p>
+                  ) : (
+                    <div className="space-y-1">
+                      <p className="text-xs text-slate-400 font-mono">Violations: {activeNode.violations}</p>
+                      <p className="text-xs text-slate-400 font-mono">Platforms: {activeNode.platforms?.join(', ')}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {loading ? (
                 <div className="flex h-full items-center justify-center gap-4">
                   <Loader size={0.85} />
@@ -438,14 +486,6 @@ export default function ThreatGraphPage() {
                 </div>
               ) : (
                 <>
-                  <div className="pointer-events-none absolute left-4 bottom-4 z-10 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/75 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 backdrop-blur">
-                    <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-500" />Critical</span>
-                    <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-orange-500" />High</span>
-                    <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-500" />Medium</span>
-                    <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-sky-500" />Low</span>
-                    <span className="hidden text-slate-400 lg:inline border-l border-white/10 pl-2">Hubs = Platforms</span>
-                  </div>
-
                     <div className="absolute inset-0 z-10 overflow-hidden">
                       {nodes.length > 0 && dimensions.width > 0 && (
                         <ForceGraph2D
@@ -551,10 +591,23 @@ export default function ThreatGraphPage() {
                           linkColor={link => {
                             const srcId = typeof link.source === 'object' ? link.source.id : link.source;
                             const tgtId = typeof link.target === 'object' ? link.target.id : link.target;
+                            
+                            // Check if this specific link is directly connected to the actively selected node
+                            const isActiveLink = activeNode && (srcId === activeNode.id || tgtId === activeNode.id);
+                            if (isActiveLink) {
+                              return 'rgba(139, 92, 246, 0.9)'; // Neon Violet
+                            }
+
                             const isHighlighted = !highlightedNodeId || connectedNodeIds.has(srcId) || connectedNodeIds.has(tgtId);
                             return isHighlighted ? 'rgba(100, 116, 139, 0.52)' : 'rgba(30, 41, 59, 0.08)';
                           }}
-                          linkWidth={link => link.value * 0.7 + 0.5}
+                          linkWidth={link => {
+                            const srcId = typeof link.source === 'object' ? link.source.id : link.source;
+                            const tgtId = typeof link.target === 'object' ? link.target.id : link.target;
+                            const isActiveLink = activeNode && (srcId === activeNode.id || tgtId === activeNode.id);
+                            
+                            return isActiveLink ? (link.value * 0.8 + 1.5) : (link.value * 0.7 + 0.5);
+                          }}
                           onNodeClick={node => {
                             handleSelectThreat(node.id);
                           }}
@@ -579,21 +632,39 @@ export default function ThreatGraphPage() {
                       </div>
                     )}
 
-                    <div className="pointer-events-none absolute inset-x-4 top-4 rounded-2xl border border-white/10 bg-slate-900/55 px-4 py-3 backdrop-blur-md">
-                      <div className="flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-200">
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-violet-400" />{networkStats.total} domains</span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-emerald-400" />{Math.max(0, connectedNodeIds.size - 1)} connected</span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-rose-400" />{networkStats.autoEscalated} auto</span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-slate-400" />{networkStats.uniquePlatforms} platforms</span>
-                      </div>
-                      <p className="mt-2 text-[11px] leading-5 text-slate-400">
-                        Select a domain or platform hub to inspect its cluster. Drag nodes to reshape relationships.
-                      </p>
-                    </div>
-                  </div>
+                    {/* Canvas Inner End */}
                 </>
               )}
             </div>
+
+            {/* Bottom Status & Legend Panel (Outside Canvas) */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+                  <span className="h-2 w-2 rounded-full bg-rose-500" />Critical
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+                  <span className="h-2 w-2 rounded-full bg-orange-500" />High
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" />Medium
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+                  <span className="h-2 w-2 rounded-full bg-sky-500" />Low
+                </span>
+                <span className="hidden sm:inline border-l border-white/10 pl-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  Hubs = Platforms
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-200 bg-white/5 px-3 py-2 rounded-xl border border-white/5">
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-violet-400" />{networkStats.total} domains</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400" />{Math.max(0, connectedNodeIds.size - 1)} connected</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-400" />{networkStats.autoEscalated} auto</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-slate-400" />{networkStats.uniquePlatforms} platforms</span>
+              </div>
+            </div>
+
           </div>
         </Card>
 
