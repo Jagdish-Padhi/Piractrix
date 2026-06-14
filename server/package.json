@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon --watch src --watch .env src/index.js",
-    "seed": "node scripts/seed_demo_data.js",
+    "seed": "node scripts/seed.js",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
