@@ -466,69 +466,103 @@ export default function ThreatGraphPage() {
           <div className="flex flex-1 min-h-0 flex-col px-4 py-4 space-y-4">
             <div ref={containerRef} style={{ minHeight: '600px' }} className="relative flex-1 min-h-0 overflow-hidden rounded-[28px] border border-white/10 bg-[#050816] shadow-[0_24px_80px_rgba(2,6,23,0.45)] group">
 
-              {/* Full-Screen Node Tooltip */}
-              {isFullscreen && activeNode && (
-                <div className="pointer-events-none absolute left-6 top-6 z-40 w-80 rounded-3xl border border-white/10 bg-slate-950/90 p-5 shadow-[0_20px_60px_rgba(2,6,23,0.45)] backdrop-blur-xl animate-in fade-in slide-in-from-left-4">
-                  <div className="flex items-start justify-between gap-3 mb-4 border-b border-white/10 pb-3">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{activeNode.nodeType === 'platform' ? 'Platform Hub' : 'Threat Domain'}</p>
-                      <h3 className="text-base font-bold text-slate-100 truncate max-w-[200px]">{activeNode.label}</h3>
-                    </div>
-                    {activeNode.nodeType !== 'platform' && (
-                      <div className={`px-2 py-1 rounded border text-[10px] font-black uppercase tracking-[0.1em] ${getThreatMeta(activeNode.threatLevel).panel} ${getThreatMeta(activeNode.threatLevel).tone}`}>
-                        {getThreatMeta(activeNode.threatLevel).label}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {activeNode.nodeType === 'platform' ? (
-                    <div className="space-y-4">
-                      <div className="flex items-end gap-2">
-                        <span className="text-3xl font-black tabular-nums text-indigo-400">{activeNode.domainCount}</span>
-                        <span className="text-xs font-semibold text-slate-400 mb-1 tracking-wider uppercase">Linked Domains</span>
-                      </div>
-                      <p className="text-[11px] leading-5 text-slate-500">This platform hub aggregates multiple threat vectors in your network.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-xl border border-white/5 bg-white/5 p-3">
-                          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Threat Score</p>
-                          <div className="mt-1 flex items-baseline gap-1">
-                            <p className="text-xl font-black text-slate-100 tabular-nums">{activeNodeScore}</p>
-                            <p className="text-xs font-semibold text-slate-500">/100</p>
-                          </div>
+              {/* Full-Screen Overlay Container (Left Side) */}
+              {isFullscreen && (
+                <div className="pointer-events-none absolute left-6 top-6 z-40 w-80 flex flex-col gap-4">
+                  {/* Node Specific Tooltip */}
+                  {activeNode && (
+                    <div className="rounded-3xl border border-white/10 bg-slate-950/90 p-5 shadow-[0_20px_60px_rgba(2,6,23,0.45)] backdrop-blur-xl animate-in fade-in slide-in-from-left-4">
+                      <div className="flex items-start justify-between gap-3 mb-4 border-b border-white/10 pb-3">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{activeNode.nodeType === 'platform' ? 'Platform Hub' : 'Threat Domain'}</p>
+                          <h3 className="text-base font-bold text-slate-100 truncate max-w-[200px]">{activeNode.label}</h3>
                         </div>
-                        <div className="rounded-xl border border-white/5 bg-white/5 p-3">
-                          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Violations</p>
-                          <p className="mt-1 text-xl font-black text-slate-100 tabular-nums">{activeNode.violations}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">AI Analysis</p>
-                        {activeNodeAI.map((reason, idx) => (
-                          <div key={idx} className="flex items-start gap-2">
-                            <Activity className="h-3.5 w-3.5 text-indigo-400 mt-0.5 shrink-0" />
-                            <p className="text-[11px] leading-4 text-slate-300">{reason}</p>
+                        {activeNode.nodeType !== 'platform' && (
+                          <div className={`px-2 py-1 rounded border text-[10px] font-black uppercase tracking-[0.1em] ${getThreatMeta(activeNode.threatLevel).panel} ${getThreatMeta(activeNode.threatLevel).tone}`}>
+                            {getThreatMeta(activeNode.threatLevel).label}
                           </div>
-                        ))}
+                        )}
                       </div>
                       
-                      {activeNode.platforms?.length > 0 && (
-                        <div className="pt-2 border-t border-white/5">
-                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Host Platforms</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {activeNode.platforms.map((p) => (
-                              <span key={p} className="rounded border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-300">
-                                {p}
-                              </span>
+                      {activeNode.nodeType === 'platform' ? (
+                        <div className="space-y-4">
+                          <div className="flex items-end gap-2">
+                            <span className="text-3xl font-black tabular-nums text-indigo-400">{activeNode.domainCount}</span>
+                            <span className="text-xs font-semibold text-slate-400 mb-1 tracking-wider uppercase">Linked Domains</span>
+                          </div>
+                          <p className="text-[11px] leading-5 text-slate-500">This platform hub aggregates multiple threat vectors in your network.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="rounded-xl border border-white/5 bg-white/5 p-3">
+                              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Threat Score</p>
+                              <div className="mt-1 flex items-baseline gap-1">
+                                <p className="text-xl font-black text-slate-100 tabular-nums">{activeNodeScore}</p>
+                                <p className="text-xs font-semibold text-slate-500">/100</p>
+                              </div>
+                            </div>
+                            <div className="rounded-xl border border-white/5 bg-white/5 p-3">
+                              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Violations</p>
+                              <p className="mt-1 text-xl font-black text-slate-100 tabular-nums">{activeNode.violations}</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">AI Analysis</p>
+                            {activeNodeAI.map((reason, idx) => (
+                              <div key={idx} className="flex items-start gap-2">
+                                <Activity className="h-3.5 w-3.5 text-indigo-400 mt-0.5 shrink-0" />
+                                <p className="text-[11px] leading-4 text-slate-300">{reason}</p>
+                              </div>
                             ))}
                           </div>
+                          
+                          {activeNode.platforms?.length > 0 && (
+                            <div className="pt-2 border-t border-white/5">
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Host Platforms</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {activeNode.platforms.map((p) => (
+                                  <span key={p} className="rounded border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-300">
+                                    {p}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
                   )}
+
+                  {/* Graph Notation Legend */}
+                  <div className="rounded-3xl border border-white/10 bg-slate-950/90 p-5 shadow-[0_20px_60px_rgba(2,6,23,0.45)] backdrop-blur-xl animate-in fade-in slide-in-from-left-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Graph Legend</p>
+                    <div className="space-y-3.5">
+                      <div className="flex items-center gap-3">
+                        <span className="h-3 w-3 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)] shrink-0" />
+                        <span className="text-[11px] font-medium text-slate-300">Critical Threat Domain</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="h-3 w-3 rounded-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)] shrink-0" />
+                        <span className="text-[11px] font-medium text-slate-300">High Threat Domain</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="h-4 w-4 rounded-full bg-slate-300 shadow-[0_0_10px_rgba(226,232,240,0.5)] shrink-0" />
+                        <span className="text-[11px] font-medium text-slate-300">Platform Hub (e.g., Telegram)</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="h-0.5 w-4 bg-slate-500 relative shrink-0">
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 border-[3px] border-transparent border-l-slate-500" />
+                        </div>
+                        <span className="text-[11px] font-medium text-slate-300">Data Flow / Relationship</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="h-0.5 w-4 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.8)] shrink-0" />
+                        <span className="text-[11px] font-medium text-slate-300">Active Selection Path</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -687,6 +721,16 @@ export default function ThreatGraphPage() {
                     )}
 
                     {/* Canvas Inner End */}
+                    <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-max max-w-[90%]">
+                      <div className="rounded-2xl border border-white/10 bg-slate-950/80 px-6 py-3 shadow-[0_20px_60px_rgba(2,6,23,0.45)] backdrop-blur">
+                        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[11px] font-medium text-slate-400">
+                          <span className="flex items-center gap-2"><MousePointer2 className="w-3.5 h-3.5 text-indigo-400" /> Click a node to view threat intelligence</span>
+                          <span className="flex items-center gap-2"><Move className="w-3.5 h-3.5 text-emerald-400" /> Drag nodes to reshape the cluster</span>
+                          <span className="flex items-center gap-2"><Search className="w-3.5 h-3.5 text-sky-400" /> Scroll to zoom in/out</span>
+                          {!isFullscreen && <span className="flex items-center gap-2"><Maximize className="w-3.5 h-3.5 text-rose-400" /> Use Full Screen for immersive analysis</span>}
+                        </div>
+                      </div>
+                    </div>
                 </>
               )}
             </div>
@@ -716,16 +760,6 @@ export default function ThreatGraphPage() {
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400" />{Math.max(0, connectedNodeIds.size - 1)} connected</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-400" />{networkStats.autoEscalated} auto</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-slate-400" />{networkStats.uniquePlatforms} platforms</span>
-              </div>
-            </div>
-
-            {/* Interaction Notations Guide */}
-            <div className="mt-4 px-4 py-3 rounded-2xl bg-white/5 border border-white/5 mx-2 mb-2">
-              <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-[11px] font-medium text-slate-400">
-                <span className="flex items-center gap-2"><MousePointer2 className="w-3.5 h-3.5 text-indigo-400" /> Click a node to view threat intelligence</span>
-                <span className="flex items-center gap-2"><Move className="w-3.5 h-3.5 text-emerald-400" /> Drag nodes to reshape the cluster</span>
-                <span className="flex items-center gap-2"><Search className="w-3.5 h-3.5 text-sky-400" /> Scroll to zoom in/out</span>
-                <span className="flex items-center gap-2"><Maximize className="w-3.5 h-3.5 text-rose-400" /> Use Full Screen for immersive analysis</span>
               </div>
             </div>
 
