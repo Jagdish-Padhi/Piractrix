@@ -5,6 +5,7 @@ import DashboardLayout from '../components/layout/DashboardLayout.jsx';
 import LoginPage from '../pages/auth/LoginPage.jsx';
 import LandingPage from '../pages/landing/LandingPage.jsx';
 import RegisterPage from '../pages/auth/RegisterPage.jsx';
+import DashboardHomePage from '../pages/dashboard/DashboardHomePage.jsx';
 import AgentCommandCenterPage from '../pages/dashboard/AgentCommandCenterPage.jsx';
 import AgentDecisionLogPage from '../pages/dashboard/AgentDecisionLogPage.jsx';
 import DashboardAssetsPage from '../pages/dashboard/DashboardAssetsPage.jsx';
@@ -13,6 +14,9 @@ import DashboardScanResultsPage from '../pages/dashboard/DashboardScanResultsPag
 import DashboardAlertsPage from '../pages/dashboard/DashboardAlertsPage.jsx';
 import DashboardAnalyticsPage from '../pages/dashboard/DashboardAnalyticsPage.jsx';
 import DashboardViolationsPage from '../pages/dashboard/DashboardViolationsPage.jsx';
+import ThreatGraphPage from '../pages/dashboard/ThreatGraphPage.jsx';
+import PredictionsPage from '../pages/dashboard/PredictionsPage.jsx';
+import NotificationSettingsPage from '../pages/dashboard/NotificationSettingsPage.jsx';
 import useAuthStore from '../store/auth.store.js';
 import GlobalLoader from '../components/loaders/GlobalLoader.jsx';
 
@@ -37,12 +41,11 @@ export default function AppRoutes() {
 
 	useEffect(() => {
 		if (isTransitioning && !isExiting) {
-			// Trigger exit animation after a short delay to ensure route is mounted
 			const timer = setTimeout(() => {
 				setExiting(true);
 				setTimeout(() => {
 					setTransitioning(false);
-				}, 600); // Match index.css duration
+				}, 600);
 			}, 300);
 			return () => clearTimeout(timer);
 		}
@@ -63,7 +66,8 @@ export default function AppRoutes() {
 				<Route path='/register' element={<RegisterPage />} />
 				<Route element={<PrivateRoute />}>
 					<Route element={<DashboardLayout />}>
-						<Route path='/dashboard' element={<AgentCommandCenterPage />} />
+						<Route path='/dashboard' element={<DashboardHomePage />} />
+						<Route path='/dashboard/agent' element={<AgentCommandCenterPage />} />
 						<Route path='/dashboard/agent-log' element={<AgentDecisionLogPage />} />
 						<Route path='/dashboard/assets' element={<DashboardAssetsPage />} />
 						<Route path='/dashboard/scans' element={<DashboardScansPage />} />
@@ -72,6 +76,9 @@ export default function AppRoutes() {
 						<Route path='/dashboard/alerts' element={<DashboardAlertsPage />} />
 						<Route path='/dashboard/violations' element={<DashboardViolationsPage />} />
 						<Route path='/dashboard/violations/:violationId' element={<DashboardViolationsPage />} />
+						<Route path='/dashboard/threat-graph' element={<ThreatGraphPage />} />
+						<Route path='/dashboard/predictions' element={<PredictionsPage />} />
+						<Route path='/dashboard/notifications' element={<NotificationSettingsPage />} />
 					</Route>
 				</Route>
 				<Route path='*' element={<Navigate to='/' replace />} />

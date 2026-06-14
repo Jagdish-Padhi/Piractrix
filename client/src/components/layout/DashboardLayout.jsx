@@ -23,8 +23,16 @@ import {
 	Menu,
 	X,
 	ChevronLeft,
-	ChevronRight
+	ChevronRight,
+	Layout,
+	Sparkles,
+	GitMerge,
+	SlidersHorizontal
 } from 'lucide-react';
+import AgentStatusBar from '../AgentStatusBar';
+import KeyboardShortcuts from '../KeyboardShortcuts';
+import EnforcementEvidenceModal from '../EnforcementEvidenceModal';
+import AgentThinkingDrawer from '../AgentThinkingDrawer';
 
 const getBreadcrumbs = (pathname) => {
 	const parts = pathname.split('/').filter(Boolean);
@@ -34,12 +42,16 @@ const getBreadcrumbs = (pathname) => {
 	
 	const segmentMap = {
 		dashboard: 'Platform',
+		agent: 'Agent Center',
 		assets: 'Asset Library',
 		scans: 'Threat Discovery',
 		'agent-log': 'Decision Log',
 		analytics: 'Analytics & Reports',
 		alerts: 'Alert Inbox',
 		violations: 'Enforcement Queue',
+		'threat-graph': 'Threat Memory Graph',
+		predictions: 'AI Piracy Forecast',
+		notifications: 'Notification Hub',
 	};
 
 	let currentPath = '';
@@ -64,7 +76,7 @@ const getBreadcrumbs = (pathname) => {
 	if (parts.length === 1 && parts[0] === 'dashboard') {
 		return [
 			{ label: 'Platform', path: '/dashboard' },
-			{ label: 'Agent Center', path: '/dashboard', isLast: true }
+			{ label: 'Overview', path: '/dashboard', isLast: true }
 		];
 	}
 	
@@ -73,8 +85,12 @@ const getBreadcrumbs = (pathname) => {
 
 const routeMetadata = {
 	'/dashboard': {
-		title: 'Command Center',
-		description: 'Autonomous Digital Rights Defense: streaming & leak vector control.',
+		title: 'Security Overview',
+		description: 'Real-time digital rights defense: active leaks and scanning coverages.',
+	},
+	'/dashboard/agent': {
+		title: 'Agent Command Center',
+		description: 'Configure and monitor ShieldAgent autonomous defense parameters.',
 	},
 	'/dashboard/agent-log': {
 		title: 'Agent Decision Log',
@@ -99,6 +115,18 @@ const routeMetadata = {
 	'/dashboard/violations': {
 		title: 'Enforcement Queue',
 		description: 'Verify copyright violations, draft notices, and track legal cases.',
+	},
+	'/dashboard/threat-graph': {
+		title: 'Threat Memory Graph',
+		description: 'Analyze network link mappings of coordinate pirate domains.',
+	},
+	'/dashboard/predictions': {
+		title: 'AI Piracy Forecast',
+		description: 'Predict leak distributions and platform surges using Gemini analytics.',
+	},
+	'/dashboard/notifications': {
+		title: 'Notification Hub',
+		description: 'Connect Twilio WhatsApp, Telegram channels, Slack webhooks, and push alerts.',
 	},
 };
 
@@ -125,13 +153,17 @@ const getRouteMetadata = (pathname) => {
 };
 
 const routeIcons = {
-	'/dashboard': Bot,
+	'/dashboard': Layout,
+	'/dashboard/agent': Bot,
 	'/dashboard/agent-log': History,
 	'/dashboard/assets': Layers,
 	'/dashboard/scans': Radar,
 	'/dashboard/analytics': BarChart3,
 	'/dashboard/alerts': Bell,
 	'/dashboard/violations': ShieldAlert,
+	'/dashboard/threat-graph': GitMerge,
+	'/dashboard/predictions': Sparkles,
+	'/dashboard/notifications': SlidersHorizontal,
 };
 
 const getRouteIcon = (pathname) => {
@@ -139,17 +171,21 @@ const getRouteIcon = (pathname) => {
 	if (pathname.startsWith('/dashboard/violations/')) return ShieldAlert;
 	
 	const matched = Object.keys(routeIcons).find(route => pathname === route);
-	return matched ? routeIcons[matched] : Bot;
+	return matched ? routeIcons[matched] : Layout;
 };
 
 const navigationItems = [
-	{ label: 'Agent Center', path: '/dashboard', icon: Bot },
+	{ label: 'Overview', path: '/dashboard', icon: Layout },
 	{ label: 'Assets', path: '/dashboard/assets', icon: Layers },
 	{ label: 'Scans', path: '/dashboard/scans', icon: Radar },
-	{ label: 'Decision Log', path: '/dashboard/agent-log', icon: History },
-	{ label: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
-	{ label: 'Alerts', path: '/dashboard/alerts', icon: Bell },
 	{ label: 'Violations', path: '/dashboard/violations', icon: ShieldAlert },
+	{ label: 'Agent Center', path: '/dashboard/agent', icon: Bot },
+	{ label: 'Decision Log', path: '/dashboard/agent-log', icon: History },
+	{ label: 'Threat Graph', path: '/dashboard/threat-graph', icon: GitMerge },
+	{ label: 'Predictions', path: '/dashboard/predictions', icon: Sparkles },
+	{ label: 'Alerts', path: '/dashboard/alerts', icon: Bell },
+	{ label: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
+	{ label: 'Notifications', path: '/dashboard/notifications', icon: SlidersHorizontal },
 ];
 
 const shellBackground = {
@@ -167,6 +203,14 @@ export default function DashboardLayout() {
 	const [unreadAlerts, setUnreadAlerts] = useState(0);
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+	useEffect(() => {
+		if (unreadAlerts > 0) {
+			document.title = `(${unreadAlerts}) Piractrix — Rights Enforcement`;
+		} else {
+			document.title = 'Piractrix — Rights Enforcement';
+		}
+	}, [unreadAlerts]);
 
 	useEffect(() => {
 		let mounted = true;
@@ -536,10 +580,16 @@ export default function DashboardLayout() {
 				</header>
 
 				{/* Main dashboard content pane */}
+				<AgentStatusBar />
 				<main className="flex-1 py-8 px-8 lg:px-12 w-full max-w-none md:overflow-y-auto scrollbar-thin">
 					<Outlet />
 				</main>
 			</div>
+			
+			{/* Global overlays & key listeners */}
+			<KeyboardShortcuts />
+			<EnforcementEvidenceModal />
+			<AgentThinkingDrawer />
 		</div>
 	);
 }
