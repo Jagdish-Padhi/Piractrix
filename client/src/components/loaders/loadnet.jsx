@@ -35,8 +35,7 @@ const Loader = ({ size = 1, color = '#7c3aed' }) => {
       marginTop: pos.t * size,
     };
   };
-
-  const BrickGroup = () => (
+  const renderBricks = () => (
     <>
       <div className="net-hex-brick" style={{ width: brickWidth, height: brickHeight, top: brickTop }} />
       <div className="net-hex-brick net-h2" style={{ width: brickWidth, height: brickHeight, top: brickTop }} />
@@ -48,7 +47,7 @@ const Loader = ({ size = 1, color = '#7c3aed' }) => {
     <div className="net-loader-wrapper" style={wrapperStyle}>
       <div className="net-socket" style={{ width: socketSize, height: socketSize }}>
         <div className="net-gel net-center-gel" style={{ height: gelSize, width: gelSize, marginLeft: centerMargin, marginTop: centerMargin }}>
-          <BrickGroup />
+          {renderBricks()}
         </div>
         {[...Array(37)].map((_, i) => {
           const col = i + 1;
@@ -60,13 +59,13 @@ const Loader = ({ size = 1, color = '#7c3aed' }) => {
               className={`net-gel c${col} net-r${row}`}
               style={{ height: gelSize, width: gelSize, ...getPosition(col) }}
             >
-              <BrickGroup />
+              {renderBricks()}
             </div>
           );
         })}
       </div>
     </div>
   );
-};
+}
 
 export default Loader;

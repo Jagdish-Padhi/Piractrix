@@ -19,8 +19,8 @@ export const useAlertStore = create((set) => ({
   fetchNotificationPrefs: async () => {
     set({ loading: true, error: '' });
     try {
-      const { data } = await api.get('/orgs/notification-prefs');
-      set({ notificationPrefs: data.notificationPrefs, loading: false });
+      const { data } = await api.get('/organization/me');
+      set({ notificationPrefs: data.organization.notificationPrefs, loading: false });
     } catch {
       set({ error: 'Failed to load preferences', loading: false });
     }
@@ -29,7 +29,7 @@ export const useAlertStore = create((set) => ({
   updateNotificationPrefs: async (prefs) => {
     set({ loading: true, error: '' });
     try {
-      const { data } = await api.patch('/orgs/notification-prefs', prefs);
+      const { data } = await api.patch('/organization/notification-prefs', prefs);
       set({ notificationPrefs: data.notificationPrefs, loading: false });
       return true;
     } catch {
