@@ -11,6 +11,7 @@ import Violation from '../src/models/violation.model.js';
 import ScanJob from '../src/models/scanJob.model.js';
 import Alert from '../src/models/alert.model.js';
 import ScanResult from '../src/models/scanResult.model.js';
+import ThreatMemory from '../src/models/threatMemory.model.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,7 +39,7 @@ const randomDate = (startDaysAgo, endDaysAgo) => {
 const platforms = ['youtube', 'twitter', 'telegram', 'web'];
 
 // Real discoverable piracy/unofficial stream URLs for demo realism
-// These are real pages that load and demonstrate the kind of content SportShield detects
+// These are real pages that load and demonstrate the kind of content Piractrix detects
 const realViolationUrls = {
 	youtube: [
 		{ url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', title: 'UCL Final 2024 Highlights [UNOFFICIAL]' },
@@ -83,7 +84,7 @@ const seedData = async () => {
 
 		// 1. Clear existing data for demo org
 		console.log('Clearing existing demo data...');
-		const existingOrg = await Organization.findOne({ email: 'demo@sportshield.com' });
+		const existingOrg = await Organization.findOne({ email: 'demo@piractrix.com' });
 		if (existingOrg) {
 			const orgId = existingOrg._id;
 			await Promise.all([
@@ -92,16 +93,17 @@ const seedData = async () => {
 				ScanResult.deleteMany({ orgId }),
 				Violation.deleteMany({ orgId }),
 				Alert.deleteMany({ orgId }),
+				ThreatMemory.deleteMany({ orgId }),
 				Organization.deleteOne({ _id: orgId })
 			]);
 		}
 
 		// 2. Create Demo Organization
 		console.log('Creating demo organization...');
-		const passwordHash = await bcrypt.hash('SportShield@123', 10);
+		const passwordHash = await bcrypt.hash('Piractrix@2026', 10);
 		const demoOrg = await Organization.create({
-			orgName: 'SportShield Global Rights',
-			email: 'demo@sportshield.com',
+			orgName: 'Piractrix Defense Systems',
+			email: 'demo@piractrix.com',
 			passwordHash,
 			plan: 'pro',
 			createdAt: randomDate(45, 45) // Org created 45 days ago
@@ -215,6 +217,55 @@ const seedData = async () => {
 		}
 		const scanJobs = await ScanJob.insertMany(scanJobsData);
 
+		// 4.5. Seed ThreatMemory (30 Interconnected Domains)
+		console.log('Seeding Threat Memory network...');
+		const hackathonDomains = [
+			'animehub.to', 'streamverse.cc', 'sportshd.live', 'matchzone.xyz',
+			'piratestreamhd.com', 'crackstreams.me', 'sportsleak.telegram', 'streamhd.xyz',
+			'watchsports.cc', 'freematch.net', 'buffstreams.sx', 'footybite.to',
+			'soccerstreams.net', 'nbastreams.xyz', 'ufcstreams.net', 'boxingstreams.cc',
+			'f1streams.live', 'cricketstreams.xyz', 'tennistv.free', 'sportspass.live',
+			'vipbox.tv', 'firstrow.sports', 'rojadirecta.me', 'totalsportek.to',
+			'hesgoal.com', 'yalla-shoot.io', 'kora-live.tv', 'beinmatch.cc',
+			'stream2watch.tv', 'cricfree.sc'
+		];
+		
+		const threatMemoryData = hackathonDomains.map((domain, index) => {
+			const threatLevel = index < 4 ? 'critical' : index < 12 ? 'high' : index < 22 ? 'medium' : 'low';
+			const related = [];
+			const numRelated = index < 8 ? randomInt(3, 6) : randomInt(0, 2);
+			for (let i = 0; i < numRelated; i++) {
+				const rel = randomElement(hackathonDomains);
+				if (rel !== domain && !related.includes(rel)) related.push(rel);
+			}
+			
+			const platformCount = index < 8 ? randomInt(2, 4) : randomInt(1, 2);
+			const domainPlatforms = [];
+			for (let i = 0; i < platformCount; i++) {
+				const p = randomElement(platforms);
+				if (!domainPlatforms.includes(p)) domainPlatforms.push(p);
+			}
+
+			return {
+				orgId,
+				domain,
+				firstSeenAt: randomDate(30, 40),
+				lastSeenAt: randomDate(0, 5),
+				totalViolations: randomInt(1, index < 5 ? 25 : 10),
+				platforms: domainPlatforms,
+				threatLevel,
+				autoEscalate: index < 3,
+				relatedDomains: related,
+				meta: {
+					ipAddresses: [`104.21.${randomInt(10, 99)}.${randomInt(10, 250)}`, `172.67.${randomInt(10, 99)}.${randomInt(10, 250)}`],
+					registrar: randomElement(['NameCheap', 'Cloudflare', 'Tucows', 'GoDaddy']),
+					hostingProvider: randomElement(['Cloudflare', 'DigitalOcean', 'Amazon AWS', 'OVH']),
+					abuseEmail: `abuse@${domain}`
+				}
+			};
+		});
+		await ThreatMemory.insertMany(threatMemoryData);
+
 		// 5. Create Realistic Violations (100+ over 30 days)
 		console.log('Seeding 100+ realistic violations across all cases...');
 		const violationData = [];
@@ -226,9 +277,9 @@ const seedData = async () => {
 			const asset = assets.find(a => a._id.toString() === scanJob.assetId.toString());
 			const detectedAt = new Date(scanJob.completedAt.getTime() - randomInt(0, 60000));
 			
-			// Simulate Repeat Offenders (60% chance to pick from highRiskDomains)
-			const domain = Math.random() > 0.4 ? randomElement(highRiskDomains) : randomElement(domains);
-			const platform = domain === 'youtube.com' ? 'youtube' : domain === 'x.com' ? 'twitter' : domain === 't.me' ? 'telegram' : 'web';
+			// Simulate Repeat Offenders (pick from hackathon domains)
+			const domain = randomElement(hackathonDomains);
+			const platform = domain.includes('telegram') ? 'telegram' : randomElement(platforms);
 			
 			// Realistic statuses
 			const statusRand = Math.random();
@@ -274,7 +325,7 @@ const seedData = async () => {
 					frameMatchCount: asset.type !== 'image' ? randomInt(1, 20) : undefined,
 				},
 				detectedAt,
-				repeatOffenderScore: highRiskDomains.includes(new URL(pickedUrl.url).hostname) ? randomInt(50, 95) : randomInt(0, 30)
+				repeatOffenderScore: randomInt(0, 95)
 			});
 
 			// Accumulate counts
@@ -371,10 +422,10 @@ const seedData = async () => {
 
 		console.log('\n✅ ROBUST SEEDING COMPLETED SUCCESSFULLY!');
 		console.log('-----------------------------------');
-		console.log(`Seeded 1 Org, ${assets.length} Assets, ${scanJobs.length} Scans, ${scanResultData.length} Results, ${violations.length} Violations, ${alertData.length} Alerts.`);
+		console.log(`Seeded 1 Org, ${assets.length} Assets, ${scanJobs.length} Scans, ${scanResultData.length} Results, ${violations.length} Violations, ${alertData.length} Alerts, ${threatMemoryData.length} Threats.`);
 		console.log('Demo Credentials:');
-		console.log('Email: demo@sportshield.com');
-		console.log('Password: SportShield@123');
+		console.log('Email: demo@piractrix.com');
+		console.log('Password: Piractrix@2026');
 		console.log('-----------------------------------');
 
 		process.exit(0);
