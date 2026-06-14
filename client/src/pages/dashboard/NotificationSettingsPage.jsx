@@ -9,7 +9,7 @@ import {
   AlertTriangle,
   Info
 } from 'lucide-react';
-import { Card, Button, Input, Toggle, PageHeader, Loader } from '../../components';
+import { Badge, Card, Button, Input, Toggle, PageHeader, Loader } from '../../components';
 import api from '../../services/api.js';
 
 export default function NotificationSettingsPage() {

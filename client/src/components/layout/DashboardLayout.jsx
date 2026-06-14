@@ -179,13 +179,13 @@ const navigationItems = [
 	{ label: 'Assets', path: '/dashboard/assets', icon: Layers },
 	{ label: 'Scans', path: '/dashboard/scans', icon: Radar },
 	{ label: 'Violations', path: '/dashboard/violations', icon: ShieldAlert },
+	{ label: 'Alerts', path: '/dashboard/alerts', icon: Bell },
+	{ label: 'Notifications', path: '/dashboard/notifications', icon: SlidersHorizontal },
+	{ label: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
 	{ label: 'Agent Center', path: '/dashboard/agent', icon: Bot },
 	{ label: 'Decision Log', path: '/dashboard/agent-log', icon: History },
 	{ label: 'Threat Graph', path: '/dashboard/threat-graph', icon: GitMerge },
 	{ label: 'Predictions', path: '/dashboard/predictions', icon: Sparkles },
-	{ label: 'Alerts', path: '/dashboard/alerts', icon: Bell },
-	{ label: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
-	{ label: 'Notifications', path: '/dashboard/notifications', icon: SlidersHorizontal },
 ];
 
 const shellBackground = {
