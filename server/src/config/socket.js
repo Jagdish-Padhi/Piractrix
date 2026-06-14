@@ -116,3 +116,11 @@ export function emitEnforcementExecuted({ orgId, enforcement }) {
 	if (!io) return;
 	io.to(getSocketRoom(orgId)).emit('agent:enforcement', { enforcement });
 }
+
+export function emitLivestreamTelemetry({ orgId, jobId, telemetry }) {
+	if (!io) return;
+	io.to(getSocketRoom(orgId)).emit('livestream:telemetry', {
+		jobId,
+		telemetry,
+	});
+}

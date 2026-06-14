@@ -22,18 +22,37 @@ const assetSchema = new mongoose.Schema(
 			type: [String],
 			default: [],
 		},
+		licensedDomains: {
+			type: [String],
+			default: [],
+		},
+		licensedPartners: [
+			{
+				name: String,
+				domain: String,
+				expiresAt: Date
+			}
+		],
 		type: {
 			type: String,
-			enum: ['video', 'image', 'highlight', 'exam_paper', 'document', 'music', 'ott_content'],
+			enum: ['video', 'image', 'highlight', 'exam_paper', 'document', 'music', 'ott_content', 'livestream'],
 			required: true,
+		},
+		livestreamUrl: {
+			type: String,
+			default: null,
 		},
 		storageKey: {
 			type: String,
-			required: true,
+			required: function () {
+				return this.type !== 'livestream';
+			},
 		},
 		gcsUrl: {
 			type: String,
-			required: true,
+			required: function () {
+				return this.type !== 'livestream';
+			},
 		},
 		thumbnailUrl: {
 			type: String,
@@ -63,7 +82,9 @@ const assetSchema = new mongoose.Schema(
 		},
 		fileSize: {
 			type: Number,
-			required: true,
+			required: function () {
+				return this.type !== 'livestream';
+			},
 		},
 		status: {
 			type: String,

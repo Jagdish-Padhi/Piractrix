@@ -90,4 +90,8 @@ export function getFirebaseAdminAuth(projectId) {
 	return initializeFirebaseAdmin(projectId).auth();
 }
 
+export function getFirestore(projectId) {
+	return initializeFirebaseAdmin(projectId).firestore();
+}
+
 export default admin;

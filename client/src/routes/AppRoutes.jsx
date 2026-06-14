@@ -16,6 +16,7 @@ import DashboardAnalyticsPage from '../pages/dashboard/DashboardAnalyticsPage.js
 import DashboardViolationsPage from '../pages/dashboard/DashboardViolationsPage.jsx';
 import ThreatGraphPage from '../pages/dashboard/ThreatGraphPage.jsx';
 import PredictionsPage from '../pages/dashboard/PredictionsPage.jsx';
+import DashboardStreamsPage from '../pages/dashboard/DashboardStreamsPage.jsx';
 import NotificationSettingsPage from '../pages/dashboard/NotificationSettingsPage.jsx';
 import useAuthStore from '../store/auth.store.js';
 import GlobalLoader from '../components/loaders/GlobalLoader.jsx';
@@ -70,6 +71,7 @@ export default function AppRoutes() {
 						<Route path='/dashboard/agent' element={<AgentCommandCenterPage />} />
 						<Route path='/dashboard/agent-log' element={<AgentDecisionLogPage />} />
 						<Route path='/dashboard/assets' element={<DashboardAssetsPage />} />
+						<Route path='/dashboard/streams' element={<DashboardStreamsPage />} />
 						<Route path='/dashboard/scans' element={<DashboardScansPage />} />
 						<Route path='/dashboard/scans/:jobId' element={<DashboardScanResultsPage />} />
 						<Route path='/dashboard/analytics' element={<DashboardAnalyticsPage />} />

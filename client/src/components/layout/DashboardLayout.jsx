@@ -27,7 +27,8 @@ import {
 	Layout,
 	Sparkles,
 	GitMerge,
-	SlidersHorizontal
+	SlidersHorizontal,
+	Tv
 } from 'lucide-react';
 import AgentStatusBar from '../AgentStatusBar';
 import KeyboardShortcuts from '../KeyboardShortcuts';
@@ -44,6 +45,7 @@ const getBreadcrumbs = (pathname) => {
 		dashboard: 'Platform',
 		agent: 'Agent Center',
 		assets: 'Asset Library',
+		streams: 'Live Streams',
 		scans: 'Threat Discovery',
 		'agent-log': 'Decision Log',
 		analytics: 'Analytics & Reports',
@@ -99,6 +101,10 @@ const routeMetadata = {
 	'/dashboard/assets': {
 		title: 'Asset Library',
 		description: 'Upload media files, manage core assets, and analyze content fingerprints.',
+	},
+	'/dashboard/streams': {
+		title: 'Live Streams',
+		description: 'Monitor authorized streams and audit live broadcasts for piracy.',
 	},
 	'/dashboard/scans': {
 		title: 'Threat Discovery',
@@ -157,6 +163,7 @@ const routeIcons = {
 	'/dashboard/agent': Bot,
 	'/dashboard/agent-log': History,
 	'/dashboard/assets': Layers,
+	'/dashboard/streams': Tv,
 	'/dashboard/scans': Radar,
 	'/dashboard/analytics': BarChart3,
 	'/dashboard/alerts': Bell,
@@ -177,6 +184,7 @@ const getRouteIcon = (pathname) => {
 const navigationItems = [
 	{ label: 'Overview', path: '/dashboard', icon: Layout },
 	{ label: 'Assets', path: '/dashboard/assets', icon: Layers },
+	{ label: 'Live Streams', path: '/dashboard/streams', icon: Tv },
 	{ label: 'Scans', path: '/dashboard/scans', icon: Radar },
 	{ label: 'Violations', path: '/dashboard/violations', icon: ShieldAlert },
 	{ label: 'Alerts', path: '/dashboard/alerts', icon: Bell },

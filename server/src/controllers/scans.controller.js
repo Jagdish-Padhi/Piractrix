@@ -6,12 +6,28 @@ import {
 	listScanResultsByJob,
 	listScanJobsByOrg,
 	retryScanJob,
+	stopLiveStreamJob,
 } from '../services/scans.service.js';
 import {
 	validateListScanResultsQuery,
 	validateListScansQuery,
 	validateStartScanPayload,
 } from '../validators/scans.validator.js';
+
+export async function stopScanController(req, res, next) {
+	try {
+		await stopLiveStreamJob({
+			orgId: req.auth.orgId,
+			scanJobId: req.params.jobId,
+		});
+
+		return res.status(200).json({
+			message: 'Monitor stopped successfully.',
+		});
+	} catch (error) {
+		return next(error);
+	}
+}
 
 export async function startScanController(req, res, next) {
 	try {

@@ -16,6 +16,25 @@ import {
 
 export async function uploadAssetController(req, res, next) {
 	try {
+		const { type, livestreamUrl } = req.body;
+
+		if (type === 'livestream') {
+			const { title, description, livestreamUrl: validatedUrl } = validateAssetUploadPayload(req.body);
+
+			const asset = await createAsset({
+				orgId: req.auth.orgId,
+				title,
+				description,
+				type: 'livestream',
+				livestreamUrl: validatedUrl,
+			});
+
+			return res.status(201).json({
+				message: 'Livestream asset created successfully.',
+				asset,
+			});
+		}
+
 		if (!req.file) {
 			return res.status(400).json({ message: 'Asset file is required.' });
 		}

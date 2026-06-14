@@ -4,9 +4,20 @@ function createValidationError(message) {
 	return error;
 }
 
+function isValidUrl(string) {
+	try {
+		const url = new URL(string);
+		return url.protocol === 'http:' || url.protocol === 'https:';
+	} catch {
+		return false;
+	}
+}
+
 export function validateAssetUploadPayload(payload) {
 	const title = payload?.title?.trim();
 	const description = payload?.description?.trim() || '';
+	const type = typeof payload?.type === 'string' ? payload.type.trim().toLowerCase() : '';
+	const livestreamUrl = typeof payload?.livestreamUrl === 'string' ? payload.livestreamUrl.trim() : '';
 
 	if (!title || title.length < 3) {
 		throw createValidationError('Title must be at least 3 characters long.');
@@ -20,7 +31,16 @@ export function validateAssetUploadPayload(payload) {
 		throw createValidationError('Description must be 500 characters or fewer.');
 	}
 
-	return { title, description };
+	if (type === 'livestream') {
+		if (!livestreamUrl) {
+			throw createValidationError('Livestream URL is required for livestream assets.');
+		}
+		if (!isValidUrl(livestreamUrl)) {
+			throw createValidationError('Please enter a valid livestream URL (must start with http:// or https://).');
+		}
+	}
+
+	return { title, description, type, livestreamUrl };
 }
 
 export function validateAssetUpdatePayload(payload) {

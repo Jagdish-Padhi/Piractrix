@@ -77,18 +77,19 @@ export function inferAssetType(mimeType = '', filename = '') {
 	return 'document';
 }
 
-export async function createAsset({ orgId, title, description, file, publicUrl }) {
-	const type = inferAssetType(file.mimetype, file.originalname || file.filename || '');
+export async function createAsset({ orgId, title, description, file, publicUrl, type: providedType, livestreamUrl }) {
+	const type = providedType || inferAssetType(file?.mimetype || '', file?.originalname || file?.filename || '');
 	const asset = await Asset.create({
 		orgId,
 		title,
 		description: description || '',
 		type,
-		storageKey: file.filename,
+		storageKey: file ? file.filename : undefined,
 		gcsUrl: publicUrl,
+		livestreamUrl,
 		thumbnailUrl: type === 'image' ? publicUrl : null,
-		fileSize: file.size,
-		status: 'processing',
+		fileSize: file ? file.size : undefined,
+		status: 'active',
 		uploadedAt: new Date(),
 	});
 
