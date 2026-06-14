@@ -201,6 +201,17 @@ export default function ThreatGraphPage() {
 
     // Create links between domains that share similar platforms or are in relatedDomains list
     const simulatedLinks = [];
+    const linkSet = new Set();
+    
+    const addLink = (sourceId, targetId, value, type) => {
+      // Sort alphabetically to deduplicate undirected links
+      const pair = [sourceId, targetId].sort().join('::');
+      if (!linkSet.has(pair)) {
+        linkSet.add(pair);
+        simulatedLinks.push({ source: sourceId, target: targetId, value, type });
+      }
+    };
+
     for (let i = 0; i < simulatedNodes.length; i++) {
       const source = simulatedNodes[i];
       
@@ -209,12 +220,7 @@ export default function ThreatGraphPage() {
         const target = simulatedNodes[j];
         const commonPlatforms = source.platforms.filter((platform) => target.platforms.includes(platform));
         if (commonPlatforms.length > 0) {
-            simulatedLinks.push({
-              source: source.id,
-              target: target.id,
-              value: commonPlatforms.length,
-              type: `Shared: ${commonPlatforms.join(', ')}`
-            });
+            addLink(source.id, target.id, commonPlatforms.length, `Shared: ${commonPlatforms.join(', ')}`);
           }
         }
 
@@ -222,12 +228,7 @@ export default function ThreatGraphPage() {
         const related = source.rawData.relatedDomains || [];
         related.forEach((relDomain) => {
           if (nodeMap[relDomain]) {
-            simulatedLinks.push({
-              source: source.id,
-              target: relDomain,
-              value: 2,
-              type: 'Direct Relation'
-            });
+            addLink(source.id, relDomain, 2, 'Direct Relation');
           }
         });
     }
@@ -311,8 +312,9 @@ export default function ThreatGraphPage() {
       }
 
       if (sortBy === 'connections') {
-        const aConnections = links.filter((link) => link.source === a.domain || link.target === a.domain).length;
-        const bConnections = links.filter((link) => link.source === b.domain || link.target === b.domain).length;
+        const getLinkNodeId = (n) => typeof n === 'object' ? n.id : n;
+        const aConnections = links.filter((link) => getLinkNodeId(link.source) === a.domain || getLinkNodeId(link.target) === a.domain).length;
+        const bConnections = links.filter((link) => getLinkNodeId(link.source) === b.domain || getLinkNodeId(link.target) === b.domain).length;
         return bConnections - aConnections;
       }
 
@@ -463,6 +465,7 @@ export default function ThreatGraphPage() {
                           onEngineStop={() => {}}
                           cooldownTicks={100}
                           nodeCanvasObject={(node, ctx, globalScale) => {
+                            ctx.save();
                             const isSelected = activeNode?.id === node.id;
                             const isHovered = hoveredNodeId === node.id;
                             const isRelevant = !highlightedNodeId || connectedNodeIds.has(node.id);
@@ -496,6 +499,7 @@ export default function ThreatGraphPage() {
                             ctx.globalAlpha = isSelected || isHovered ? 1 : isRelevant ? 0.96 : 0.18;
                             const label = node.label.length > 20 ? `${node.label.substring(0, 17)}...` : node.label;
                             ctx.fillText(label, node.x, node.y + size + fontSize + 2/globalScale);
+                            ctx.restore();
                           }}
                           linkCanvasObjectMode={() => 'after'}
                           linkCanvasObject={(link, ctx, globalScale) => {

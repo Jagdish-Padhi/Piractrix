@@ -16,6 +16,7 @@ export default function AgentStatusBar() {
   const [isConnected, setIsConnected] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingMsg, setProcessingMsg] = useState('');
+  const [hasError, setHasError] = useState(false);
 
   const fetchStatus = async () => {
     try {
@@ -29,8 +30,10 @@ export default function AgentStatusBar() {
       if (res.data.channels) {
         setChannels(res.data.channels);
       }
+      setHasError(false);
     } catch (err) {
       console.warn('Failed to fetch agent status:', err.message);
+      setHasError(true);
     }
   };
 
@@ -118,6 +121,18 @@ export default function AgentStatusBar() {
   };
 
   // Render based on state
+  if (hasError) {
+    return (
+      <div className="bg-red-50/90 border-b border-red-100 text-red-800 px-6 py-2.5 flex items-center justify-between text-xs font-bold transition-all duration-300 backdrop-blur-md sticky top-20 z-10">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-red-500" />
+          <span className="uppercase tracking-wider">Agent Error</span>
+          <span className="font-medium text-red-600">Failed to load agent status. Retrying...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (!isConnected) {
     return (
       <div className="bg-red-50/90 border-b border-red-100 text-red-800 px-6 py-2.5 flex items-center justify-between text-xs font-bold transition-all duration-300 backdrop-blur-md sticky top-20 z-10">

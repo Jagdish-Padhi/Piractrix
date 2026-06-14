@@ -16,7 +16,7 @@
     "@tailwindcss/vite": "^4.2.2",
     "axios": "^1.17.0",
     "firebase": "^12.11.0",
-    "lucide-react": "^1.7.0",
+    "lucide-react": "^0.383.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-force-graph-2d": "^1.29.1",

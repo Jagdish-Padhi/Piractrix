@@ -3,7 +3,6 @@ import AgentDecisionLog from '../models/agentDecisionLog.model.js';
 import Asset from '../models/asset.model.js';
 import Violation from '../models/violation.model.js';
 import ScanJob from '../models/scanJob.model.js';
-import fetch from 'node-fetch';
 
 export async function getStatus(req, res, next) {
   try {

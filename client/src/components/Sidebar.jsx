@@ -49,12 +49,11 @@ const Sidebar = ({
 			{/* Menu Items */}
 			<nav className='flex-1 overflow-y-auto px-4 py-6 space-y-2'>
 				{items.map((item) => (
-					<a
+					<Link
 						key={item.id}
-						href={item.href || '#'}
+						to={item.href || '#'}
 						onClick={(e) => {
 							if (onItemClick) {
-								e.preventDefault();
 								onItemClick(item.id);
 							}
 						}}
@@ -67,7 +66,7 @@ const Sidebar = ({
 					>
 						{item.icon && <span className='w-5 h-5 flex-shrink-0'>{item.icon}</span>}
 						{!isCollapsed && <span className='flex-1 truncate'>{item.label}</span>}
-					</a>
+					</Link>
 				))}
 			</nav>
 

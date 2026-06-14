@@ -581,8 +581,10 @@ export default function DashboardLayout() {
 
 				{/* Main dashboard content pane */}
 				<AgentStatusBar />
-				<main className="flex-1 py-8 px-8 lg:px-12 w-full max-w-none md:overflow-y-auto scrollbar-thin">
-					<Outlet />
+				<main className="flex-1 flex flex-col overflow-hidden py-8 px-8 lg:px-12 w-full max-w-none">
+					<div className="h-full flex-1 min-h-0 overflow-y-auto scrollbar-thin pb-12">
+						<Outlet />
+					</div>
 				</main>
 			</div>
 			
