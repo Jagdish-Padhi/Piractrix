@@ -34,6 +34,7 @@ export default function NotificationSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [pushSubmitting, setPushSubmitting] = useState(false);
+  const [testingWa, setTestingWa] = useState(false);
 
   useEffect(() => {
     fetchPrefs();
@@ -152,9 +153,27 @@ export default function NotificationSettingsPage() {
       setMessage({ type: 'info', text: 'Sending Slack test message...' });
       await api.post('/alerts/test-slack', { webhookUrl: prefs.slackWebhookUrl });
       setMessage({ type: 'success', text: 'Slack test message sent successfully!' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     } catch (err) {
       console.error('Slack test failed:', err);
       setMessage({ type: 'error', text: 'Slack test delivery failed. Check webhook URL.' });
+    }
+  };
+
+  const testWhatsAppNotification = async () => {
+    if (!prefs.whatsappNumber) {
+      setMessage({ type: 'error', text: 'Please enter a WhatsApp Number first.' });
+      return;
+    }
+    setTestingWa(true);
+    try {
+      const { data } = await api.post('/organization/test-whatsapp', { whatsappNumber: prefs.whatsappNumber });
+      setMessage({ type: 'success', text: data.message || 'Test message dispatched to WhatsApp!' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to send WhatsApp test.' });
+    } finally {
+      setTestingWa(false);
     }
   };
 
@@ -245,13 +264,30 @@ export default function NotificationSettingsPage() {
                   </p>
                   
                   {prefs.whatsappEnabled && (
-                    <div className="pl-10 pt-3 max-w-sm">
+                    <div className="pl-10 pt-3 space-y-3 max-w-sm">
                       <Input
                         label="WhatsApp Phone Number"
                         placeholder="+1234567890"
                         value={prefs.whatsappNumber || ''}
                         onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
                       />
+                      <Button 
+                        type="button" 
+                        variant="secondary" 
+                        size="xs"
+                        onClick={testWhatsAppNotification}
+                        disabled={testingWa}
+                        className={`transition-all duration-200 cursor-pointer hover:bg-slate-100 active:scale-95 ${testingWa ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      >
+                        {testingWa ? (
+                          <span className="flex items-center gap-2">
+                            <Loader className="w-3 h-3 animate-spin" />
+                            Sending...
+                          </span>
+                        ) : (
+                          'Send Test Notification'
+                        )}
+                      </Button>
                     </div>
                   )}
                 </div>

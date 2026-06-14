@@ -51,4 +51,37 @@ organizationRouter.patch('/notification-prefs', async (req, res, next) => {
 	}
 });
 
+import { sendWhatsAppAlert } from '../services/whatsapp.service.js';
+
+organizationRouter.post('/test-whatsapp', async (req, res, next) => {
+	try {
+		const organization = await getOrganizationById(req.auth.orgId);
+		const { whatsappNumber } = req.body;
+		if (!whatsappNumber) {
+			return res.status(400).json({ message: 'WhatsApp number is required.' });
+		}
+
+		const success = await sendWhatsAppAlert({
+			to: whatsappNumber,
+			org: organization,
+			violation: {
+				_id: '000000000000000000000000',
+				platform: 'youtube',
+				matchConfidence: 99,
+				matchType: 'manual_test',
+				caseId: 'PIR-TEST-000'
+			},
+			severity: 5
+		});
+
+		if (success) {
+			return res.status(200).json({ message: 'Test message dispatched to WhatsApp.' });
+		} else {
+			return res.status(500).json({ message: 'Failed to send WhatsApp message. Check server logs or Twilio config.' });
+		}
+	} catch (error) {
+		return next(error);
+	}
+});
+
 export default organizationRouter;
