@@ -135,6 +135,7 @@ export default function ThreatGraphPage() {
   
   const svgRef = useRef(null);
   const containerRef = useRef(null);
+  const fgRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -191,6 +192,11 @@ export default function ThreatGraphPage() {
       setLinks([]);
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        if (fgRef.current) {
+          fgRef.current.zoomToFit(400);
+        }
+      }, 600);
     }
   };
 
@@ -440,26 +446,22 @@ export default function ThreatGraphPage() {
               <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-200">Live graph workspace</span>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="secondary" size="sm" onClick={toggleFullscreen} className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10" title="Toggle Full Screen">
+                {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                Zoom
+              </Button>
               <Button variant="secondary" size="sm" onClick={fetchThreatMemory} className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">
                 <RefreshCw className="h-4 w-4" />
                 Refresh
               </Button>
               <Button variant="secondary" size="sm" onClick={handleClearSelection} className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">
-                Clear
+                Reset
               </Button>
             </div>
           </div>
 
           <div className="flex flex-1 min-h-0 flex-col px-4 py-4 space-y-4">
             <div ref={containerRef} style={{ minHeight: '600px' }} className="relative flex-1 min-h-0 overflow-hidden rounded-[28px] border border-white/10 bg-[#050816] shadow-[0_24px_80px_rgba(2,6,23,0.45)] group">
-              {/* Full Screen Toggle */}
-              <button 
-                onClick={toggleFullscreen} 
-                className="absolute right-4 top-4 z-50 p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-                title="Toggle Full Screen"
-              >
-                {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-              </button>
 
               {/* Full-Screen Node Tooltip */}
               {isFullscreen && activeNode && (
@@ -489,6 +491,7 @@ export default function ThreatGraphPage() {
                     <div className="absolute inset-0 z-10 overflow-hidden">
                       {nodes.length > 0 && dimensions.width > 0 && (
                         <ForceGraph2D
+                          ref={fgRef}
                           width={dimensions.width}
                           height={dimensions.height || 600}
                           backgroundColor="rgba(0,0,0,0)"
