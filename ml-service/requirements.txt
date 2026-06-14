@@ -25,7 +25,6 @@ python-dotenv==1.0.1
 
 requests==2.31.0
 beautifulsoup4==4.12.3
-yt-dlp==2024.3.10
 
 pymongo==4.6.3
 yt-dlp==2026.6.9
