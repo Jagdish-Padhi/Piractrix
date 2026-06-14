@@ -9,7 +9,9 @@ import {
   AlertTriangle,
   Maximize,
   Minimize,
-  Activity
+  Activity,
+  MousePointer2,
+  Move
 } from 'lucide-react';
 import { Card, Button, Badge, Loader } from '../../components';
 import toast from 'react-hot-toast';
@@ -714,6 +716,16 @@ export default function ThreatGraphPage() {
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400" />{Math.max(0, connectedNodeIds.size - 1)} connected</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-400" />{networkStats.autoEscalated} auto</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-slate-400" />{networkStats.uniquePlatforms} platforms</span>
+              </div>
+            </div>
+
+            {/* Interaction Notations Guide */}
+            <div className="mt-4 px-4 py-3 rounded-2xl bg-white/5 border border-white/5 mx-2 mb-2">
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-[11px] font-medium text-slate-400">
+                <span className="flex items-center gap-2"><MousePointer2 className="w-3.5 h-3.5 text-indigo-400" /> Click a node to view threat intelligence</span>
+                <span className="flex items-center gap-2"><Move className="w-3.5 h-3.5 text-emerald-400" /> Drag nodes to reshape the cluster</span>
+                <span className="flex items-center gap-2"><Search className="w-3.5 h-3.5 text-sky-400" /> Scroll to zoom in/out</span>
+                <span className="flex items-center gap-2"><Maximize className="w-3.5 h-3.5 text-rose-400" /> Use Full Screen for immersive analysis</span>
               </div>
             </div>
 
