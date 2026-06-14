@@ -62,6 +62,17 @@ export async function setMode(req, res, next) {
   }
 }
 
+export async function setThreatEscalate(req, res, next) {
+  try {
+    const orgId = req.auth?.orgId;
+    const { domain, autoEscalate } = req.body;
+    const result = await AgentService.setThreatEscalate({ orgId, domain, autoEscalate });
+    return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function approveDecision(req, res, next) {
   try {
     const orgId = req.auth?.orgId;

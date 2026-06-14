@@ -52,6 +52,20 @@ export async function setMode({ orgId, mode }) {
   return { autonomousMode: statusDoc.autonomousMode };
 }
 
+export async function setThreatEscalate({ orgId, domain, autoEscalate }) {
+  const doc = await ThreatMemory.findOneAndUpdate(
+    { orgId, domain },
+    { autoEscalate: Boolean(autoEscalate) },
+    { new: true }
+  );
+  if (!doc) {
+    const err = new Error('Threat memory not found');
+    err.statusCode = 404;
+    throw err;
+  }
+  return doc;
+}
+
 export async function approveDecision({ orgId, decisionId }) {
   const decision = await AgentDecisionLog.findOne({ _id: decisionId, orgId });
   if (!decision) {

@@ -12,6 +12,7 @@ router.get('/decisions', AgentController.listDecisions);
 router.get('/decisions/:id', AgentController.getDecision);
 router.get('/decisions/:id/trace', AgentController.getDecisionTrace);
 router.get('/threat-memory', AgentController.listThreatMemory);
+router.patch('/threat-memory/escalate', AgentController.setThreatEscalate);
 router.patch('/mode', AgentController.setMode);
 router.post('/approve/:decisionId', AgentController.approveDecision);
 router.get('/stats', AgentController.getStats);
