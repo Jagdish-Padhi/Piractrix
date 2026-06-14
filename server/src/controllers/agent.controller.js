@@ -136,18 +136,18 @@ export async function getPrediction(req, res, next) {
     const apiKey = process.env.GEMINI_API_KEY;
     const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 
+    const mockPrediction = {
+      expectedViolations: Math.max(10, Math.floor(orgViolations * 0.15 + (avgPerScan[0]?.avg || 5) * 4)),
+      peakHour: '+2 Hours',
+      topPlatforms: ['Telegram Channels (48%)', 'YouTube Streams (32%)', 'Web Leaks (20%)'],
+      riskLevel: 'HIGH',
+      confidence: '82%',
+      reasoning: `Based on your database historical count of ${orgViolations} violations, events like "${eventName || asset?.title || 'Main Broadcast'}" exhibit elevated threat levels on Telegram and YouTube. Automatic scans are rescheduled to run at high risk intervals (every 30 mins).`
+    };
+
     if (!apiKey) {
-      // Return a realistic mock forecast if no Gemini key is provided
-      const expectedViolations = Math.max(10, Math.floor(orgViolations * 0.15 + (avgPerScan[0]?.avg || 5) * 4));
       return res.json({
-        prediction: {
-          expectedViolations,
-          peakHour: 'T+2h (T = Broadcast Kickoff)',
-          topPlatforms: ['Telegram Channels (48%)', 'YouTube Streams (32%)', 'Web Leaks (20%)'],
-          riskLevel: expectedViolations > 40 ? 'CRITICAL' : 'HIGH',
-          confidence: '82%',
-          reasoning: `Based on your database historical count of ${orgViolations} violations, events like "${eventName || asset?.title || 'Main Broadcast'}" exhibit elevated threat levels on Telegram and YouTube. Automatic scans are rescheduled to run at high risk intervals (every 30 mins).`
-        },
+        prediction: mockPrediction,
         asset: asset ? { title: asset.title, type: asset.type } : null,
         generatedAt: new Date().toISOString()
       });
@@ -160,8 +160,20 @@ export async function getPrediction(req, res, next) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: geminiPrompt }] }] })
     });
+    
+    if (!geminiRes.ok) {
+      console.warn('[Gemini API] Failed to fetch prediction, using fallback mock.', await geminiRes.text());
+      return res.json({ prediction: mockPrediction, asset: asset ? { title: asset.title, type: asset.type } : null, generatedAt: new Date().toISOString() });
+    }
+
     const geminiData = await geminiRes.json();
-    const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!text) {
+      console.warn('[Gemini API] Empty response, using fallback mock.');
+      return res.json({ prediction: mockPrediction, asset: asset ? { title: asset.title, type: asset.type } : null, generatedAt: new Date().toISOString() });
+    }
+
     const cleanText = text.replace(/```json|```/g, '').trim();
     const prediction = JSON.parse(cleanText);
 

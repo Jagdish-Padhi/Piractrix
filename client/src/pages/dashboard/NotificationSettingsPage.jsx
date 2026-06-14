@@ -212,7 +212,7 @@ export default function NotificationSettingsPage() {
                     <Badge variant="success" className="text-[10px]">Connected</Badge>
                   </div>
                   <p className="text-xs text-slate-400 pl-10 max-w-md">
-                    Sends violation summaries and Gemini-drafted reports directly to your registered rights holder email.
+                    Sends violation summaries and AI-drafted reports directly to your registered rights holder email.
                   </p>
                 </div>
                 <div className="flex items-center gap-4 pl-10 md:pl-0">
@@ -438,7 +438,7 @@ export default function NotificationSettingsPage() {
                 ))}
               </div>
               <p className="text-[10px] text-slate-400">
-                Determines the minimum Gemini severity classification required to dispatch any external notification channel alert.
+                Determines the minimum severity classification required to dispatch any external notification channel alert.
               </p>
             </div>
 

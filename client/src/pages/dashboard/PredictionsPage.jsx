@@ -40,9 +40,10 @@ export default function PredictionsPage() {
     try {
       setLoadingAssets(true);
       const res = await api.get('/assets?page=1&limit=100');
-      setAssets(res.data.assets || []);
-      if (res.data.assets?.length > 0) {
-        setSelectedAssetId(res.data.assets[0]._id);
+      const fetchedAssets = res.data.items || [];
+      setAssets(fetchedAssets);
+      if (fetchedAssets.length > 0) {
+        setSelectedAssetId(fetchedAssets[0]._id);
       }
     } catch (err) {
       console.warn('Failed to load assets for predictions', err);
@@ -70,7 +71,7 @@ export default function PredictionsPage() {
       setPredictionData(data);
     } catch (err) {
       console.error('Failed to get predictions', err);
-      setError('Gemini prediction engine timed out. Please try again.');
+      setError('Piractrix Intelligence prediction engine timed out. Please try again.');
     } finally {
       setGenerating(false);
     }
@@ -103,7 +104,7 @@ export default function PredictionsPage() {
     <div className="w-full space-y-6 lg:space-y-8 animate-in fade-in duration-300 pb-12">
       <PageHeader
         title="Piracy Predictions"
-        subtitle="Leverage Gemini threat intelligence models to forecast stream leaks before they broadcast."
+        subtitle="Leverage predictive threat models to forecast stream leaks before they broadcast."
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
@@ -165,7 +166,7 @@ export default function PredictionsPage() {
                 ) : (
                   <>
                     <Zap className="h-4 w-4 fill-white text-white" />
-                    <span>Run Gemini Intelligence</span>
+                    <span>Generate Threat Forecast</span>
                   </>
                 )}
               </Button>
@@ -242,7 +243,7 @@ export default function PredictionsPage() {
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-slate-800">Awaiting Simulation Parameters</h3>
                 <p className="text-xs text-slate-400 max-w-sm">
-                  Select an asset and enter event details to trigger Gemini's zero-day predictive model.
+                  Select an asset and enter event details to trigger Piractrix Intelligence's zero-day predictive model.
                 </p>
               </div>
             </div>
@@ -253,46 +254,44 @@ export default function PredictionsPage() {
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 
                 {/* Expected Violations */}
-                <Card className="p-4 flex flex-col justify-between border-l-4 border-l-purple-500">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Expected Leaks</span>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-3xl font-black text-slate-900">
-                      {simMetrics ? simMetrics.violations : predictionData.prediction.expectedViolations}
-                    </span>
-                    <span className="text-xs text-slate-400">active URLs</span>
-                  </div>
-                </Card>
+                <div className="rounded-xl bg-white border border-slate-200 border-t-[3px] border-t-purple-500 p-5 flex flex-col justify-center min-h-[120px] shadow-xs">
+                  <span className="text-3xl font-black text-slate-900 tracking-tight">
+                    {simMetrics ? simMetrics.violations : (predictionData.prediction?.expectedViolations || 0)}
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-500 mt-1 leading-snug">
+                    Expected active stream leaks forecasted for this event
+                  </span>
+                </div>
 
                 {/* Peak Hour */}
-                <Card className="p-4 flex flex-col justify-between border-l-4 border-l-orange-500">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Peak Threat Hour</span>
-                  <div className="mt-2">
-                    <span className="text-xl font-bold text-slate-900 block truncate">
-                      {predictionData.prediction.peakHour}
-                    </span>
-                  </div>
-                </Card>
+                <div className="rounded-xl bg-white border border-slate-200 border-t-[3px] border-t-orange-500 p-5 flex flex-col justify-center min-h-[120px] shadow-xs">
+                  <span className="text-2xl font-black text-slate-900 tracking-tight">
+                    {predictionData.prediction?.peakHour || 'Unknown'}
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-500 mt-1 leading-snug">
+                    Estimated peak threat hour measured from broadcast start
+                  </span>
+                </div>
 
                 {/* Risk Level */}
-                <Card className="p-4 flex flex-col justify-between border-l-4 border-l-rose-500">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Risk Severity</span>
-                  <div className="mt-2 flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-rose-600 animate-ping" />
-                    <span className="text-lg font-black text-rose-600">
-                      {predictionData.prediction.riskLevel}
-                    </span>
-                  </div>
-                </Card>
+                <div className="rounded-xl bg-white border border-slate-200 border-t-[3px] border-t-rose-500 p-5 flex flex-col justify-center min-h-[120px] shadow-xs">
+                  <span className="text-2xl font-black text-slate-900 tracking-tight uppercase">
+                    {predictionData.prediction?.riskLevel || 'Unknown'}
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-500 mt-1 leading-snug">
+                    Calculated risk severity based on platform distribution
+                  </span>
+                </div>
 
                 {/* Confidence */}
-                <Card className="p-4 flex flex-col justify-between border-l-4 border-l-emerald-500">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Confidence</span>
-                  <div className="mt-2 flex items-baseline gap-0.5">
-                    <span className="text-3xl font-black text-slate-900">
-                      {predictionData.prediction.confidence}
-                    </span>
-                  </div>
-                </Card>
+                <div className="rounded-xl bg-white border border-slate-200 border-t-[3px] border-t-emerald-500 p-5 flex flex-col justify-center min-h-[120px] shadow-xs">
+                  <span className="text-3xl font-black text-slate-900 tracking-tight">
+                    {predictionData.prediction?.confidence || '0%'}
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-500 mt-1 leading-snug">
+                    Predictive engine confidence score for intelligence data
+                  </span>
+                </div>
 
               </div>
 
@@ -300,7 +299,7 @@ export default function PredictionsPage() {
               <Card className="p-6 space-y-6">
                 <h3 className="text-sm font-black uppercase tracking-wider text-slate-500">Forecasted Platform Distribution</h3>
                 <div className="space-y-4">
-                  {predictionData.prediction.topPlatforms.map((platformStr, idx) => {
+                  {(predictionData.prediction.topPlatforms || []).map((platformStr, idx) => {
                     const match = platformStr.match(/^(.*?)\s*\((\d+)%\)$/);
                     const name = match ? match[1] : platformStr;
                     const val = match ? parseInt(match[2]) : (35 - idx * 10);
@@ -330,17 +329,17 @@ export default function PredictionsPage() {
                 </div>
               </Card>
 
-              {/* Gemini Analytics Explainer */}
+              {/* Piractrix Intelligence Analytics Explainer */}
               <Card className="p-6 bg-slate-900 border-none text-slate-100 space-y-4">
                 <div className="flex items-center gap-2 pb-3 border-b border-slate-800">
                   <div className="h-2 w-2 rounded-full bg-violet-400 animate-pulse" />
-                  <span className="text-xs font-black uppercase tracking-wider text-violet-400">AI Intelligence Reasoning</span>
+                  <span className="text-xs font-black uppercase tracking-wider text-violet-400">Predictive Threat Analysis</span>
                 </div>
                 <p className="text-sm leading-relaxed text-slate-300 font-mono">
-                  {predictionData.prediction.reasoning}
+                  {predictionData.prediction?.reasoning || 'No analysis available.'}
                 </p>
                 <div className="pt-2 flex justify-between items-center text-[10px] font-mono text-slate-500">
-                  <span>Model: Gemini 1.5 Pro (Piracy Patterns)</span>
+                  <span>Model: Predictive Analysis Engine</span>
                   <span>Generated At: {new Date(predictionData.generatedAt).toLocaleTimeString()}</span>
                 </div>
               </Card>

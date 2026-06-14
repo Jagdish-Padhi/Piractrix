@@ -272,107 +272,75 @@ export default function AgentCommandCenterPage() {
   }
 
   return (
-    <div className='w-full space-y-6 lg:space-y-8 animate-in fade-in duration-500 select-none'>
+    <div className='w-full space-y-6 lg:space-y-8 animate-in fade-in duration-500 select-none pb-12'>
       
-      {/* Dynamic forecast card at top */}
-      <section className="bg-gradient-to-r from-purple-950 via-slate-950 to-indigo-950 border border-purple-900/50 rounded-2xl p-5 shadow-lg flex flex-col md:flex-row gap-5 items-center justify-between text-white font-sans relative overflow-hidden">
-        {/* Glow circles */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-600/10 rounded-full blur-2xl" />
+      {/* Top Header & Core Metrics */}
+      <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">Agent Command Center</h1>
+          <p className="text-sm text-slate-500 mt-1">Monitor autonomous decisions, system telemetry, and defense accuracy.</p>
+        </div>
         
-        <div className="space-y-2 z-10">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping" />
-            <h3 className="text-xs uppercase font-extrabold tracking-widest text-purple-300">Active Threat Forecast</h3>
+        {/* Auto-Defense Master Toggle */}
+        <div className="flex items-center gap-4 bg-white border border-slate-200 rounded-2xl p-2 pr-4 shadow-xs">
+          <div className={`p-2.5 rounded-xl ${autonomousMode ? 'bg-purple-100 text-purple-600 animate-pulse' : 'bg-slate-100 text-slate-400'}`}>
+            <Shield size={20} />
           </div>
-          <p className="text-lg font-black tracking-tight max-w-md">Gemini predicts coordinated live streams piracy peak in the next 12 hours.</p>
-          <p className="text-[11px] text-slate-400 max-w-md">Scans rescheduled to run at high risk intervals. Enabling autonomous mode is recommended.</p>
+          <div>
+            <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-800">Auto-Defense Engine</h4>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">Autonomous enforcement</p>
+          </div>
+          <div className="ml-4 pl-4 border-l border-slate-100">
+            <button
+              onClick={() => handleToggleRequest(!autonomousMode)}
+              className={`py-2 px-5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+                autonomousMode 
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-200/50' 
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+              }`}
+            >
+              {autonomousMode ? 'Active' : 'Standby'}
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div className="flex gap-3 shrink-0 z-10 w-full md:w-auto">
-          <Button as={Link} to="/dashboard/predictions" variant="secondary" className="flex-1 md:flex-none border-purple-800/80 bg-white/5 hover:bg-white/10 text-white font-extrabold uppercase text-[10px] tracking-wider py-3 px-5 rounded-xl border">
-            Full Forecast
-          </Button>
-          <button 
-            onClick={() => handleToggleRequest(true)}
-            disabled={autonomousMode}
-            className="flex-1 md:flex-none bg-purple-600 hover:bg-purple-700 text-white font-extrabold uppercase tracking-widest text-[10px] py-3 px-5 rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-purple-900/40 transition-all hover:scale-[1.02] active:scale-98 cursor-pointer disabled:opacity-50"
-          >
-            <Shield size={13} />
-            Activate Auto-Defense
-          </button>
+      {/* KPI Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="rounded-xl bg-white border border-slate-200 border-t-[3px] border-t-purple-500 p-5 flex flex-col justify-center min-h-[100px] shadow-xs">
+          <span className="text-3xl font-black text-slate-900 tracking-tight">{stats.totalDecisions}</span>
+          <span className="text-[11px] font-medium text-slate-500 mt-1 leading-snug">Total intelligence decisions processed</span>
         </div>
-      </section>
+        <div className="rounded-xl bg-white border border-slate-200 border-t-[3px] border-t-emerald-500 p-5 flex flex-col justify-center min-h-[100px] shadow-xs">
+          <span className="text-3xl font-black text-slate-900 tracking-tight">
+            {stats.totalDecisions > 0 ? `${Math.round((stats.actionsTaken / stats.totalDecisions) * 100)}%` : '100%'}
+          </span>
+          <span className="text-[11px] font-medium text-slate-500 mt-1 leading-snug">Agent classification accuracy rate</span>
+        </div>
+        <div className="rounded-xl bg-white border border-slate-200 border-t-[3px] border-t-sky-500 p-5 flex flex-col justify-center min-h-[100px] shadow-xs">
+          <span className="text-2xl font-black text-slate-900 tracking-tight">
+            {lastRun ? new Date(lastRun).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Standby'}
+          </span>
+          <span className="text-[11px] font-medium text-slate-500 mt-1 leading-snug">Timestamp of last executed action</span>
+        </div>
+      </div>
 
-      {/* 3-Column Command Center layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      {/* Main Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
-        {/* Column 1 (Left 1/4) - Agent Status Widget */}
-        <div className="space-y-6">
-          <Card
-            className="border-slate-200/60 bg-white shadow-xs"
-            title="ShieldAgent Status"
-          >
-            <div className="space-y-4">
-              {/* Premium Toggle Button */}
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col items-center gap-3">
-                <div className={`p-4 rounded-full ${autonomousMode ? 'bg-purple-100 text-purple-600 animate-pulse' : 'bg-slate-100 text-slate-400'}`}>
-                  <Shield size={32} />
-                </div>
-                <div className="text-center">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">Auto-Defense Control</h4>
-                  <p className="text-[10px] font-semibold text-slate-400 mt-0.5">Toggle autonomous notice dispatch</p>
-                </div>
-                <button
-                  onClick={() => handleToggleRequest(!autonomousMode)}
-                  className={`w-full py-2.5 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
-                    autonomousMode 
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md' 
-                      : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 shadow-xs'
-                  }`}
-                >
-                  {autonomousMode ? 'Auto-Defense: ON' : 'Auto-Defense: OFF'}
-                </button>
-              </div>
-
-              {/* Stats aggregation list */}
-              <div className="space-y-2 font-mono text-[11px]">
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-400 font-bold">Total Actions:</span>
-                  <span className="font-extrabold text-slate-800">{stats.totalDecisions}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-400 font-bold">Accuracy rate:</span>
-                  <span className="font-extrabold text-emerald-600">
-                    {stats.totalDecisions > 0 ? `${Math.round((stats.actionsTaken / stats.totalDecisions) * 100)}%` : '100%'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-slate-400 font-bold">Last Action:</span>
-                  <span className="font-extrabold text-slate-600">
-                    {lastRun ? new Date(lastRun).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'None'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Column 2 (Center 2/4) - Expandable Decision Cards */}
+        {/* Main Column (Left 2/3) - Security Decision Queue */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
             <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-400">Security Decision Queue</h3>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => loadAgentData(true)}
-                className="h-8 px-3 rounded-xl text-[10px] font-bold bg-white border-slate-200 hover:bg-slate-50 transition-all cursor-pointer"
-              >
-                <RefreshCw className={`w-3 h-3 mr-1.5 ${isSyncing ? 'animate-spin' : ''}`} />
-                Sync
-              </Button>
-            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => loadAgentData(true)}
+              className="h-8 px-3 rounded-xl text-[10px] font-bold bg-white border-slate-200 hover:bg-slate-50 transition-all cursor-pointer"
+            >
+              <RefreshCw className={`w-3 h-3 mr-1.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              Sync
+            </Button>
           </div>
 
           <div className="space-y-3">
@@ -388,7 +356,6 @@ export default function AgentCommandCenterPage() {
                   key={d._id} 
                   className={`bg-white rounded-2xl border border-slate-200/60 shadow-xs hover:border-slate-350 transition-all overflow-hidden flex flex-col`}
                 >
-                  {/* Collapsed Header */}
                   <div 
                     onClick={() => setExpandedDecisionId(isExpanded ? null : d._id)}
                     className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50/20"
@@ -415,7 +382,6 @@ export default function AgentCommandCenterPage() {
                     </div>
                   </div>
 
-                  {/* Expanded Content Drawer */}
                   {isExpanded && (
                     <div className="px-4 pb-4 border-t border-slate-100 bg-slate-50/30 space-y-4 animate-in slide-in-from-top-2 duration-200">
                       <div className="pt-3 space-y-1.5">
@@ -426,17 +392,15 @@ export default function AgentCommandCenterPage() {
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 text-xs">
-                        {/* Cascade Verify Info */}
                         <div className="space-y-1.5">
                           <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Cascade Verify</h4>
-                          <div className="bg-white border border-slate-100 rounded-xl p-3 flex gap-2 font-mono text-[10px] text-slate-500 select-none">
-                            <span className="flex items-center gap-0.5 text-green-600 font-bold"><CheckCircle size={10} /> Keyword</span>
-                            <span className="flex items-center gap-0.5 text-green-600 font-bold"><CheckCircle size={10} /> Fingerprint</span>
-                            <span className="flex items-center gap-0.5 text-green-600 font-bold"><CheckCircle size={10} /> Vision</span>
+                          <div className="bg-white border border-slate-100 rounded-xl p-3 flex flex-wrap gap-2 font-mono text-[10px] text-slate-500 select-none">
+                            <span className="flex items-center gap-0.5 text-emerald-600 font-bold"><CheckCircle size={10} /> Keyword</span>
+                            <span className="flex items-center gap-0.5 text-emerald-600 font-bold"><CheckCircle size={10} /> Fingerprint</span>
+                            <span className="flex items-center gap-0.5 text-emerald-600 font-bold"><CheckCircle size={10} /> Vision</span>
                           </div>
                         </div>
 
-                        {/* Domain prior violations */}
                         <div className="space-y-1.5">
                           <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Threat Memory Lookup</h4>
                           <div className="bg-white border border-slate-100 rounded-xl p-3 flex justify-between items-center font-mono text-[10px]">
@@ -446,14 +410,13 @@ export default function AgentCommandCenterPage() {
                         </div>
                       </div>
 
-                      {/* Expandable actions */}
                       <div className="flex flex-wrap gap-2.5 pt-2 border-t border-slate-100">
                         {d.outcome === 'pending' && !d.autonomousMode ? (
                           <button
                             onClick={() => handleApprove(d._id)}
                             className="bg-purple-600 hover:bg-purple-700 text-white font-extrabold uppercase tracking-widest text-[9px] py-2 px-4 rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
                           >
-                            Approve and Execute
+                            Approve & Execute
                           </button>
                         ) : (
                           <Link
@@ -485,52 +448,56 @@ export default function AgentCommandCenterPage() {
           </div>
         </div>
 
-        {/* Column 3 (Right 1/4) - Telemetry Terminal & Threat Memory */}
+        {/* Side Column (Right 1/3) - Telemetry & Memory */}
         <div className="space-y-6">
-          {/* Telemetry Terminal */}
-          <Card
-            className="border-slate-200/60 bg-white shadow-xs"
-            title="Telemetry Terminal"
-          >
-            <div className="relative overflow-hidden h-[250px] rounded-xl bg-slate-950 border border-slate-900 p-3 flex flex-col justify-end">
-              <div className="space-y-1.5 overflow-y-auto scrollbar-none font-mono text-[9px] text-slate-300">
+          <Card className="border-slate-200/60 bg-white shadow-xs p-0 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+              <div>
+                <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">System Telemetry</h3>
+                <p className="text-[9px] text-slate-400 font-semibold uppercase mt-0.5">Real-time scan logs</p>
+              </div>
+              <Terminal size={14} className="text-slate-400" />
+            </div>
+            <div className="relative h-[220px] bg-slate-950 p-4 flex flex-col justify-end overflow-hidden">
+              <div className="space-y-2 overflow-y-auto scrollbar-none font-mono text-[9px] text-slate-300">
                 {liveLogs.map((log) => (
-                  <div key={log.id} className="flex gap-2 pb-1 border-b border-slate-900 last:border-0 last:pb-0 animate-in slide-in-from-bottom-1 duration-200">
-                    <span className="w-1.5 h-1.5 rounded-full mt-1 shrink-0 bg-purple-500 animate-pulse" />
+                  <div key={log.id} className="flex items-start gap-2 animate-in slide-in-from-bottom-1 duration-200">
                     <span className="text-slate-500 shrink-0">{log.time}</span>
-                    <span className="font-black text-purple-400 uppercase">[{log.platform}]</span>
-                    <span className="truncate">{log.text}</span>
+                    <span className="font-bold text-purple-400 uppercase shrink-0">[{log.platform}]</span>
+                    <span className="leading-tight text-slate-200 break-words">{log.text}</span>
                   </div>
                 ))}
                 {liveLogs.length === 0 && (
-                  <div className="text-slate-500">Awaiting scan telemetry stream...</div>
+                  <div className="text-slate-500 text-center py-10">Awaiting scan telemetry stream...</div>
                 )}
               </div>
             </div>
           </Card>
 
-          {/* Threat memory compact */}
-          <Card
-            className="border-slate-200/60 bg-white shadow-xs"
-            title="Threat Memory Cache"
-            subtitle="Registered repeat offender pirate domains."
-          >
-            <div className="space-y-2.5">
+          <Card className="border-slate-200/60 bg-white shadow-xs p-0 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+              <div>
+                <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Threat Memory</h3>
+                <p className="text-[9px] text-slate-400 font-semibold uppercase mt-0.5">Known repeat offenders</p>
+              </div>
+              <Brain size={14} className="text-slate-400" />
+            </div>
+            <div className="p-4 space-y-2">
               {threatMemory.slice(0, 4).map((t) => (
-                <div key={t._id} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100/50 transition-colors">
-                  <div className="min-w-0">
+                <div key={t._id} className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs hover:border-slate-300 transition-colors">
+                  <div className="min-w-0 pr-3">
                     <p className="text-xs font-bold text-slate-800 truncate">{t.domain}</p>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                      Count: {t.totalViolations}
+                    <p className="text-[9px] text-slate-400 uppercase tracking-widest font-semibold mt-0.5">
+                      Violations: {t.totalViolations}
                     </p>
                   </div>
-                  <Badge variant={t.threatLevel === 'critical' || t.threatLevel === 'high' ? 'danger' : 'warning'} className="font-bold text-[8px] uppercase tracking-wider px-1">
+                  <Badge variant={t.threatLevel === 'critical' || t.threatLevel === 'high' ? 'danger' : 'warning'} className="font-bold text-[8px] uppercase tracking-wider px-1.5 py-0.5 shrink-0">
                     {t.threatLevel}
                   </Badge>
                 </div>
               ))}
               {threatMemory.length === 0 && (
-                <div className="py-6 text-center text-slate-400 text-xs">No entries loaded.</div>
+                <div className="py-8 text-center text-slate-400 text-xs">No entries loaded.</div>
               )}
             </div>
           </Card>
@@ -538,7 +505,7 @@ export default function AgentCommandCenterPage() {
 
       </div>
 
-      {/* Confirmation Modal when enabling Autonomous Mode */}
+      {/* Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={() => setShowConfirmModal(false)} />
@@ -548,11 +515,11 @@ export default function AgentCommandCenterPage() {
               <h3 className="text-sm font-black uppercase tracking-wider text-slate-800">Activate Auto-Defense?</h3>
             </div>
             
-            <p className="text-xs text-slate-500 leading-relaxed font-medium mb-4">
+            <p className="text-xs text-slate-500 leading-relaxed font-medium mb-5">
               When active, ShieldAgent will automatically draft DMCA takedown notices, update enforcement logs, and alert platform abuse teams in real time without human confirmation.
             </p>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3">
               <button
                 onClick={() => {
                   setShowConfirmModal(false);

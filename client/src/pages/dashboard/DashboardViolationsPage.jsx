@@ -151,7 +151,7 @@ export default function DashboardViolationsPage() {
 			setSelectedViolation(detailRes.data.violation);
 			
 			setIsDmcaDrawerOpen(true);
-			toast.success('DMCA drafted successfully by Gemini.');
+			toast.success('DMCA drafted successfully by Piractrix Intelligence.');
 			await loadViolations();
 		} catch (requestError) {
 			const message = requestError.response?.data?.message || 'Failed to draft DMCA notice.';
