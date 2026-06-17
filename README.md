@@ -8,7 +8,7 @@
 
 | 🚀 Live Demo | 🎥 Video Walkthrough | 📊 Presentation |
 |:------------:|:-------------------:|:---------------:|
-| [**Launch App**](https://sportshield-ten.vercel.app/) | [**Watch Demo**](https://www.youtube.com/watch?v=LNHvwYCQkd8) | [**View PPT**](https://canva.link/wcxppf1vd2k979i) |
+| [**Launch App**](https://piractrix-1sea-five.vercel.app/) | [**Watch Demo**](https://youtu.be/h2i-1TWPsI0) | [**View PPT**](https://canva.link/sch8h0vebp817vb) |
 
 ---
 
