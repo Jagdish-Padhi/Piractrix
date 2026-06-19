@@ -1,7 +1,5 @@
 # 🛡️ Piractrix : AI-Powered Autonomous Rights Enforcement
 
-**Hackathon:** Google Solution Challenge 2026 | **Team:** Esc(Reality); | **Track:** Digital Asset Protection
-
 ---
 
 ## 🔗 Quick Links (For Real experience)
